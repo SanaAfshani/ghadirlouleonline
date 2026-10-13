@@ -56,7 +56,6 @@ export const getPriceBoard = cache(async (): Promise<PriceBoard> => {
         title: i.title,
         price: market.open ? i.price : null,
         previousPrice: market.open ? i.previousPrice : null,
-        weight: i.weight,
         note: i.note,
         priceChangedAt: i.priceChangedAt.toISOString(),
       })),

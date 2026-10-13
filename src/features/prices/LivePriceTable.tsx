@@ -72,8 +72,8 @@ function Price({ price, open }: { price: number | null; open: boolean }) {
 function downloadCsv(name: string, rows: ReturnType<typeof findItems>) {
   const cell = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
   const lines = [
-    ['عنوان', 'محصول', 'وزن (کیلوگرم)', 'قیمت (تومان)', 'توضیحات', 'آخرین تغییر'],
-    ...rows.map((r) => [r.title, r.productName, r.weight, r.price ?? 'استعلام', r.note, priceTime(r.priceChangedAt)]),
+    ['عنوان', 'محصول', 'قیمت (تومان)', 'توضیحات', 'آخرین تغییر'],
+    ...rows.map((r) => [r.title, r.productName, r.price ?? 'استعلام', r.note, priceTime(r.priceChangedAt)]),
   ];
   const blob = new Blob(['\uFEFF' + lines.map((l) => l.map(cell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a');
@@ -102,7 +102,6 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
     const list = term ? all.filter((r) => latinDigits(`${r.title} ${r.note} ${r.productName}`).toLowerCase().includes(term)) : all;
     return limit ? list.slice(0, limit) : list;
   }, [all, q, limit]);
-  const hasWeight = all.some((r) => r.weight);
   // قیمت نمودار از تابلوی زنده خوانده می‌شود؛ بسته شدن فروش یا استعلامی شدن ردیف، پنجره را می‌بندد
   const liveRow = chart && all.find((r) => r.id === chart.id);
   const chartTarget = chart && open && liveRow?.price != null ? { ...chart, price: liveRow.price } : null;
@@ -174,7 +173,6 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
             <tr>
               <th scope="col" className="text-right font-bold px-5 py-3">عنوان</th>
               {showProduct && <th scope="col" className="text-right font-bold px-4 py-3">محصول</th>}
-              {hasWeight && <th scope="col" className="text-right font-bold px-4 py-3">وزن</th>}
               <th scope="col" className="text-right font-bold px-4 py-3">قیمت</th>
               <th scope="col" className="text-right font-bold px-4 py-3">توضیحات</th>
               <th scope="col" className="text-right font-bold px-4 py-3 whitespace-nowrap">آخرین تغییر</th>
@@ -193,7 +191,6 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
                       <Link href={r.href} className="text-[var(--accent)] font-semibold hover:underline">{r.productName}</Link>
                     </td>
                   )}
-                  {hasWeight && <td className="px-4 py-3.5 text-[var(--muted-foreground)] num whitespace-nowrap">{r.weight ? `${faDigits(r.weight)} کیلوگرم` : '—'}</td>}
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-2">
                       <Price price={r.price} open={open} />
@@ -265,7 +262,6 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
                 </div>
               </div>
               <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[var(--muted-foreground)] num">
-                {r.weight && <span>وزن: {faDigits(r.weight)} کیلوگرم</span>}
                 <span>{priceTime(r.priceChangedAt)}</span>
                 {r.note && <span className="basis-full leading-5">{faDigits(r.note)}</span>}
               </div>

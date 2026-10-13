@@ -8,7 +8,7 @@ export type LiveItem = {
   /** وقتی بازار بسته است سرور null می‌فرستد — قیمت حتی در HTML صفحه هم نیست */
   price: number | null;
   previousPrice: number | null;
-  weight: string;
+  /** وزن عمداً نیست — فقط برای محاسبه قیمت در پنل ادمین است و به کاربر نمایش داده نمی‌شود */
   note: string;
   priceChangedAt: string;
 };
