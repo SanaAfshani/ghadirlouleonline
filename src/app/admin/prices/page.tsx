@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { WEEK_ORDER, WEEKDAY_LABEL, type MarketMode, type MarketSchedule, type MarketStatus } from '@/shared/lib/market';
 import { cn, formatPersianNumber, latinDigits } from '@/shared/lib/utils';
+import { toWeight } from '@/shared/lib/price-admin';
 import { useConfirm } from '@/shared/ui/ConfirmDialog';
 
 type Item = {
@@ -17,7 +18,7 @@ type Item = {
   weight: string; note: string; sortOrder: number; priceChangedAt: string;
 };
 type ProductRow = {
-  id: string; name: string; slug: string; published: boolean;
+  id: string; name: string; slug: string; published: boolean; pricePerKg: number | null;
   category: { slug: string; name: string };
   priceItems: Item[];
 };
@@ -145,8 +146,10 @@ function MarketPanel({ market, onChange }: { market: Market; onChange: (m: Marke
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
-function PriceInput({ item, onSaved, onEnter, inputRef }: {
+function PriceInput({ item, locked, onSaved, onEnter, inputRef }: {
   item: Item;
+  /** قیمت از فرمول وزن × قیمت روز می‌آید و دستی ویرایش نمی‌شود */
+  locked: boolean;
   onSaved: (i: Item) => void;
   onEnter: () => void;
   inputRef: (el: HTMLInputElement | null) => void;
@@ -187,16 +190,18 @@ function PriceInput({ item, onSaved, onEnter, inputRef }: {
         value={value}
         inputMode="numeric"
         dir="ltr"
+        readOnly={locked}
+        title={locked ? 'وزن × قیمت روز هر کیلو — برای تغییر، قیمت روز یا وزن را عوض کنید' : undefined}
         onChange={(e) => setValue(fmt(parse(e.target.value)))}
         onFocus={(e) => {
           setFocused(true);
           e.target.select();
         }}
-        onBlur={commit}
+        onBlur={locked ? () => setFocused(false) : commit}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
             e.preventDefault();
-            commit();
+            if (!locked) commit();
             onEnter();
           }
           if (e.key === 'Escape') setValue(fmt(saved));
@@ -206,6 +211,7 @@ function PriceInput({ item, onSaved, onEnter, inputRef }: {
         className={cn(
           inputCls,
           'w-full text-left font-bold text-base pl-9 num',
+          locked && 'bg-transparent cursor-default',
           state === 'saved' && 'border-emerald-500',
           state === 'error' && 'border-red-500',
         )}
@@ -219,12 +225,78 @@ function PriceInput({ item, onSaved, onEnter, inputRef }: {
   );
 }
 
+/* ─────────────────────────── قیمت روز هر کیلو ─────────────────────────── */
+
+function PricePerKgPanel({ product, onApplied }: { product: ProductRow; onApplied: () => Promise<void> }) {
+  const confirm = useConfirm();
+  const [value, setValue] = useState(fmt(product.pricePerKg));
+  const [busy, setBusy] = useState(false);
+  const [synced, setSynced] = useState(product.pricePerKg);
+  const weighted = product.priceItems.filter((i) => toWeight(i.weight) != null).length;
+
+  // قیمت روز از بیرون عوض شد (مثلاً تغییر درصدی گروهی)
+  if (product.pricePerKg !== synced) {
+    setSynced(product.pricePerKg);
+    setValue(fmt(product.pricePerKg));
+  }
+
+  const apply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const next = parse(value);
+    if (next === product.pricePerKg) return;
+    const ok = await confirm(
+      next
+        ? { title: `قیمت روز هر کیلو ${fmt(next)} تومان شود؟`, message: `قیمت ${formatPersianNumber(weighted)} ردیف وزن‌دار با فرمول «وزن × قیمت روز» دوباره حساب می‌شود.`, tone: 'default', confirmLabel: 'اعمال' }
+        : { title: 'فرمول قیمت روز خاموش شود؟', message: 'قیمت فعلی ردیف‌ها می‌ماند و از این به بعد هر قیمت دستی وارد می‌شود.', tone: 'default', confirmLabel: 'خاموش کردن' },
+    );
+    if (!ok) return;
+    setBusy(true);
+    try {
+      const r = await api<{ updated: number }>('/api/admin/prices/per-kg', { method: 'PUT', body: JSON.stringify({ productId: product.id, pricePerKg: next }) });
+      await onApplied();
+      toast.success(next ? `${formatPersianNumber(r.updated)} قیمت به‌روز شد` : 'قیمت‌گذاری دستی شد');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'خطا');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <form onSubmit={apply} className="px-5 py-3 border-b border-[var(--border)] flex flex-wrap items-center gap-x-3 gap-y-2">
+      <label htmlFor={`perkg-${product.id}`} className="text-sm font-bold text-[var(--foreground)]">قیمت روز هر کیلو</label>
+      <div className="relative">
+        <input
+          id={`perkg-${product.id}`}
+          value={value}
+          onChange={(e) => setValue(fmt(parse(e.target.value)))}
+          inputMode="numeric"
+          dir="ltr"
+          placeholder="خاموش"
+          className={cn(inputCls, 'w-40 text-left font-bold num pl-14')}
+        />
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[11px] text-[var(--muted-foreground)]">تومان</span>
+      </div>
+      <button disabled={busy || parse(value) === product.pricePerKg} className="h-10 px-4 rounded-xl bg-[var(--accent)] text-[var(--accent-foreground)] text-sm font-bold disabled:opacity-40 flex items-center gap-1.5">
+        {busy && <Loader2 className="w-4 h-4 animate-spin" />}اعمال
+      </button>
+      <p className="basis-full text-xs text-[var(--muted-foreground)] leading-6">
+        {product.pricePerKg
+          ? 'قیمت هر متر = وزن هر متر (کیلوگرم) × قیمت روز هر کیلو. قیمت ردیف‌های وزن‌دار خودکار حساب می‌شود؛ برای تغییر، قیمت روز یا وزن ردیف را عوض کنید.'
+          : 'با وارد کردن قیمت روز، قیمت هر ردیف از «وزن × قیمت روز» حساب می‌شود و دیگر لازم نیست ردیف‌ها را تک‌تک قیمت بزنید.'}
+      </p>
+    </form>
+  );
+}
+
 /* ─────────────────────────── جدول یک محصول ─────────────────────────── */
 
-function ProductBoard({ product, onChange }: { product: ProductRow; onChange: (items: Item[]) => void }) {
+function ProductBoard({ product, onChange }: { product: ProductRow; onChange: (patch: Partial<ProductRow>) => void }) {
   const confirm = useConfirm();
 
   const items = product.priceItems;
+  const setItems = (next: Item[]) => onChange({ priceItems: next });
+  const isLocked = (i: Item) => !!product.pricePerKg && toWeight(i.weight) != null;
   const refs = useRef<(HTMLInputElement | null)[]>([]);
   const [q, setQ] = useState('');
   const [pct, setPct] = useState('');
@@ -238,7 +310,7 @@ function ProductBoard({ product, onChange }: { product: ProductRow; onChange: (i
     return t ? items.filter((i) => latinDigits(i.title).includes(t)) : items;
   }, [items, q]);
 
-  const replaceItem = (u: Item) => onChange(items.map((i) => (i.id === u.id ? u : i)));
+  const replaceItem = (u: Item) => setItems(items.map((i) => (i.id === u.id ? u : i)));
 
   const patchField = async (i: Item, field: 'title' | 'weight' | 'note', value: string) => {
     if (value === i[field]) return;
@@ -256,7 +328,7 @@ function ProductBoard({ product, onChange }: { product: ProductRow; onChange: (i
     const next = [...items];
     next[idx] = { ...b, sortOrder: a.sortOrder };
     next[j] = { ...a, sortOrder: b.sortOrder };
-    onChange(next);
+    setItems(next);
     await Promise.all([
       api(`/api/admin/prices/${a.id}`, { method: 'PATCH', body: JSON.stringify({ sortOrder: b.sortOrder }) }),
       api(`/api/admin/prices/${b.id}`, { method: 'PATCH', body: JSON.stringify({ sortOrder: a.sortOrder }) }),
@@ -265,7 +337,7 @@ function ProductBoard({ product, onChange }: { product: ProductRow; onChange: (i
 
   const remove = async (i: Item) => {
     if (!(await confirm({ title: `ردیف «${i.title}» حذف شود؟` }))) return;
-    onChange(items.filter((x) => x.id !== i.id));
+    setItems(items.filter((x) => x.id !== i.id));
     await api(`/api/admin/prices/${i.id}`, { method: 'DELETE' }).catch((e) => toast.error(e.message));
   };
 
@@ -274,7 +346,7 @@ function ProductBoard({ product, onChange }: { product: ProductRow; onChange: (i
     if (!draft.title.trim()) return;
     try {
       const item = await api<Item>('/api/admin/prices', { method: 'POST', body: JSON.stringify({ productId: product.id, ...draft, price: parse(draft.price) }) });
-      onChange([...items, item]);
+      setItems([...items, item]);
       setDraft({ title: '', price: '', weight: '', note: '' });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'خطا');
@@ -282,14 +354,15 @@ function ProductBoard({ product, onChange }: { product: ProductRow; onChange: (i
   };
 
   const reload = async () => {
-    const all = await api<ProductRow[]>('/api/admin/prices');
-    onChange(all.find((p) => p.id === product.id)?.priceItems ?? []);
+    const fresh = (await api<ProductRow[]>('/api/admin/prices')).find((p) => p.id === product.id);
+    onChange({ priceItems: fresh?.priceItems ?? [], pricePerKg: fresh?.pricePerKg ?? null });
   };
 
   const bulk = async () => {
     const n = Number(latinDigits(pct).replace(/[^\d.-]/g, ''));
     if (!n) return toast.error('درصد را وارد کنید، مثلاً ۳ یا -۲');
-    if (!(await confirm({ title: `همه قیمت‌های «${product.name}» ${n > 0 ? 'افزایش' : 'کاهش'} ${formatPersianNumber(Math.abs(n))}٪ پیدا کند؟`, tone: 'default', confirmLabel: 'اعمال' }))) return;
+    const target = product.pricePerKg ? `قیمت روز هر کیلوی «${product.name}»` : `همه قیمت‌های «${product.name}»`;
+    if (!(await confirm({ title: `${target} ${formatPersianNumber(Math.abs(n))}٪ ${n > 0 ? 'افزایش' : 'کاهش'} پیدا کند؟`, tone: 'default', confirmLabel: 'اعمال' }))) return;
     setBusy(true);
     try {
       const r = await api<{ updated: number }>('/api/admin/prices/bulk', { method: 'POST', body: JSON.stringify({ productId: product.id, percent: n, roundTo }) });
@@ -342,6 +415,8 @@ function ProductBoard({ product, onChange }: { product: ProductRow; onChange: (i
         </div>
       </div>
 
+      <PricePerKgPanel product={product} onApplied={reload} />
+
       {/* ابزار گروهی */}
       <div className="px-5 py-3 border-b border-[var(--border)] flex flex-wrap items-center gap-2 bg-[var(--background)]/40">
         <div className="relative flex-1 min-w-[180px]">
@@ -381,7 +456,7 @@ function ProductBoard({ product, onChange }: { product: ProductRow; onChange: (i
           const idx = items.indexOf(i);
           const change = i.price != null && i.previousPrice ? ((i.price - i.previousPrice) / i.previousPrice) * 100 : 0;
           return (
-            <div key={i.id} className="p-3 sm:px-5 grid grid-cols-2 @3xl:grid-cols-[minmax(0,1.4fr)_180px_100px_minmax(0,1fr)_auto] gap-2 items-center">
+            <div key={i.id} className="p-3 sm:px-5 grid grid-cols-2 @3xl:grid-cols-[minmax(0,1.4fr)_180px_100px_minmax(0,1fr)_auto] gap-2 items-start">
               <input
                 defaultValue={i.title}
                 onBlur={(e) => patchField(i, 'title', e.target.value.trim())}
@@ -392,26 +467,29 @@ function ProductBoard({ product, onChange }: { product: ProductRow; onChange: (i
               <div className="min-w-0 order-1 @3xl:order-none">
                 <PriceInput
                   item={i}
+                  locked={isLocked(i)}
                   onSaved={replaceItem}
                   inputRef={(el) => { refs.current[idx] = el; }}
                   onEnter={() => refs.current[idx + 1]?.focus()}
                 />
-                <p className="mt-1 h-4 text-[11px] text-[var(--muted-foreground)] flex items-center gap-1 num">
-                  {change !== 0 && (
-                    <span className={cn('flex items-center font-bold', change > 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400')}>
-                      {change > 0 ? <ArrowUpLeft className="w-3 h-3" /> : <ArrowDownLeft className="w-3 h-3" />}
-                      {Math.abs(change).toLocaleString('fa-IR', { maximumFractionDigits: 1 })}٪
-                    </span>
-                  )}
-                  {i.previousPrice != null && i.previousPrice !== i.price && <span>قبلی: {fmt(i.previousPrice)}</span>}
-                </p>
+                {i.previousPrice != null && i.previousPrice !== i.price && (
+                  <p className="mt-1 h-4 text-[11px] text-[var(--muted-foreground)] flex items-center gap-1 num">
+                    {change !== 0 && (
+                      <span className={cn('flex items-center font-bold', change > 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400')}>
+                        {change > 0 ? <ArrowUpLeft className="w-3 h-3" /> : <ArrowDownLeft className="w-3 h-3" />}
+                        {Math.abs(change).toLocaleString('fa-IR', { maximumFractionDigits: 1 })}٪
+                      </span>
+                    )}
+                    <span>قبلی: {fmt(i.previousPrice)}</span>
+                  </p>
+                )}
               </div>
-              <input defaultValue={i.weight} onBlur={(e) => patchField(i, 'weight', e.target.value.trim())} placeholder="وزن" className={cn(inputCls, 'w-full order-3 @3xl:order-none')} aria-label="وزن" />
+              <input defaultValue={i.weight} onBlur={(e) => patchField(i, 'weight', e.target.value.trim())} placeholder="وزن (کیلو)" className={cn(inputCls, 'w-full order-3 @3xl:order-none')} aria-label="وزن هر متر (کیلوگرم)" />
               <input defaultValue={i.note} onBlur={(e) => patchField(i, 'note', e.target.value.trim())} placeholder="توضیحات" className={cn(inputCls, 'w-full order-4 @3xl:order-none')} aria-label="توضیحات" />
-              <div className="flex items-center justify-end self-start order-2 @3xl:order-none @3xl:self-center">
-                <button onClick={() => move(idx, -1)} disabled={idx === 0 || !!q} aria-label="بالا" className="w-8 h-9 grid place-items-center text-[var(--muted-foreground)] hover:text-[var(--foreground)] disabled:opacity-20"><ChevronUp className="w-4 h-4" /></button>
-                <button onClick={() => move(idx, 1)} disabled={idx === items.length - 1 || !!q} aria-label="پایین" className="w-8 h-9 grid place-items-center text-[var(--muted-foreground)] hover:text-[var(--foreground)] disabled:opacity-20"><ChevronDown className="w-4 h-4" /></button>
-                <button onClick={() => remove(i)} aria-label="حذف" className="w-8 h-9 grid place-items-center text-[var(--muted-foreground)] hover:text-red-700 dark:hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+              <div className="flex items-center justify-end order-2 @3xl:order-none">
+                <button onClick={() => move(idx, -1)} disabled={idx === 0 || !!q} aria-label="بالا" className="w-8 h-10 grid place-items-center text-[var(--muted-foreground)] hover:text-[var(--foreground)] disabled:opacity-20"><ChevronUp className="w-4 h-4" /></button>
+                <button onClick={() => move(idx, 1)} disabled={idx === items.length - 1 || !!q} aria-label="پایین" className="w-8 h-10 grid place-items-center text-[var(--muted-foreground)] hover:text-[var(--foreground)] disabled:opacity-20"><ChevronDown className="w-4 h-4" /></button>
+                <button onClick={() => remove(i)} aria-label="حذف" className="w-8 h-10 grid place-items-center text-[var(--muted-foreground)] hover:text-red-700 dark:hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
               </div>
             </div>
           );
@@ -421,8 +499,16 @@ function ProductBoard({ product, onChange }: { product: ProductRow; onChange: (i
 
       <form onSubmit={add} className="p-3 sm:px-5 border-t border-[var(--border)] bg-[var(--background)]/40 grid grid-cols-2 @3xl:grid-cols-[minmax(0,1.4fr)_180px_100px_minmax(0,1fr)_auto] gap-2">
         <input value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} placeholder="ردیف جدید — عنوان" className={cn(inputCls, 'col-span-2 @3xl:col-span-1')} />
-        <input value={draft.price} onChange={(e) => setDraft({ ...draft, price: fmt(parse(e.target.value)) })} placeholder="قیمت (تومان)" dir="ltr" inputMode="numeric" className={cn(inputCls, 'text-left')} />
-        <input value={draft.weight} onChange={(e) => setDraft({ ...draft, weight: e.target.value })} placeholder="وزن" className={inputCls} />
+        <input
+          value={product.pricePerKg && toWeight(draft.weight) ? fmt(Math.round(toWeight(draft.weight)! * product.pricePerKg)) : draft.price}
+          onChange={(e) => setDraft({ ...draft, price: fmt(parse(e.target.value)) })}
+          readOnly={!!product.pricePerKg && toWeight(draft.weight) != null}
+          placeholder={product.pricePerKg ? 'وزن × قیمت روز' : 'قیمت (تومان)'}
+          dir="ltr"
+          inputMode="numeric"
+          className={cn(inputCls, 'text-left')}
+        />
+        <input value={draft.weight} onChange={(e) => setDraft({ ...draft, weight: e.target.value })} placeholder="وزن (کیلو)" className={inputCls} />
         <input value={draft.note} onChange={(e) => setDraft({ ...draft, note: e.target.value })} placeholder="توضیحات" className={cn(inputCls, 'col-span-2 @3xl:col-span-1')} />
         <button className="h-10 px-4 rounded-xl bg-emerald-500 text-black text-sm font-bold flex items-center justify-center gap-1.5 col-span-2 @3xl:col-span-1"><Plus className="w-4 h-4" />افزودن</button>
       </form>
@@ -498,7 +584,7 @@ function PriceBoardPage() {
           <ProductBoard
             key={selected.id}
             product={selected}
-            onChange={(items) => setProducts((all) => all!.map((p) => (p.id === selected.id ? { ...p, priceItems: items } : p)))}
+            onChange={(patch) => setProducts((all) => all!.map((p) => (p.id === selected.id ? { ...p, ...patch } : p)))}
           />
         )}
       </div>

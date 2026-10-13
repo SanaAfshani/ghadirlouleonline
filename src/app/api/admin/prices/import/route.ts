@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/shared/lib/prisma';
 import { requireAdmin } from '@/shared/lib/admin-auth';
 import { serverErrorResponse } from '@/shared/lib/api-errors';
-import { text, toPrice } from '@/shared/lib/price-admin';
+import { priceFromWeight, text, toPrice } from '@/shared/lib/price-admin';
 
 /** ورود گروهی (پیست از اکسل). replace=true یعنی جدول قبلی محصول جایگزین شود */
 export async function POST(request: NextRequest) {
@@ -12,8 +12,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const productId = text(body.productId, 64);
     const rows = Array.isArray(body.rows) ? body.rows : [];
+    const product = productId ? await prisma.product.findUnique({ where: { id: productId }, select: { pricePerKg: true } }) : null;
     const clean = rows
-      .map((r: Record<string, unknown>) => ({ title: text(r.title), price: toPrice(r.price), weight: text(r.weight, 40), note: text(r.note) }))
+      .map((r: Record<string, unknown>) => {
+        const weight = text(r.weight, 40);
+        return { title: text(r.title), price: priceFromWeight(weight, product?.pricePerKg) ?? toPrice(r.price), weight, note: text(r.note) };
+      })
       .filter((r: { title: string }) => r.title)
       .slice(0, 500);
     if (!productId || !clean.length) return NextResponse.json({ success: false, error: 'ردیفی برای ورود نیست' }, { status: 400 });
