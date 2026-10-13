@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowDownLeft, ArrowUpLeft, ChartLine, Clock, FileSpreadsheet, Lock, MessageSquareText, Search, ShoppingBag } from 'lucide-react';
 import { cn, faDigits, latinDigits } from '@/shared/lib/utils';
 import { useConsult } from '@/features/consult/ConsultProvider';
+import { useQuoteCart } from '@/features/quotes/QuoteCartProvider';
 import type { PriceBoard } from '@/shared/lib/price-board-types';
 import { findItems, useLiveBoard, type Flash } from './live-store';
 import { PriceChartDialog, type ChartTarget } from './PriceChartDialog';
@@ -91,6 +92,7 @@ const flashBg: Record<Flash, string> = {
 export function LivePriceTable({ initial, productIds, limit, showProduct = false, searchFrom = 12, caption, toolbar = false }: Props) {
   const { board, flashes } = useLiveBoard(initial);
   const { open: openConsult } = useConsult();
+  const { add: addToQuote } = useQuoteCart();
   const [q, setQ] = useState('');
   const [chart, setChart] = useState<ChartTarget | null>(null);
   const closeChart = useCallback(() => setChart(null), []);
@@ -109,8 +111,20 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
 
   if (!all.length) return null;
 
-  const act = (r: (typeof rows)[number]) =>
-    openConsult(open && r.price != null ? `${faDigits(r.title)} — ${r.price.toLocaleString('fa-IR')} تومان` : faDigits(r.title));
+  const act = (r: (typeof rows)[number]) => {
+    if (open && r.price != null) {
+      addToQuote({
+        priceItemId: r.id,
+        productId: r.productId,
+        productName: r.productName,
+        title: r.title,
+        unitPrice: r.price,
+        note: r.note,
+      });
+      return;
+    }
+    openConsult(faDigits(r.title));
+  };
   const showChart = (r: (typeof rows)[number]) =>
     r.price != null && setChart({ id: r.id, title: r.title, productName: r.productName, price: r.price });
 

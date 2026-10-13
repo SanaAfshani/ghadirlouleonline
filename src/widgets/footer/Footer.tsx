@@ -46,7 +46,7 @@ export function Footer({ categories }: { categories: NavCategory[] }) {
   const linkCls = 'block py-1.5 text-sm text-slate-400 hover:text-[var(--accent)] transition-colors';
 
   return (
-    <footer className="relative mt-16 bg-[var(--ink)] text-slate-300 overflow-hidden pb-bottom-nav">
+    <footer className="relative mt-16 bg-[var(--ink)] text-slate-300 overflow-hidden pb-bottom-nav print:hidden">
       <div className="absolute inset-0 bp-grid opacity-40" />
       {/* نوار هشدار صنعتی لبه بالای فوتر */}
       <div className="relative h-1.5 hazard opacity-90" aria-hidden />

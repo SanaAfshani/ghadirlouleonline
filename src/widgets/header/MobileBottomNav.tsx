@@ -30,7 +30,7 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label="ناوبری پایین"
-      className="lg:hidden fixed inset-x-0 bottom-0 z-40 bg-[var(--ink)] border-t border-white/10 pb-[env(safe-area-inset-bottom)]"
+      className="lg:hidden fixed inset-x-0 bottom-0 z-40 bg-[var(--ink)] border-t border-white/10 pb-[env(safe-area-inset-bottom)] print:hidden"
     >
       <div className="relative mx-auto max-w-md h-[64px] grid grid-cols-5 items-stretch">
         {ITEMS.map((item) =>

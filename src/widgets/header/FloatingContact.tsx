@@ -19,7 +19,7 @@ export function FloatingContact() {
   const btn = 'grid place-items-center w-12 h-12 rounded-2xl shadow-lg transition-transform hover:-translate-y-0.5';
 
   return (
-    <div className="hidden lg:flex fixed left-5 bottom-6 z-40 flex-col gap-2.5">
+    <div className="hidden lg:flex fixed left-5 bottom-6 z-40 flex-col gap-2.5 print:hidden">
       <a href={whatsappUrl} target="_blank" rel="noopener" aria-label="واتس‌اپ" className={cn(btn, 'bg-[#25D366] text-white')}>
         <MessageCircle className="w-6 h-6" />
       </a>

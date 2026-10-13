@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+@media print {
+  .print\:hidden { display: none !important; }
+  main { padding-top: 0 !important; }
+  body { background: white !important; }
+}
+
 /* dark: تیلویند همراه کلاس .dark (next-themes) — نه تنظیم سیستم‌عامل؛ وگرنه با دکمه تغییر تم هماهنگ نمی‌شد */
 @custom-variant dark (&:where(.dark, .dark *));
 

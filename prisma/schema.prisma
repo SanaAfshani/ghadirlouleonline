@@ -239,3 +239,62 @@ model Media {
   originalName String   @default("")
   createdAt    DateTime @default(now())
 }
+
+/// پیش‌فاکتور — درخواست مشتری یا صدور ادمین؛ قیمت‌ها اسنپ‌شات می‌شوند
+model Quote {
+  id              String      @id @default(cuid())
+  /// شماره نمایشی مثل Q-1404-0001
+  number          String      @unique
+  /// توکن تصادفی برای لینک عمومی /q/[token]
+  token           String      @unique
+  status          QuoteStatus @default(REQUESTED)
+  customerName    String
+  customerPhone   String
+  customerEmail   String      @default("")
+  customerCompany String      @default("")
+  customerMessage String      @default("")
+  /// یادداشت داخلی ادمین — روی پیش‌فاکتور عمومی نیست
+  adminNote       String      @default("")
+  sourcePath      String?
+  /// نرخ مالیات بر ارزش افزوده به درصد (پیش‌فرض ۱۰)
+  vatRate         Float       @default(10)
+  subtotal        Int         @default(0)
+  vatAmount       Int         @default(0)
+  total           Int         @default(0)
+  /// اعتبار پیش‌فاکتور صادرشده؛ قبل از صدور می‌تواند null باشد
+  validUntil      DateTime?
+  issuedAt        DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  items           QuoteItem[]
+
+  @@index([status, createdAt])
+  @@index([createdAt])
+}
+
+model QuoteItem {
+  id          String  @id @default(cuid())
+  quoteId     String
+  quote       Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  priceItemId String?
+  productId   String?
+  title       String
+  /// قیمت واحد اسنپ‌شات‌شده (تومان)
+  unitPrice   Int
+  /// مقدار به واحد (معمولاً متر)
+  quantity    Float
+  unit        String  @default("متر")
+  lineTotal   Int
+  note        String  @default("")
+  sortOrder   Int     @default(0)
+
+  @@index([quoteId, sortOrder])
+}
+
+enum QuoteStatus {
+  DRAFT
+  REQUESTED
+  ISSUED
+  REJECTED
+  EXPIRED
+}

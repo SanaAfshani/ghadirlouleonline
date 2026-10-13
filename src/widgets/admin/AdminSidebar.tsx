@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { m as motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard, Package, Layers, FileText, HelpCircle,
+  LayoutDashboard, Package, Layers, FileText, FileSpreadsheet, HelpCircle,
   Star, Building2, MessageSquare, Settings, Users, LogOut,
   Menu, Palette, ChevronLeft, SearchCheck, CandlestickChart, PhoneCall } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
@@ -26,6 +26,7 @@ const navGroups = [
     label: 'محتوا',
     items: [
       { href: '/admin/prices', label: 'تابلوی قیمت', icon: CandlestickChart },
+      { href: '/admin/quotes', label: 'پیش‌فاکتورها', icon: FileSpreadsheet },
       { href: '/admin/products', label: 'محصولات', icon: Package },
       { href: '/admin/categories', label: 'دسته‌بندی‌ها', icon: Layers },
       { href: '/admin/blog', label: 'وبلاگ', icon: FileText },
@@ -65,8 +66,11 @@ function NavItem({
   collapsed: boolean;
 }) {
   const pathname = usePathname();
-  const { unread } = useAdminNotifications();
-  const badge = href === '/admin/messages' && unread > 0 ? unread : 0;
+  const { unread, pendingQuotes } = useAdminNotifications();
+  const badge =
+    href === '/admin/messages' && unread > 0 ? unread
+      : href === '/admin/quotes' && pendingQuotes > 0 ? pendingQuotes
+        : 0;
   const active = exact ? pathname === href : pathname.startsWith(href);
 
   return (

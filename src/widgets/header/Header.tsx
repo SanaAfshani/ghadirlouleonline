@@ -117,7 +117,7 @@ export function Header({ categories }: { categories: NavCategory[] }) {
 
   return (
     <>
-      <header className="fixed top-0 inset-x-0 z-50">
+      <header className="fixed top-0 inset-x-0 z-50 print:hidden">
         {/* نوار بالا — فقط دسکتاپ */}
         <div className="hidden lg:block h-[38px] bg-[var(--ink)] text-[12px] text-slate-300">
           <div className="container-main h-full flex items-center justify-between">

@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   if (auth instanceof NextResponse) return auth;
   try {
     const where = { read: false };
-    const [unread, latest] = await Promise.all([
+    const [unread, latest, pendingQuotes] = await Promise.all([
       prisma.contactMessage.count({ where }),
       prisma.contactMessage.findMany({
         where,
@@ -17,8 +17,9 @@ export async function GET(request: NextRequest) {
         take: 8,
         select: { id: true, name: true, phone: true, subject: true, sourcePath: true, createdAt: true },
       }),
+      prisma.quote.count({ where: { status: 'REQUESTED' } }),
     ]);
-    return NextResponse.json({ success: true, data: { unread, latest } }, { headers: { 'Cache-Control': 'no-store' } });
+    return NextResponse.json({ success: true, data: { unread, latest, pendingQuotes } }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     return serverErrorResponse(error, 'Admin notifications error:');
   }

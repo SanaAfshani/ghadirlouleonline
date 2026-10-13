@@ -6,6 +6,7 @@ import { getNavCategories, getSiteSettingsMap } from '@/shared/lib/data';
 import { mergeSiteSettings } from '@/shared/lib/site-settings';
 import { SiteSettingsProvider } from '@/shared/providers/SiteSettingsProvider';
 import { ConsultProvider } from '@/features/consult/ConsultProvider';
+import { QuoteCartProvider } from '@/features/quotes/QuoteCartProvider';
 import { LeadTracker } from '@/features/leads/LeadTracker';
 
 /** Render at request time — required for Prisma/Postgres on Vercel */
@@ -25,14 +26,16 @@ export default async function MainLayout({
       {/* .site: لایه طراحی صنعتی سایت عمومی (globals.css) — contents یعنی بدون اثر روی چیدمان */}
       <div className="site contents">
         <ConsultProvider>
-          <div className="flex flex-col min-h-screen">
-            <Header categories={categories} />
-            <main className="flex-1 pt-[var(--nav-height)]">{children}</main>
-            <Footer categories={categories} />
-          </div>
-          <MobileBottomNav />
-          <FloatingContact />
-          <LeadTracker />
+          <QuoteCartProvider>
+            <div className="flex flex-col min-h-screen">
+              <Header categories={categories} />
+              <main className="flex-1 pt-[var(--nav-height)]">{children}</main>
+              <Footer categories={categories} />
+            </div>
+            <MobileBottomNav />
+            <FloatingContact />
+            <LeadTracker />
+          </QuoteCartProvider>
         </ConsultProvider>
       </div>
     </SiteSettingsProvider>

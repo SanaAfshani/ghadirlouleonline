@@ -13,7 +13,7 @@ export type PendingMessage = {
   createdAt: string;
 };
 
-type State = { unread: number; latest: PendingMessage[] };
+type State = { unread: number; latest: PendingMessage[]; pendingQuotes: number };
 type Ctx = State & {
   refresh: () => Promise<void>;
   /** اعلان مرورگر (حتی وقتی تب پنل در پس‌زمینه است) — فقط با کلیک کاربر قابل درخواست است */
@@ -22,7 +22,7 @@ type Ctx = State & {
 };
 
 const NotificationsContext = createContext<Ctx>({
-  unread: 0, latest: [], refresh: async () => {}, browserNotify: 'unsupported', enableBrowserNotify: async () => {},
+  unread: 0, latest: [], pendingQuotes: 0, refresh: async () => {}, browserNotify: 'unsupported', enableBrowserNotify: async () => {},
 });
 
 export const useAdminNotifications = () => useContext(NotificationsContext);
@@ -36,7 +36,7 @@ const readPermission = (): Ctx['browserNotify'] => (typeof Notification === 'und
  * همه از همین یک درخواست می‌خوانند. پیام تازه ← toast + شمارنده در عنوان تب + اعلان مرورگر (اگر اجازه داده شده).
  */
 export function AdminNotificationsProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<State>({ unread: 0, latest: [] });
+  const [state, setState] = useState<State>({ unread: 0, latest: [], pendingQuotes: 0 });
   // اجازه فعلی مرورگر؛ بعد از درخواست کاربر، پاسخ همان درخواست جایگزینش می‌شود
   const current = useSyncExternalStore(noopSubscribe, readPermission, () => 'unsupported' as const);
   const [requested, setRequested] = useState<NotificationPermission | null>(null);
