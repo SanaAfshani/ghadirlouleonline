@@ -9,12 +9,12 @@ export const siteConfig = {
   url: 'https://ghadirlouleonline.ir',
   phone: '09121184970',
   mobile: '09123837505',
-  email: 'atlastejaratazhand@gmail.com',
+  email: 'ghadirlouleonline@gmail.com',
   /** تلفن‌های ثابت دفتر مرکزی شرکت */
-  companyPhones: ['02186038220', '02186038224', '02186038296'],
+  companyPhones: ['021-91094784'],
   /** دفتر مرکزی (فروش) */
-  address: 'تهران، میدان ولیعصر، خیابان کریمخان زند، برج الماس کریمخان، طبقه پنجم، واحد ۵۲۵',
-  office: { street: 'میدان ولیعصر، خیابان کریمخان زند، برج الماس کریمخان، طبقه پنجم، واحد ۵۲۵', city: 'تهران', region: 'تهران' },
+  address: 'تهران، شادآباد',
+  office: { street: 'شادآباد', city: 'تهران', region: 'تهران' },
   /** کارخانه و انبار */
   factoryAddress: 'سمنان، گرمسار، شهرک صنعتی گرمسار',
   factory: { street: 'شهرک صنعتی گرمسار', city: 'گرمسار', region: 'سمنان', lat: 35.2427689, lng: 52.2637137 },

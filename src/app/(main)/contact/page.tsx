@@ -9,7 +9,7 @@ import { breadcrumbSchema, localBusinessSchema } from '@/shared/lib/seo';
 export const metadata: Metadata = {
   title: 'تماس با ما | آدرس کارخانه و دفتر مرکزی',
   description:
-    `راه‌های ارتباط با ${siteConfig.legalName}: تلفن دفتر مرکزی ${siteConfig.companyPhones[0]}، آدرس دفتر تهران (کریمخان زند، برج الماس) و کارخانه و انبار شهرک صنعتی گرمسار. استعلام قیمت لوله و مسیریابی روی نقشه.`,
+    `راه‌های ارتباط با ${siteConfig.legalName}: تلفن دفتر مرکزی ${siteConfig.companyPhones[0]}، آدرس دفتر تهران (شادآباد) و کارخانه و انبار شهرک صنعتی گرمسار. استعلام قیمت لوله و مسیریابی روی نقشه.`,
   alternates: { canonical: `${siteConfig.url}/contact` },
 };
 
