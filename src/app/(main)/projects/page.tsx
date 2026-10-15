@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: 'پروژه‌ها | نمونه‌کارهای تامین لوله و اتصالات',
     description:
-      'نمونه پروژه‌های اجراشده تامین لوله آب و فاضلاب، اتصالات و شیرآلات صنعتی در سراسر ایران توسط قدیر لوله آنلاین.',
+      'نمونه پروژه‌های اجراشده تامین لوله آب و فاضلاب و اتصالات صنعتی در سراسر ایران توسط قدیر لوله آنلاین.',
     alternates: { canonical: `${siteConfig.url}/projects` },
     // صفحه خالی «محتوای کم» حساب می‌شود؛ با ثبت اولین پروژه خودکار ایندکس‌پذیر می‌شود
     ...(hasProjects ? {} : { robots: { index: false, follow: true } }),

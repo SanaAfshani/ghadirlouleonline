@@ -6,7 +6,7 @@ import { Users, Package, Building2, Award } from 'lucide-react';
 
 const stats = [
   { end: 20,   suffix: '+', label: 'سال تجربه',     desc: 'در تامین لوله آب و فاضلاب', icon: Award,     color: 'amber' },
-  { end: 5000, suffix: '+', label: 'نوع محصول',    desc: 'لوله، اتصالات و شیرآلات',   icon: Package,   color: 'blue'  },
+  { end: 5000, suffix: '+', label: 'نوع محصول',    desc: 'لوله و اتصالات',   icon: Package,   color: 'blue'  },
   { end: 500,  suffix: '+', label: 'مشتری راضی',   desc: 'پیمانکار و شرکت‌های آب',   icon: Users,     color: 'green' },
   { end: 200,  suffix: '+', label: 'پروژه اجرایی', desc: 'آبرسانی و فاضلاب شهری',    icon: Building2, color: 'teal'  },
 ];

@@ -71,7 +71,7 @@ export default async function OpengraphImage() {
           {siteConfig.name}
         </RtlText>
         <RtlText style={{ fontSize: 36, color: '#cbd5e1', marginTop: 28, lineHeight: 1.5 }}>
-          لوله، اتصالات و شیرآلات صنعتی
+          لوله و اتصالات آب و فاضلاب
         </RtlText>
         <RtlText style={{ fontSize: 30, color: '#f59e0b', marginTop: 34 }}>
           ارسال به سراسر کشور

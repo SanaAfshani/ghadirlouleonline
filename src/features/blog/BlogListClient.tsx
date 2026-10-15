@@ -32,7 +32,7 @@ export function BlogListClient({ posts }: { posts: BlogPostCard[] }) {
 
   return (
     <>
-      <PageHero label="مجله تخصصی" title="مقالات و راهنماها" description="آموزش، راهنمای فنی و اخبار دنیای لوله آب و فاضلاب، پلیکا، پلی‌اتیلن و چدن" />
+      <PageHero label="مجله تخصصی" title="مقالات و راهنماها" description="آموزش، راهنمای فنی و اخبار دنیای لوله آب و فاضلاب، کاروگیت، پلی‌اتیلن و پلیکا" />
 
       <div className="container-main section-padding space-y-10">
         {featured && (

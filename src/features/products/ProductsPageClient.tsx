@@ -31,8 +31,8 @@ export function ProductsPageClient({ categories, products: allProducts }: Produc
     <>
       <PageHero
         label="کاتالوگ محصولات"
-        title="لوله، اتصالات و شیرآلات"
-        description="بیش از ۵۰۰۰ نوع محصول — پلیکا، پلی اتیلن، چدن داکتیل، منهول و اتصالات با کیفیت تضمین شده"
+        title="لوله و اتصالات"
+        description="لوله کاروگیت، پلی اتیلن، پلیکا، منهول، سپتیک تانک، آبیاری قطره‌ای و اتصالات با قیمت روز"
       />
 
       <div className="container-main py-6 md:py-10">

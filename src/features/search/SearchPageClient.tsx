@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Search, Package, FileText, Building2, ArrowLeft, TrendingUp, Loader2 } from 'lucide-react';
 import { SearchInput } from '@/shared/ui/SearchInput';
 
-const suggestions = ['لوله پلیکا', 'پلی اتیلن', 'منهول', 'شیرآلات', 'اتصالات', 'چدن داکتیل'];
+const suggestions = ['لوله کاروگیت', 'لوله پلی اتیلن', 'لوله پلیکا', 'منهول', 'سپتیک تانک', 'اتصالات'];
 
 type SearchProduct = {
   id: string;
