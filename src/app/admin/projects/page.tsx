@@ -155,7 +155,7 @@ export default function AdminProjectsPage() {
                         </div>
                         <div>
                           <div className="text-[var(--foreground)] font-medium">{project.title}</div>
-                          {project.featured && <span className="text-xs text-[var(--accent)]">⭐ ویژه</span>}
+                          {project.featured && <span className="text-xs text-[var(--accent-text)]">⭐ ویژه</span>}
                         </div>
                       </div>
                     </td>
@@ -188,7 +188,7 @@ export default function AdminProjectsPage() {
                         )}
                         <Link
                           href={`/admin/projects/${project.id}/edit`}
-                          className="w-8 h-8 rounded-lg bg-[var(--muted)] flex items-center justify-center text-[var(--muted-foreground)] hover:text-[var(--accent)]"
+                          className="w-8 h-8 rounded-lg bg-[var(--muted)] flex items-center justify-center text-[var(--muted-foreground)] hover:text-[var(--accent-text)]"
                         >
                           <Pencil className="w-4 h-4" />
                         </Link>

@@ -149,7 +149,7 @@ export function ArticleImportDialog({ open, onClose, filled, onImport }: Props) 
               )}
 
               {skipped.length > 0 && (
-                <p className="flex items-start gap-2 text-xs text-[var(--accent)] leading-relaxed">
+                <p className="flex items-start gap-2 text-xs text-[var(--accent-text)] leading-relaxed">
                   <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                   {formatPersianNumber(skipped.length)} فیلد از قبل پر است و رد می‌شود. برای
                   جایگزینی، گزینه زیر را فعال کن.

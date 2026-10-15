@@ -136,7 +136,7 @@ export default function AdminBlogPage() {
                         </div>
                         <div>
                           <div className="text-[var(--foreground)] font-medium line-clamp-1">{post.title}</div>
-                          {post.featured && <span className="text-xs text-[var(--accent)]">⭐ ویژه</span>}
+                          {post.featured && <span className="text-xs text-[var(--accent-text)]">⭐ ویژه</span>}
                         </div>
                       </div>
                     </td>
@@ -165,7 +165,7 @@ export default function AdminBlogPage() {
                         )}
                         <Link
                           href={`/admin/blog/${encodeURIComponent(post.slug)}/edit`}
-                          className="w-8 h-8 rounded-lg bg-[var(--muted)] flex items-center justify-center text-[var(--muted-foreground)] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-all"
+                          className="w-8 h-8 rounded-lg bg-[var(--muted)] flex items-center justify-center text-[var(--muted-foreground)] hover:text-[var(--accent-text)] hover:bg-[var(--accent)]/10 transition-all"
                         >
                           <Pencil className="w-4 h-4" />
                         </Link>

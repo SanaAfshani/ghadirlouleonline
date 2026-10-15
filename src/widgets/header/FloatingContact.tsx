@@ -20,7 +20,7 @@ export function FloatingContact() {
 
   return (
     <div className="hidden lg:flex fixed left-5 bottom-6 z-40 flex-col gap-2.5 print:hidden">
-      <a href={whatsappUrl} target="_blank" rel="noopener" aria-label="واتس‌اپ" className={cn(btn, 'bg-[#25D366] text-white')}>
+      <a href={whatsappUrl} target="_blank" rel="noopener" aria-label="واتس‌اپ" className={cn(btn, 'bg-[#128C7E] text-white')}>
         <MessageCircle className="w-6 h-6" />
       </a>
       <a href={phoneHref} aria-label="تماس تلفنی" className={cn(btn, 'bg-[var(--accent)] text-[var(--accent-foreground)]')}>

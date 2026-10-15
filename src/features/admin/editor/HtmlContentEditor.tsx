@@ -119,7 +119,7 @@ export function HtmlContentEditor({ value, onChange, rows = 14, placeholder, lab
 
       {preview ? (
         <div
-          className="w-full bg-[var(--muted)] border border-[var(--border)] rounded-xl px-4 py-3 text-[var(--foreground)] overflow-auto [&_h2]:text-lg [&_h2]:font-bold [&_h2]:mt-5 [&_h2]:mb-2 [&_h3]:text-base [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2 [&_p]:mb-3 [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:mr-6 [&_ol]:mr-6 [&_li]:mb-1 [&_a]:text-[var(--accent)] [&_a]:underline [&_strong]:font-bold [&_table]:w-full [&_th]:border [&_td]:border [&_th]:border-[var(--border)] [&_td]:border-[var(--border)] [&_th]:p-2 [&_td]:p-2"
+          className="w-full bg-[var(--muted)] border border-[var(--border)] rounded-xl px-4 py-3 text-[var(--foreground)] overflow-auto [&_h2]:text-lg [&_h2]:font-bold [&_h2]:mt-5 [&_h2]:mb-2 [&_h3]:text-base [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2 [&_p]:mb-3 [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:mr-6 [&_ol]:mr-6 [&_li]:mb-1 [&_a]:text-[var(--accent-text)] [&_a]:underline [&_strong]:font-bold [&_table]:w-full [&_th]:border [&_td]:border [&_th]:border-[var(--border)] [&_td]:border-[var(--border)] [&_th]:p-2 [&_td]:p-2"
           style={{ minHeight: rows * 24 }}
           dangerouslySetInnerHTML={{ __html: value || '<p class="text-[var(--muted-foreground)]">محتوایی وارد نشده است.</p>' }}
         />
@@ -143,7 +143,7 @@ export function HtmlContentEditor({ value, onChange, rows = 14, placeholder, lab
       />
 
       <p className="flex items-start gap-1.5 text-xs text-[var(--muted-foreground)] mt-1.5 leading-relaxed">
-        <Sparkles className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-[var(--accent)]/70" />
+        <Sparkles className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-[var(--accent-text)]/70" />
         متن را مستقیم از ابزار تولید محتوا، Word یا Google Docs پیست کن — خودکار به HTML تمیز تبدیل می‌شود.
       </p>
     </div>

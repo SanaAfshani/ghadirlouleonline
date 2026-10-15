@@ -80,7 +80,7 @@ export default async function PricesPage() {
                       <p className="text-xs text-[var(--muted-foreground)]">{l.categoryName}</p>
                       <h2 id={`h-${l.productSlug}`} className="text-xl sm:text-2xl font-black">قیمت {l.productName}</h2>
                     </div>
-                    <Link href={l.href} className="text-sm font-bold text-[var(--accent)] shrink-0">صفحه محصول ←</Link>
+                    <Link href={l.href} className="text-sm font-bold text-[var(--accent-text)] shrink-0">صفحه محصول ←</Link>
                   </div>
                   <LivePriceTable initial={board} productIds={[l.productId]} caption={`قیمت ${l.productName}`} toolbar />
                 </section>

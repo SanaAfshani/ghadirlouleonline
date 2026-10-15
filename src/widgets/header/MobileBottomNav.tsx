@@ -49,7 +49,7 @@ export function MobileBottomNav() {
               {active(item.href) && (
                 <motion.span layoutId="bottom-nav-active" className="absolute top-0 inset-x-4 h-[3px] bg-[var(--accent)]" transition={{ type: 'spring', damping: 26, stiffness: 380 }} />
               )}
-              <item.icon className={cn('w-[22px] h-[22px]', active(item.href) ? 'text-[var(--accent)]' : 'text-slate-400')} />
+              <item.icon className={cn('w-[22px] h-[22px]', active(item.href) ? 'text-[var(--accent-text)]' : 'text-slate-400')} />
               <span className={cn('text-[10.5px] font-bold', active(item.href) ? 'text-white' : 'text-slate-400')}>{item.label}</span>
             </Link>
           ),

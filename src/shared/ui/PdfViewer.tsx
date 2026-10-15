@@ -19,7 +19,7 @@ export function PdfViewer({ url, title }: PdfViewerProps) {
       <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-4 bg-[var(--card)] border-b border-[var(--border)]">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-9 h-9 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center flex-shrink-0">
-            <FileText className="w-5 h-5 text-[var(--accent)]" />
+            <FileText className="w-5 h-5 text-[var(--accent-text)]" />
           </div>
           <div className="min-w-0">
             <p className="text-[var(--foreground)] font-semibold text-sm leading-tight">کاتالوگ محصول</p>
@@ -92,7 +92,7 @@ export function PdfViewer({ url, title }: PdfViewerProps) {
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-xs text-[var(--accent)] font-bold hover:opacity-80 transition-opacity"
+                className="flex items-center gap-1.5 text-xs text-[var(--accent-text)] font-bold hover:opacity-80 transition-opacity"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
                 باز کردن در مرورگر

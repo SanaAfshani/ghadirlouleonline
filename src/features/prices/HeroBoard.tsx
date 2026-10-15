@@ -70,7 +70,7 @@ export function HeroBoard({ initial, rows = 5 }: { initial: PriceBoard; rows?: n
       </ul>
 
       <div className="px-4 sm:px-5 py-3.5 border-t border-white/[0.06] flex items-center justify-between gap-3 text-xs">
-        <Link href={line.href} className="flex items-center gap-1 font-bold text-[var(--accent)]">
+        <Link href={line.href} className="flex items-center gap-1 font-bold text-[var(--accent-text)]">
           جدول کامل {line.productName} <span className="text-slate-500 num">({faDigits(line.items.length)})</span>
         </Link>
         <Link href="/prices" className="flex items-center gap-1 text-slate-300 hover:text-white">

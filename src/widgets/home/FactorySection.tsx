@@ -32,7 +32,7 @@ export function FactorySection({ address, factoryAddress, companyPhones, mapUrl 
           <ol className="mt-8 grid grid-cols-1 sm:grid-cols-3 border border-white/10 rounded-2xl overflow-hidden">
             {STEPS.map((s, i) => (
               <li key={s.title} className="p-4 border-b sm:border-b-0 sm:border-s first:border-s-0 border-white/10 last:border-b-0 bg-white/[0.03]">
-                <span className="text-2xl font-black text-[var(--accent)] num leading-none">{faDigits(String(i + 1).padStart(2, '0'))}</span>
+                <span className="text-2xl font-black text-[var(--accent-text)] num leading-none">{faDigits(String(i + 1).padStart(2, '0'))}</span>
                 <p className="mt-2 font-bold text-sm text-white">{s.title}</p>
                 <p className="mt-1 text-xs leading-6 text-slate-400">{s.desc}</p>
               </li>
@@ -61,7 +61,7 @@ export function FactorySection({ address, factoryAddress, companyPhones, mapUrl 
 
           <article className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
             <div className="flex items-start gap-3.5">
-              <span className="grid place-items-center w-11 h-11 rounded-xl bg-white/10 text-[var(--accent)] shrink-0"><Building2 className="w-5 h-5" /></span>
+              <span className="grid place-items-center w-11 h-11 rounded-xl bg-white/10 text-[var(--accent-text)] shrink-0"><Building2 className="w-5 h-5" /></span>
               <div className="min-w-0">
                 <h3 className="font-black text-white">دفتر مرکزی و فروش</h3>
                 <p className="mt-1 text-sm leading-7 text-slate-300 num">{faDigits(address)}</p>
@@ -71,7 +71,7 @@ export function FactorySection({ address, factoryAddress, companyPhones, mapUrl 
               <div className="mt-4 grid grid-cols-1 min-[400px]:grid-cols-2 min-[400px]:[&>:last-child:nth-child(odd)]:col-span-2 gap-2">
                 {companyPhones.map((p) => (
                   <a key={p} href={phoneHref(p)} className="h-11 rounded-xl border border-white/15 flex items-center justify-center gap-2 text-sm font-bold hover:bg-white/10 transition-colors">
-                    <Phone className="w-4 h-4 text-[var(--accent)]" />
+                    <Phone className="w-4 h-4 text-[var(--accent-text)]" />
                     <span dir="ltr" className="num">{faDigits(p)}</span>
                   </a>
                 ))}

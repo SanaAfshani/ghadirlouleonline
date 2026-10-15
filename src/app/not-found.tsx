@@ -12,7 +12,7 @@ export default function NotFound() {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', damping: 20, delay: 0.1 }}
-          className="text-[10rem] font-black text-[var(--accent)] leading-none mb-4 select-none"
+          className="text-[10rem] font-black text-[var(--accent-text)] leading-none mb-4 select-none"
         >
           ۴۰۴
         </motion.div>
@@ -47,7 +47,7 @@ export default function NotFound() {
           </Link>
           <Link
             href="/products"
-            className="flex items-center gap-2 h-11 px-6 rounded-xl border border-[var(--border)] text-[var(--foreground)] font-medium hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all"
+            className="flex items-center gap-2 h-11 px-6 rounded-xl border border-[var(--border)] text-[var(--foreground)] font-medium hover:border-[var(--accent)] hover:text-[var(--accent-text)] transition-all"
           >
             <Search className="w-4 h-4" />
             مشاهده محصولات

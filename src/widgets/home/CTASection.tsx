@@ -38,7 +38,7 @@ export function CTASection() {
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
         >
-          <span className="inline-block text-[var(--accent)] text-sm font-semibold uppercase tracking-widest mb-4">
+          <span className="inline-block text-[var(--accent-text)] text-sm font-semibold uppercase tracking-widest mb-4">
             آماده همکاری هستیم
           </span>
           <h2 className="text-4xl md:text-5xl font-black text-white mb-5 leading-tight">
@@ -58,7 +58,7 @@ export function CTASection() {
             </Link>
             <a
               href={phoneHref}
-              className="flex items-center gap-3 h-14 px-10 rounded-2xl border-2 border-slate-600 text-white text-base font-semibold hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all duration-300 hover:-translate-y-1"
+              className="flex items-center gap-3 h-14 px-10 rounded-2xl border-2 border-slate-600 text-white text-base font-semibold hover:border-[var(--accent)] hover:text-[var(--accent-text)] transition-all duration-300 hover:-translate-y-1"
             >
               <Phone className="w-5 h-5" />
               {phone}

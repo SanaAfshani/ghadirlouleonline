@@ -22,7 +22,7 @@ type DashboardData = {
 };
 
 const colorMap: Record<string, { bg: string; text: string; ring: string }> = {
-  amber:  { bg: 'bg-[var(--accent)]/10',  text: 'text-[var(--accent)]',  ring: 'ring-[var(--accent)]/20' },
+  amber:  { bg: 'bg-[var(--accent)]/10',  text: 'text-[var(--accent-text)]',  ring: 'ring-[var(--accent)]/20' },
   blue:   { bg: 'bg-blue-500/10',   text: 'text-blue-700 dark:text-blue-400',   ring: 'ring-blue-500/20' },
   rose:   { bg: 'bg-rose-500/10',   text: 'text-rose-700 dark:text-rose-400',   ring: 'ring-rose-500/20' },
   green:  { bg: 'bg-green-500/10',  text: 'text-green-700 dark:text-green-400',  ring: 'ring-green-500/20' },
@@ -171,7 +171,7 @@ export function AdminDashboardClient({ data }: { data: DashboardData }) {
             <h2 className="font-semibold text-[var(--foreground)]">آخرین پیام‌ها</h2>
             <Link
               href="/admin/messages"
-              className="text-[var(--accent)] hover:text-[var(--accent)] text-xs transition-colors flex items-center gap-1"
+              className="text-[var(--accent-text)] hover:text-[var(--accent-text)] text-xs transition-colors flex items-center gap-1"
             >
               مشاهده همه <ArrowLeft className="w-3 h-3" />
             </Link>
@@ -250,7 +250,7 @@ export function AdminDashboardClient({ data }: { data: DashboardData }) {
               <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-[var(--muted)]/40">
                 <div className="mt-1.5 flex-shrink-0">
                   {item.type === 'product' ? (
-                    <Package className="w-3.5 h-3.5 text-[var(--accent)]" />
+                    <Package className="w-3.5 h-3.5 text-[var(--accent-text)]" />
                   ) : (
                     <FileText className="w-3.5 h-3.5 text-blue-700 dark:text-blue-400" />
                   )}

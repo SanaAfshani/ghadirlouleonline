@@ -250,7 +250,7 @@ export default function NewBlogPostPage() {
               />
               {form.pdfUrl ? (
                 <div className="flex items-center gap-3 bg-[var(--muted)] rounded-xl px-4 py-3">
-                  <FileText className="w-5 h-5 text-[var(--accent)] flex-shrink-0" />
+                  <FileText className="w-5 h-5 text-[var(--accent-text)] flex-shrink-0" />
                   <span className="text-sm text-[var(--foreground)] flex-1 truncate" dir="ltr">
                     {form.pdfUrl.split('/').pop()}
                   </span>
@@ -267,10 +267,10 @@ export default function NewBlogPostPage() {
                   type="button"
                   onClick={() => pdfInputRef.current?.click()}
                   disabled={pdfUploading}
-                  className="w-full border-2 border-dashed border-[var(--border)] rounded-xl p-6 flex flex-col items-center justify-center gap-3 text-[var(--muted-foreground)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors disabled:opacity-50"
+                  className="w-full border-2 border-dashed border-[var(--border)] rounded-xl p-6 flex flex-col items-center justify-center gap-3 text-[var(--muted-foreground)] hover:border-[var(--accent)] hover:text-[var(--accent-text)] transition-colors disabled:opacity-50"
                 >
                   {pdfUploading ? (
-                    <Loader2 className="w-7 h-7 animate-spin text-[var(--accent)]" />
+                    <Loader2 className="w-7 h-7 animate-spin text-[var(--accent-text)]" />
                   ) : (
                     <FileText className="w-7 h-7" />
                   )}

@@ -167,7 +167,7 @@ export default function AdminQuotesPage() {
     <div className="max-w-7xl space-y-5">
       <div>
         <h1 className="text-2xl font-bold text-[var(--foreground)] flex items-center gap-2">
-          <FileSpreadsheet className="w-6 h-6 text-[var(--accent)]" />
+          <FileSpreadsheet className="w-6 h-6 text-[var(--accent-text)]" />
           پیش‌فاکتورها
         </h1>
         <p className="text-[var(--muted-foreground)] text-sm mt-1">درخواست مشتری را بررسی کنید، در صورت نیاز اصلاح کنید و صادر کنید.</p>

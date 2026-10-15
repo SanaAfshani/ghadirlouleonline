@@ -19,9 +19,9 @@ export function BlogPostView({ post, relatedCategories = [] }: { post: BlogPost;
     <div className="min-h-screen bg-[var(--background)]">
       <div className="container-main py-10 max-w-5xl">
         <nav className="flex items-center gap-2 text-sm text-[var(--muted-foreground)] mb-8 flex-wrap">
-          <Link href="/" className="hover:text-[var(--accent)] transition-colors">خانه</Link>
+          <Link href="/" className="hover:text-[var(--accent-text)] transition-colors">خانه</Link>
           <span>/</span>
-          <Link href="/blog" className="hover:text-[var(--accent)] transition-colors">وبلاگ</Link>
+          <Link href="/blog" className="hover:text-[var(--accent-text)] transition-colors">وبلاگ</Link>
           <span>/</span>
           <span className="text-[var(--foreground)] truncate min-w-0 max-w-full">{faDigits(post.title)}</span>
         </nav>
@@ -29,7 +29,7 @@ export function BlogPostView({ post, relatedCategories = [] }: { post: BlogPost;
         <motion.article>
           {/* Meta */}
           <header className="max-w-3xl mb-8">
-            <span className="text-sm font-bold text-[var(--accent)]">{tag}</span>
+            <span className="text-sm font-bold text-[var(--accent-text)]">{tag}</span>
             <h1 className="mt-2 text-2xl sm:text-3xl md:text-[2.5rem] font-black text-[var(--foreground)] leading-snug md:leading-tight">
               {faDigits(post.title)}
             </h1>
@@ -90,7 +90,7 @@ export function BlogPostView({ post, relatedCategories = [] }: { post: BlogPost;
               <ul className="flex flex-wrap gap-2">
                 {relatedCategories.map((c) => (
                   <li key={c.slug}>
-                    <Link href={`/products/${c.slug}`} className="h-10 px-4 rounded-xl border border-[var(--border)] text-sm font-bold inline-flex items-center gap-1.5 hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors">
+                    <Link href={`/products/${c.slug}`} className="h-10 px-4 rounded-xl border border-[var(--border)] text-sm font-bold inline-flex items-center gap-1.5 hover:border-[var(--accent)] hover:text-[var(--accent-text)] transition-colors">
                       <Tag className="w-4 h-4" />
                       {c.comingSoon ? <>{c.name} (به زودی)</> : <>قیمت {c.name}</>}
                     </Link>
@@ -108,7 +108,7 @@ export function BlogPostView({ post, relatedCategories = [] }: { post: BlogPost;
             <div className="mt-12 pt-8 border-t border-[var(--border)]">
               <Link
                 href="/blog"
-                className="inline-flex items-center gap-2 text-[var(--accent)] font-semibold hover:gap-3 transition-all"
+                className="inline-flex items-center gap-2 text-[var(--accent-text)] font-semibold hover:gap-3 transition-all"
               >
                 <ArrowRight className="w-4 h-4" />
                 بازگشت به وبلاگ

@@ -81,7 +81,7 @@ function NavItem({
         'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
         collapsed ? 'justify-center px-2' : '',
         active
-          ? 'bg-[var(--accent)]/15 text-[var(--accent)]'
+          ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]'
           : 'text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]',
       )}
     >
@@ -94,7 +94,7 @@ function NavItem({
       <Icon
         className={cn(
           'flex-shrink-0 transition-colors',
-          active ? 'text-[var(--accent)]' : 'text-[var(--muted-foreground)] group-hover:text-[var(--foreground)]',
+          active ? 'text-[var(--accent-text)]' : 'text-[var(--muted-foreground)] group-hover:text-[var(--foreground)]',
           collapsed ? 'w-5 h-5' : 'w-4 h-4',
         )}
       />
@@ -105,7 +105,7 @@ function NavItem({
         </span>
       )}
       {!collapsed && active && !badge && (
-        <ChevronLeft className="w-3.5 h-3.5 mr-auto text-[var(--accent)]/60" />
+        <ChevronLeft className="w-3.5 h-3.5 mr-auto text-[var(--accent-text)]/60" />
       )}
 
       {collapsed && (

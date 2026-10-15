@@ -95,11 +95,11 @@ export function SeoPanel({ value, onChange, context, variant = 'article', previe
       {/* سربرگ متمایز — تا ادمین این بخش را با فیلدهای محتوا اشتباه نگیرد */}
       <div className="bg-[var(--accent)]/10 border-b border-[var(--accent)]/20 px-6 py-4 flex items-center gap-3">
         <div className="w-9 h-9 rounded-xl bg-[var(--accent)]/20 flex items-center justify-center flex-shrink-0">
-          <Search className="w-4 h-4 text-[var(--accent)]" />
+          <Search className="w-4 h-4 text-[var(--accent-text)]" />
         </div>
         <div>
           <h2 className="text-[var(--foreground)] font-bold">تنظیمات سئو</h2>
-          <p className="text-[var(--accent)]/60 text-xs mt-0.5">
+          <p className="text-[var(--accent-text)]/60 text-xs mt-0.5">
             این بخش فقط روی نتایج گوگل اثر دارد و در خود صفحه نمایش داده نمی‌شود
           </p>
         </div>
@@ -147,7 +147,7 @@ export function SeoPanel({ value, onChange, context, variant = 'article', previe
                   passedCount === checks.length
                     ? 'text-emerald-700 dark:text-emerald-400'
                     : passedCount >= 3
-                      ? 'text-[var(--accent)]'
+                      ? 'text-[var(--accent-text)]'
                       : 'text-red-700 dark:text-red-400'
                 }`}
               >
@@ -249,7 +249,7 @@ export function SeoPanel({ value, onChange, context, variant = 'article', previe
             className="w-full flex items-center justify-between text-right group"
           >
             <span className="flex items-center gap-2.5">
-              <Share2 className="w-4 h-4 text-[var(--muted-foreground)] group-hover:text-[var(--accent)] transition-colors" />
+              <Share2 className="w-4 h-4 text-[var(--muted-foreground)] group-hover:text-[var(--accent-text)] transition-colors" />
               <span className="text-sm font-medium text-[var(--foreground)]">
                 اشتراک‌گذاری در شبکه‌های اجتماعی
               </span>

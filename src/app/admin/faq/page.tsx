@@ -161,7 +161,7 @@ export default function AdminFaqPage() {
                 className="w-full flex items-center gap-4 px-6 py-4 text-right hover:bg-[var(--muted)]/40 transition-colors"
               >
                 <div className="w-8 h-8 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center flex-shrink-0">
-                  <HelpCircle className="w-4 h-4 text-[var(--accent)]" />
+                  <HelpCircle className="w-4 h-4 text-[var(--accent-text)]" />
                 </div>
                 <span className="flex-1 text-[var(--foreground)] font-medium">{faq.question}</span>
                 <div className="flex items-center gap-3">
@@ -193,7 +193,7 @@ export default function AdminFaqPage() {
                         <button
                           type="button"
                           onClick={() => openEdit(faq)}
-                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-all text-xs"
+                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--accent-text)] hover:bg-[var(--accent)]/10 transition-all text-xs"
                         >
                           <Pencil className="w-3.5 h-3.5" />
                           ویرایش

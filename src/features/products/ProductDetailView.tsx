@@ -46,7 +46,7 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
         >
           {images.map((src, i) => (
             <div key={src} className="relative w-full aspect-[4/3] bg-[var(--muted)]">
-              <Image src={src} alt={i === 0 ? name : `${name} — تصویر ${faDigits(i + 1)}`} fill sizes="100vw" className="object-cover" priority={i === 0} />
+              <Image src={src} alt={i === 0 ? name : `${name} — تصویر ${faDigits(i + 1)}`} fill sizes="100vw" quality={90} className="object-cover" priority={i === 0} />
             </div>
           ))}
         </div>
@@ -62,7 +62,7 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
       {/* دسکتاپ: تصویر اصلی + بندانگشتی */}
       <div className="hidden lg:block">
         <div className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-[var(--muted)] border border-[var(--border)]">
-          <Image src={images[active]} alt={name} fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" priority />
+          <Image src={images[active]} alt={name} fill sizes="(max-width: 1024px) 100vw, 50vw" quality={90} className="object-cover" priority />
         </div>
         {images.length > 1 && (
           <div className="mt-3 grid grid-cols-5 gap-2">
@@ -138,11 +138,11 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
       {/* مسیر صفحه */}
       <div className="border-b border-[var(--border)] bg-[var(--card)]">
         <nav aria-label="مسیر صفحه" className="container-main h-11 flex items-center gap-1.5 text-xs text-[var(--muted-foreground)] overflow-x-auto no-scrollbar whitespace-nowrap">
-          <Link href="/" className="hover:text-[var(--accent)]">خانه</Link>
+          <Link href="/" className="hover:text-[var(--accent-text)]">خانه</Link>
           <ChevronLeft className="w-3 h-3 shrink-0" />
-          <Link href="/products" className="hover:text-[var(--accent)]">محصولات</Link>
+          <Link href="/products" className="hover:text-[var(--accent-text)]">محصولات</Link>
           <ChevronLeft className="w-3 h-3 shrink-0" />
-          <Link href={`/products/${product.category.slug}`} className="hover:text-[var(--accent)]">{product.category.name}</Link>
+          <Link href={`/products/${product.category.slug}`} className="hover:text-[var(--accent-text)]">{product.category.name}</Link>
           <ChevronLeft className="w-3 h-3 shrink-0" />
           <span className="text-[var(--foreground)] font-semibold">{faDigits(product.name)}</span>
         </nav>
@@ -156,7 +156,7 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
 
           <motion.div className="flex flex-col">
             <div className="flex flex-wrap items-center gap-2">
-              <Link href={`/products/${product.category.slug}`} className="h-7 px-3 rounded-lg bg-[var(--accent)]/12 text-[var(--accent)] text-xs font-bold flex items-center">
+              <Link href={`/products/${product.category.slug}`} className="h-7 px-3 rounded-lg bg-[var(--accent)]/12 text-[var(--accent-text)] text-xs font-bold flex items-center">
                 {product.category.name}
               </Link>
               {comingSoon ? (
@@ -218,7 +218,7 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
                       </span>
                     )}
                   </div>
-                  <button onClick={() => scrollTo('price-table')} className="mt-3 text-sm font-bold text-[var(--accent)] hover:underline">
+                  <button onClick={() => scrollTo('price-table')} className="mt-3 text-sm font-bold text-[var(--accent-text)] hover:underline">
                     مشاهده جدول کامل قیمت ←
                   </button>
                 </>
@@ -248,10 +248,10 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
                 {comingSoon ? 'استعلام و اطلاع از زمان عرضه' : 'ثبت درخواست مشاوره و خرید'}
               </button>
               <a href={phoneHref} className="h-13 px-5 rounded-2xl border border-[var(--border)] font-bold flex items-center gap-2 hover:border-[var(--accent)]">
-                <Phone className="w-4.5 h-4.5 text-[var(--accent)]" />
+                <Phone className="w-4.5 h-4.5 text-[var(--accent-text)]" />
                 <span dir="ltr" className="num">{faDigits(phone)}</span>
               </a>
-              <a href={whatsappUrl} target="_blank" rel="noopener" aria-label="واتس‌اپ" className="h-13 w-13 rounded-2xl bg-[#25D366] text-white grid place-items-center">
+              <a href={whatsappUrl} target="_blank" rel="noopener" aria-label="واتس‌اپ" className="h-13 w-13 rounded-2xl bg-[#128C7E] text-white grid place-items-center">
                 <MessageCircle className="w-5 h-5" />
               </a>
             </div>
@@ -263,7 +263,7 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
                 { icon: Headphones, label: 'مشاوره فنی رایگان' },
               ].map(({ icon: Icon, label }) => (
                 <li key={label} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-[var(--card)] border border-[var(--border)] text-center">
-                  <Icon className="w-5 h-5 text-[var(--accent)]" />
+                  <Icon className="w-5 h-5 text-[var(--accent-text)]" />
                   <span className="text-[11px] leading-tight text-[var(--muted-foreground)] font-semibold">{label}</span>
                 </li>
               ))}
@@ -281,7 +281,7 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
                 <button
                   key={s.id}
                   onClick={() => scrollTo(s.id)}
-                  className={cn('relative h-13 px-4 text-sm font-bold whitespace-nowrap transition-colors', current === s.id ? 'text-[var(--accent)]' : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]')}
+                  className={cn('relative h-13 px-4 text-sm font-bold whitespace-nowrap transition-colors', current === s.id ? 'text-[var(--accent-text)]' : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]')}
                 >
                   {s.label}
                   {current === s.id && <motion.span layoutId="product-tab" className="absolute inset-x-3 bottom-0 h-[3px] rounded-full bg-[var(--accent)]" />}
@@ -341,23 +341,23 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
               <p className="mt-2 font-black text-lg leading-8">برای استعلام قیمت و خرید این محصول تماس بگیرید</p>
               <div className="mt-5 space-y-2">
                 <a href={phoneHref} className="flex items-center justify-between h-12 px-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10">
-                  <Phone className="w-4.5 h-4.5 text-[var(--accent)]" />
+                  <Phone className="w-4.5 h-4.5 text-[var(--accent-text)]" />
                   <span dir="ltr" className="num font-bold">{faDigits(phone)}</span>
                 </a>
                 {mobile && mobile !== phone && (
                   <a href={mobileHref} className="flex items-center justify-between h-12 px-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10">
-                    <Phone className="w-4.5 h-4.5 text-[var(--accent)]" />
+                    <Phone className="w-4.5 h-4.5 text-[var(--accent-text)]" />
                     <span dir="ltr" className="num font-bold">{faDigits(mobile)}</span>
                   </a>
                 )}
-                <a href={whatsappUrl} target="_blank" rel="noopener" className="flex items-center justify-center gap-2 h-12 rounded-2xl bg-[#25D366] font-bold">
+                <a href={whatsappUrl} target="_blank" rel="noopener" className="flex items-center justify-center gap-2 h-12 rounded-2xl bg-[#128C7E] font-bold">
                   <MessageCircle className="w-5 h-5" /> گفتگو در واتس‌اپ
                 </a>
               </div>
               <p className="mt-4 flex items-center gap-1.5 text-xs text-slate-400"><Clock className="w-3.5 h-3.5" />{siteConfig.workingHours}</p>
             </div>
           </div>
-          <button onClick={() => open(product.name)} className="mt-3 w-full h-12 rounded-2xl border-2 border-[var(--accent)] text-[var(--accent)] font-black hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition-colors">
+          <button onClick={() => open(product.name)} className="mt-3 w-full h-12 rounded-2xl border-2 border-[var(--accent)] text-[var(--accent-text)] font-black hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition-colors">
             ثبت درخواست مشاوره
           </button>
         </aside>
@@ -384,7 +384,7 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
             {comingSoon ? 'استعلام قیمت' : 'مشاوره و خرید'}
           </button>
           <a href={phoneHref} aria-label="تماس" className="w-12 h-12 rounded-2xl bg-[var(--ink)] text-white grid place-items-center"><Phone className="w-5 h-5" /></a>
-          <a href={whatsappUrl} target="_blank" rel="noopener" aria-label="واتس‌اپ" className="w-12 h-12 rounded-2xl bg-[#25D366] text-white grid place-items-center"><MessageCircle className="w-5 h-5" /></a>
+          <a href={whatsappUrl} target="_blank" rel="noopener" aria-label="واتس‌اپ" className="w-12 h-12 rounded-2xl bg-[#128C7E] text-white grid place-items-center"><MessageCircle className="w-5 h-5" /></a>
         </div>
       </div>
     </div>

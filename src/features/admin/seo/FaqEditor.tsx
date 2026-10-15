@@ -117,7 +117,7 @@ export function FaqEditor({ value, onChange, entityLabel = 'مقاله' }: Props
         )}
 
         {incomplete > 0 && (
-          <p className="text-xs text-[var(--accent)] leading-relaxed">
+          <p className="text-xs text-[var(--accent-text)] leading-relaxed">
             {formatPersianNumber(incomplete)} سوال ناقص است. ردیف‌هایی که سوال یا پاسخ خالی دارند هنگام ذخیره حذف
             می‌شوند.
           </p>

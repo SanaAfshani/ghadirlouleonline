@@ -70,7 +70,7 @@ export function ContactPageClient({ contactInfo, locations, whatsappUrl }: Props
           <Phone className="w-5 h-5" /> تماس
         </a>
         {whatsappUrl && (
-          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="h-14 rounded-2xl bg-[#25D366] text-white font-black flex items-center justify-center gap-2 shadow-lg">
+          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="h-14 rounded-2xl bg-[#128C7E] text-white font-black flex items-center justify-center gap-2 shadow-lg">
             <MessageCircle className="w-5 h-5" /> واتس‌اپ
           </a>
         )}
@@ -98,7 +98,7 @@ export function ContactPageClient({ contactInfo, locations, whatsappUrl }: Props
                       {items.filter((it) => it.text).map((it) => (
                         <li key={it.text}>
                           {it.href ? (
-                            <a href={it.href} dir={it.ltr ? 'ltr' : undefined} className="block mt-0.5 font-bold hover:text-[var(--accent)] transition-colors text-right num break-all">
+                            <a href={it.href} dir={it.ltr ? 'ltr' : undefined} className="block mt-0.5 font-bold hover:text-[var(--accent-text)] transition-colors text-right num break-all">
                               {icon === 'phone' ? faDigits(it.text) : it.text}
                             </a>
                           ) : (
@@ -113,7 +113,7 @@ export function ContactPageClient({ contactInfo, locations, whatsappUrl }: Props
             })}
             {whatsappUrl && (
               <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="hidden lg:flex items-center gap-4 p-5 rounded-3xl border border-[var(--border)] hover:border-[#25D366] transition-colors">
-                <span className="grid place-items-center w-11 h-11 rounded-2xl bg-[#25D366] text-white shrink-0"><MessageCircle className="w-5 h-5" /></span>
+                <span className="grid place-items-center w-11 h-11 rounded-2xl bg-[#128C7E] text-white shrink-0"><MessageCircle className="w-5 h-5" /></span>
                 <span>
                   <span className="block font-bold">گفتگو در واتس‌اپ</span>
                   <span className="block text-xs text-[var(--muted-foreground)]">پاسخ سریع در ساعت کاری</span>
@@ -158,7 +158,7 @@ export function ContactPageClient({ contactInfo, locations, whatsappUrl }: Props
                   className={cn('rounded-3xl border border-[var(--border)] overflow-hidden flex flex-col', l.kind === 'factory' && 'lg:row-span-2')}
                 >
                   <div className="p-5 sm:p-6 flex gap-4">
-                    <span className="grid place-items-center w-11 h-11 rounded-2xl bg-[var(--ink)] text-[var(--accent)] shrink-0"><Icon className="w-5 h-5" /></span>
+                    <span className="grid place-items-center w-11 h-11 rounded-2xl bg-[var(--ink)] text-[var(--accent-text)] shrink-0"><Icon className="w-5 h-5" /></span>
                     <div className="min-w-0 flex-1">
                       <h3 className="font-black">{l.title}</h3>
                       <p className="mt-1 text-sm leading-7 text-[var(--muted-foreground)] num">

@@ -40,7 +40,7 @@ function NotificationBell() {
   return (
     <div ref={ref} className="relative">
       <button onClick={() => setOpen((v) => !v)} aria-label={`اعلان‌ها${unread ? ` (${unread} پیام پیگیری‌نشده)` : ''}`} aria-expanded={open} className={iconBtn}>
-        {unread ? <BellRing className="w-5 h-5 text-[var(--accent)]" /> : <Bell className="w-5 h-5" />}
+        {unread ? <BellRing className="w-5 h-5 text-[var(--accent-text)]" /> : <Bell className="w-5 h-5" />}
         {unread > 0 && (
           <span className="absolute -top-0.5 -left-0.5 min-w-5 h-5 px-1 rounded-full bg-red-600 text-white text-[11px] font-bold grid place-items-center num">
             {unread > 99 ? '۹۹+' : faDigits(unread)}
@@ -78,7 +78,7 @@ function NotificationBell() {
             </ul>
           )}
           <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-t border-[var(--border)] bg-[var(--card)]">
-            <Link href="/admin/messages" onClick={() => setOpen(false)} className="text-sm font-bold text-[var(--accent)]">همه پیام‌ها ←</Link>
+            <Link href="/admin/messages" onClick={() => setOpen(false)} className="text-sm font-bold text-[var(--accent-text)]">همه پیام‌ها ←</Link>
             {browserNotify === 'default' && (
               <button onClick={enableBrowserNotify} className="text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)] underline">
                 فعال‌سازی اعلان مرورگر

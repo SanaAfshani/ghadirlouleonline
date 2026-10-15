@@ -14,7 +14,7 @@ export function FaqAccordion({ faqs }: { faqs: FaqItem[] }) {
   return (
     <section className="mt-12 pt-8 border-t border-[var(--border)]">
       <h2 className="flex items-center gap-2.5 text-xl sm:text-2xl font-black text-[var(--foreground)] mb-6">
-        <HelpCircle className="w-6 h-6 text-[var(--accent)]" />
+        <HelpCircle className="w-6 h-6 text-[var(--accent-text)]" />
         سوالات متداول
       </h2>
 
@@ -38,7 +38,7 @@ export function FaqAccordion({ faqs }: { faqs: FaqItem[] }) {
                   transition={{ duration: 0.2 }}
                   className="flex-shrink-0"
                 >
-                  <ChevronDown className="w-5 h-5 text-[var(--accent)]" />
+                  <ChevronDown className="w-5 h-5 text-[var(--accent-text)]" />
                 </motion.div>
               </button>
               {/* پاسخ همیشه در HTML است (برای خزنده گوگل)؛ فقط با grid-rows جمع/باز می‌شود */}

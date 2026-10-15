@@ -30,15 +30,15 @@ export function TestimonialsSection({ testimonials }: { testimonials: Testimonia
               transition={{ delay: i * 0.08 }}
               className="w-[84%] sm:w-[60%] md:w-auto relative rounded-3xl bg-[var(--background)] border border-[var(--border)] p-6 flex flex-col"
             >
-              <Quote className="absolute top-5 left-5 w-10 h-10 text-[var(--accent)]/15" />
+              <Quote className="absolute top-5 left-5 w-10 h-10 text-[var(--accent-text)]/15" />
               <div className="flex gap-0.5" aria-label={`امتیاز ${t.rating} از ۵`}>
                 {Array.from({ length: 5 }, (_, s) => (
-                  <Star key={s} className={`w-4 h-4 ${s < t.rating ? 'fill-[var(--accent)] text-[var(--accent)]' : 'text-[var(--border)]'}`} />
+                  <Star key={s} className={`w-4 h-4 ${s < t.rating ? 'fill-[var(--accent)] text-[var(--accent-text)]' : 'text-[var(--border)]'}`} />
                 ))}
               </div>
               <blockquote className="mt-4 text-[15px] leading-8 text-[var(--foreground)]/85">{t.content}</blockquote>
               <figcaption className="mt-auto pt-5 flex items-center gap-3">
-                <span className="grid place-items-center w-11 h-11 rounded-full bg-[var(--accent)]/15 text-[var(--accent)] font-black">{t.name.replace(/^(مهندس|حاج|دکتر)\s+/, '').charAt(0)}</span>
+                <span className="grid place-items-center w-11 h-11 rounded-full bg-[var(--accent)]/15 text-[var(--accent-text)] font-black">{t.name.replace(/^(مهندس|حاج|دکتر)\s+/, '').charAt(0)}</span>
                 <span>
                   <span className="block font-bold">{t.name}</span>
                   {(t.company || t.position) && <span className="block text-xs text-[var(--muted-foreground)]">{[t.position, t.company].filter(Boolean).join(' — ')}</span>}

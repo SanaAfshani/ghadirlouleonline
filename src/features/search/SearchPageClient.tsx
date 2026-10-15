@@ -98,7 +98,7 @@ function SearchResultsInner() {
             className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
               query === term
                 ? 'bg-[var(--accent)] border-[var(--accent)] text-[var(--accent-foreground)]'
-                : 'bg-[var(--card)] border-[var(--border)] text-[var(--muted-foreground)] hover:border-[var(--accent)]/40 hover:text-[var(--accent)]'
+                : 'bg-[var(--card)] border-[var(--border)] text-[var(--muted-foreground)] hover:border-[var(--accent)]/40 hover:text-[var(--accent-text)]'
             }`}
           >
             {term}
@@ -143,7 +143,7 @@ function SearchResultsInner() {
             {products.length > 0 && (
               <section>
                 <h2 className="flex items-center gap-2 font-bold text-lg mb-4">
-                  <Package className="w-4 h-4 text-[var(--accent)]" />
+                  <Package className="w-4 h-4 text-[var(--accent-text)]" />
                   محصولات ({products.length})
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -153,9 +153,9 @@ function SearchResultsInner() {
                       href={`/products/${p.category}/${p.slug}`}
                       className="group flex items-start gap-4 p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-[var(--accent)]/40 transition-all"
                     >
-                      <Package className="w-5 h-5 text-[var(--accent)] flex-shrink-0 mt-0.5" />
+                      <Package className="w-5 h-5 text-[var(--accent-text)] flex-shrink-0 mt-0.5" />
                       <div className="min-w-0">
-                        <h3 className="font-semibold text-sm group-hover:text-[var(--accent)] line-clamp-1">{p.name}</h3>
+                        <h3 className="font-semibold text-sm group-hover:text-[var(--accent-text)] line-clamp-1">{p.name}</h3>
                         <p className="text-xs text-[var(--muted-foreground)]">{p.categoryName}</p>
                       </div>
                     </Link>
@@ -178,7 +178,7 @@ function SearchResultsInner() {
                       className="group flex items-center justify-between gap-4 p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-[var(--accent)]/40"
                     >
                       <div className="min-w-0">
-                        <h3 className="font-semibold text-sm group-hover:text-[var(--accent)] truncate">{p.title}</h3>
+                        <h3 className="font-semibold text-sm group-hover:text-[var(--accent-text)] truncate">{p.title}</h3>
                         <p className="text-xs text-[var(--muted-foreground)] line-clamp-1">{p.excerpt}</p>
                       </div>
                       <ArrowLeft className="w-4 h-4 flex-shrink-0 text-[var(--muted-foreground)]" />
@@ -202,7 +202,7 @@ function SearchResultsInner() {
                       className="group flex items-center justify-between gap-4 p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-[var(--accent)]/40"
                     >
                       <div className="min-w-0">
-                        <h3 className="font-semibold text-sm group-hover:text-[var(--accent)] truncate">{p.title}</h3>
+                        <h3 className="font-semibold text-sm group-hover:text-[var(--accent-text)] truncate">{p.title}</h3>
                         <p className="text-xs text-[var(--muted-foreground)] line-clamp-1">{p.description}</p>
                       </div>
                       <ArrowLeft className="w-4 h-4 flex-shrink-0" />

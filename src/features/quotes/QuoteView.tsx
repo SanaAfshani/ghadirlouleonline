@@ -231,7 +231,7 @@ export function QuoteView({ quote, settings }: { quote: PublicQuote; settings: S
               </p>
               <p>{settings.factoryAddress || siteConfig.factoryAddress}</p>
               {settings.mapUrl && (
-                <a href={settings.mapUrl} target="_blank" rel="noopener" className="text-[var(--accent)] font-semibold print:hidden">
+                <a href={settings.mapUrl} target="_blank" rel="noopener" className="text-[var(--accent-text)] font-semibold print:hidden">
                   مشاهده روی نقشه
                 </a>
               )}

@@ -39,9 +39,9 @@ export function CategoriesPageClient({ categories }: { categories: CategoryCard[
                     )}
                   </div>
                   <div className="flex-1 flex flex-col p-4 sm:p-5">
-                    <h2 className="font-black text-[15px] sm:text-lg group-hover:text-[var(--accent)] transition-colors">{cat.name}</h2>
+                    <h2 className="font-black text-[15px] sm:text-lg group-hover:text-[var(--accent-text)] transition-colors">{cat.name}</h2>
                     {cat.description && <p className="mt-1.5 text-xs sm:text-sm text-[var(--muted-foreground)] leading-6 line-clamp-2">{faDigits(cat.description)}</p>}
-                    <span className="mt-auto pt-4 flex items-center gap-1.5 text-sm font-bold text-[var(--accent)]">
+                    <span className="mt-auto pt-4 flex items-center gap-1.5 text-sm font-bold text-[var(--accent-text)]">
                       مشاهده محصولات <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
                     </span>
                   </div>

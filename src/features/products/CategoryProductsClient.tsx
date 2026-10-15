@@ -49,10 +49,10 @@ export function CategoryProductsClient({ category, products, board, priceProduct
             <ChevronLeft className="w-3 h-3 shrink-0" />
             <Link href="/products" className="hover:text-white">محصولات</Link>
             <ChevronLeft className="w-3 h-3 shrink-0" />
-            <span className="text-[var(--accent)]">{category.name}</span>
+            <span className="text-[var(--accent-text)]">{category.name}</span>
           </nav>
           <motion.div>
-            <span className="h-7 px-3 rounded-lg border border-[var(--accent)]/40 bg-[var(--accent)]/10 text-[var(--accent)] text-xs font-bold inline-flex items-center num">
+            <span className="h-7 px-3 rounded-lg border border-[var(--accent)]/40 bg-[var(--accent)]/10 text-[var(--accent-text)] text-xs font-bold inline-flex items-center num">
               {category.comingSoon ? 'به زودی' : `${faDigits(products.length)} محصول`}
             </span>
             <h1 className="mt-3 text-[1.7rem] sm:text-4xl font-black text-white">خرید {category.name}</h1>

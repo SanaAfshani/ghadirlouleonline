@@ -24,7 +24,7 @@ const card = 'bg-[var(--card)] border border-[var(--border)] rounded-2xl';
 const input = 'w-full h-11 bg-[var(--muted)] border border-[var(--border)] rounded-xl px-4 text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--accent)]';
 
 function scoreColor(n: number) {
-  return n >= 80 ? 'text-emerald-700 dark:text-emerald-400' : n >= 55 ? 'text-[var(--accent)]' : 'text-red-700 dark:text-red-400';
+  return n >= 80 ? 'text-emerald-700 dark:text-emerald-400' : n >= 55 ? 'text-[var(--accent-text)]' : 'text-red-700 dark:text-red-400';
 }
 
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
@@ -143,13 +143,13 @@ export default function SeoCenterPage() {
                 </div>
                 <div className={`${card} p-5`}><p className="text-xs text-[var(--muted-foreground)]">صفحات بررسی‌شده</p><p className="mt-2 text-4xl font-black text-[var(--foreground)]">{formatPersianNumber(audit.summary.pages)}</p></div>
                 <div className={`${card} p-5`}><p className="text-xs text-[var(--muted-foreground)]">خطا</p><p className="mt-2 text-4xl font-black text-red-700 dark:text-red-400">{formatPersianNumber(audit.summary.errors)}</p></div>
-                <div className={`${card} p-5`}><p className="text-xs text-[var(--muted-foreground)]">هشدار</p><p className="mt-2 text-4xl font-black text-[var(--accent)]">{formatPersianNumber(audit.summary.warnings)}</p></div>
+                <div className={`${card} p-5`}><p className="text-xs text-[var(--muted-foreground)]">هشدار</p><p className="mt-2 text-4xl font-black text-[var(--accent-text)]">{formatPersianNumber(audit.summary.warnings)}</p></div>
               </div>
 
               <div className={`${card} p-6 bg-gradient-to-l from-[var(--accent)]/10 to-transparent border-[var(--accent)]/30`}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-start gap-3">
-                    <span className="grid place-items-center w-11 h-11 rounded-xl bg-[var(--accent)]/20 text-[var(--accent)] shrink-0"><Wand2 className="w-5 h-5" /></span>
+                    <span className="grid place-items-center w-11 h-11 rounded-xl bg-[var(--accent)]/20 text-[var(--accent-text)] shrink-0"><Wand2 className="w-5 h-5" /></span>
                     <div>
                       <h2 className="text-[var(--foreground)] font-bold">بهینه‌سازی خودکار</h2>
                       <p className="text-[var(--muted-foreground)] text-sm mt-1 leading-6">
@@ -173,7 +173,7 @@ export default function SeoCenterPage() {
                             <span className="px-2 py-0.5 rounded bg-[var(--border)] text-[var(--foreground)]">{TYPE_LABEL[f.type]}</span>
                             <span className="font-bold text-[var(--foreground)]">{f.name}</span>
                             <span>←</span>
-                            <span className="text-[var(--accent)]">{FIELD_LABEL[f.field] ?? f.field}</span>
+                            <span className="text-[var(--accent-text)]">{FIELD_LABEL[f.field] ?? f.field}</span>
                           </div>
                           {f.before && <p className="mt-1.5 text-xs text-red-300/80 line-through" dir="auto">{f.before}</p>}
                           <p className="mt-1.5 text-[var(--foreground)] leading-6" dir="auto">{f.after}</p>
@@ -199,7 +199,7 @@ export default function SeoCenterPage() {
                     {issueCounts.map((c) => (
                       <li key={c.message} className="flex items-center justify-between gap-3 text-sm">
                         <span className="flex items-center gap-2 text-[var(--foreground)]">
-                          {c.level === 'error' ? <XCircle className="w-4 h-4 text-red-700 dark:text-red-400" /> : <AlertTriangle className="w-4 h-4 text-[var(--accent)]" />}
+                          {c.level === 'error' ? <XCircle className="w-4 h-4 text-red-700 dark:text-red-400" /> : <AlertTriangle className="w-4 h-4 text-[var(--accent-text)]" />}
                           {c.message}
                         </span>
                         <span className="text-[var(--muted-foreground)]">{formatPersianNumber(c.n)} صفحه</span>
@@ -237,7 +237,7 @@ export default function SeoCenterPage() {
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {it.issues.length === 0 && <span className="text-xs text-emerald-700 dark:text-emerald-400">بدون مشکل</span>}
                     {it.issues.map((is, i) => (
-                      <span key={i} className={`text-[11px] px-2 py-0.5 rounded-md ${is.level === 'error' ? 'bg-red-500/15 text-red-700 dark:text-red-300' : 'bg-[var(--accent)]/10 text-[var(--accent)]'}`}>{is.message}</span>
+                      <span key={i} className={`text-[11px] px-2 py-0.5 rounded-md ${is.level === 'error' ? 'bg-red-500/15 text-red-700 dark:text-red-300' : 'bg-[var(--accent)]/10 text-[var(--accent-text)]'}`}>{is.message}</span>
                     ))}
                   </div>
                 </div>

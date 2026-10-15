@@ -17,7 +17,7 @@ export default function AdminThemePage() {
     <div className="max-w-3xl space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-[var(--foreground)] flex items-center gap-3">
-          <Palette className="w-7 h-7 text-[var(--accent)]" />
+          <Palette className="w-7 h-7 text-[var(--accent-text)]" />
           مدیریت رنگ‌بندی سایت
         </h1>
         <p className="text-[var(--muted-foreground)] text-sm mt-2">
@@ -90,7 +90,7 @@ export default function AdminThemePage() {
         </div>
       </div>
 
-      <div className="bg-[var(--accent)]/10 border border-[var(--accent)]/20 rounded-xl p-4 text-[var(--accent)] text-sm">
+      <div className="bg-[var(--accent)]/10 border border-[var(--accent)]/20 rounded-xl p-4 text-[var(--accent-text)] text-sm">
         💡 تغییر رنگ بلافاصله روی تمام صفحات سایت اعمال می‌شود و در مرورگر ذخیره می‌شود.
       </div>
     </div>

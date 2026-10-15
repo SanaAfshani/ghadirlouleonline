@@ -13,7 +13,7 @@ function StarRating({ rating }: { rating: number }) {
       {Array.from({ length: 5 }).map((_, i) => (
         <Star
           key={i}
-          className={`w-4 h-4 ${i < rating ? 'text-[var(--accent)] fill-[var(--accent)]' : 'text-[var(--muted-foreground)]'}`}
+          className={`w-4 h-4 ${i < rating ? 'text-[var(--accent-text)] fill-[var(--accent)]' : 'text-[var(--muted-foreground)]'}`}
         />
       ))}
     </div>

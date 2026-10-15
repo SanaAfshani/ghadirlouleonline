@@ -202,7 +202,7 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
                   <td className="px-5 py-3.5 font-semibold leading-7">{faDigits(r.title)}</td>
                   {showProduct && (
                     <td className="px-4 py-3.5 whitespace-nowrap">
-                      <Link href={r.href} className="text-[var(--accent)] font-semibold hover:underline">{r.productName}</Link>
+                      <Link href={r.href} className="text-[var(--accent-text)] font-semibold hover:underline">{r.productName}</Link>
                     </td>
                   )}
                   <td className="px-4 py-3.5">
@@ -219,7 +219,7 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
                         onClick={() => showChart(r)}
                         aria-label={`نمودار قیمت ${r.title}`}
                         title="نمودار نوسان قیمت"
-                        className="inline-grid place-items-center w-9 h-9 rounded-xl text-[var(--muted-foreground)] hover:text-[var(--accent)] hover:bg-[var(--muted)] transition-colors"
+                        className="inline-grid place-items-center w-9 h-9 rounded-xl text-[var(--muted-foreground)] hover:text-[var(--accent-text)] hover:bg-[var(--muted)] transition-colors"
                       >
                         <ChartLine className="w-4.5 h-4.5" />
                       </button>
@@ -250,7 +250,7 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
             <li key={r.id} className={cn('rounded-2xl border border-[var(--border)] p-3.5 transition-colors duration-700', flash ? flashBg[flash] : 'bg-[var(--background)]')}>
               <p className="font-bold text-[14px] leading-7">{faDigits(r.title)}</p>
               {showProduct && (
-                <Link href={r.href} className="text-xs font-semibold text-[var(--accent)]">{r.productName}</Link>
+                <Link href={r.href} className="text-xs font-semibold text-[var(--accent-text)]">{r.productName}</Link>
               )}
               <div className="mt-2 flex items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1.5">

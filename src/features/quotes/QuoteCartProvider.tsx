@@ -197,7 +197,7 @@ function QuoteCartPanel({
             {/* هدر تراز */}
             <div className="h-16 shrink-0 px-5 border-b border-[var(--border)] flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 min-w-0">
-                <span className="grid place-items-center w-9 h-9 rounded-xl bg-[var(--accent)]/15 text-[var(--accent)] shrink-0">
+                <span className="grid place-items-center w-9 h-9 rounded-xl bg-[var(--accent)]/15 text-[var(--accent-text)] shrink-0">
                   <FileSpreadsheet className="w-4.5 h-4.5" />
                 </span>
                 <div className="min-w-0">

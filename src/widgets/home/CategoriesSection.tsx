@@ -75,7 +75,7 @@ export function CategoriesSection({ categories }: { categories: NavCategory[] })
               (shown.length - 1) % 4 === 2 ? 'lg:col-span-2' : 'lg:col-span-1',
             )}
           >
-            <LayoutGrid className="w-8 h-8 text-[var(--accent)] transition-transform group-hover:scale-110" />
+            <LayoutGrid className="w-8 h-8 text-[var(--accent-text)] transition-transform group-hover:scale-110" />
             <span className="font-black">همه دسته‌ها</span>
             <span className="text-xs text-[var(--muted-foreground)] num">{faDigits(categories.length)} دسته‌بندی</span>
           </Link>

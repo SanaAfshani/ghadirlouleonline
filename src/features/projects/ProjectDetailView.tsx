@@ -18,11 +18,11 @@ export function ProjectDetailView({ project }: Props) {
     <div className="min-h-screen bg-[var(--background)]">
       <div className="container-main py-10 max-w-4xl">
         <nav className="flex items-center gap-2 text-sm text-[var(--muted-foreground)] mb-8 flex-wrap">
-          <Link href="/" className="hover:text-[var(--accent)] transition-colors">
+          <Link href="/" className="hover:text-[var(--accent-text)] transition-colors">
             خانه
           </Link>
           <span>/</span>
-          <Link href="/projects" className="hover:text-[var(--accent)] transition-colors">
+          <Link href="/projects" className="hover:text-[var(--accent-text)] transition-colors">
             پروژه‌ها
           </Link>
           <span>/</span>
@@ -86,7 +86,7 @@ export function ProjectDetailView({ project }: Props) {
           <div className="mt-12 pt-8 border-t border-[var(--border)]">
             <Link
               href="/projects"
-              className="inline-flex items-center gap-2 text-[var(--accent)] font-semibold hover:gap-3 transition-all"
+              className="inline-flex items-center gap-2 text-[var(--accent-text)] font-semibold hover:gap-3 transition-all"
             >
               <ArrowRight className="w-4 h-4" />
               بازگشت به پروژه‌ها

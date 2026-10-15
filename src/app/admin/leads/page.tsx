@@ -165,7 +165,7 @@ export default function LeadsPage() {
                           {p.path === '—' ? (
                             <span className="text-[var(--muted-foreground)]">نامشخص</span>
                           ) : (
-                            <a href={p.path} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 hover:text-[var(--accent)] break-all">
+                            <a href={p.path} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 hover:text-[var(--accent-text)] break-all">
                               <bdi dir="ltr">{safeDecode(p.path)}</bdi> <ExternalLink className="w-3 h-3 shrink-0" />
                             </a>
                           )}

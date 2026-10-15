@@ -8,7 +8,7 @@ export function PricesEmptyState() {
   const { open } = useConsult();
   return (
     <div className="max-w-lg mx-auto text-center py-12">
-      <span className="mx-auto grid place-items-center w-16 h-16 rounded-3xl bg-[var(--accent)]/12 text-[var(--accent)]">
+      <span className="mx-auto grid place-items-center w-16 h-16 rounded-3xl bg-[var(--accent)]/12 text-[var(--accent-text)]">
         <Table2 className="w-8 h-8" />
       </span>
       <h2 className="mt-5 text-xl font-black">لیست قیمت در حال به‌روزرسانی است</h2>

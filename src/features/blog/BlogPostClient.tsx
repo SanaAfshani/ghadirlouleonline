@@ -73,9 +73,9 @@ export function BlogPostClient({ slug }: Props) {
     <div className="container-main py-8">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-[var(--muted-foreground)] mb-8">
-        <Link href="/" className="hover:text-[var(--accent)]">خانه</Link>
+        <Link href="/" className="hover:text-[var(--accent-text)]">خانه</Link>
         <span>/</span>
-        <Link href="/blog" className="hover:text-[var(--accent)]">وبلاگ</Link>
+        <Link href="/blog" className="hover:text-[var(--accent-text)]">وبلاگ</Link>
         <span>/</span>
         <span className="text-[var(--foreground)] line-clamp-1">{post.title}</span>
       </nav>
@@ -160,7 +160,7 @@ export function BlogPostClient({ slug }: Props) {
                   href={`/blog/${p.slug}`}
                   className="block p-3 rounded-xl hover:bg-[var(--muted)] transition-colors group"
                 >
-                  <div className="text-sm text-[var(--foreground)] group-hover:text-[var(--accent)] transition-colors leading-relaxed">
+                  <div className="text-sm text-[var(--foreground)] group-hover:text-[var(--accent-text)] transition-colors leading-relaxed">
                     {p.title}
                   </div>
                 </Link>
@@ -174,7 +174,7 @@ export function BlogPostClient({ slug }: Props) {
             <p className="text-[var(--accent-foreground)]/80 text-sm mb-4">کارشناسان ما آماده راهنمایی هستند</p>
             <a
               href={phoneHref}
-              className="block w-full py-2.5 rounded-xl bg-[var(--accent-foreground)]/90 text-[var(--accent)] font-semibold text-sm hover:opacity-90 transition-colors"
+              className="block w-full py-2.5 rounded-xl bg-[var(--accent-foreground)]/90 text-[var(--accent-text)] font-semibold text-sm hover:opacity-90 transition-colors"
             >
               {phone}
             </a>

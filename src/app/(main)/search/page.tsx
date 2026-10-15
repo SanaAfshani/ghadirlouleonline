@@ -18,7 +18,7 @@ export default function SearchPage() {
           <nav className="flex items-center gap-2 text-xs text-slate-500 mb-4">
             <Link href="/" className="hover:text-slate-300 transition-colors">خانه</Link>
             <span>/</span>
-            <span className="text-[var(--accent)]">جستجو</span>
+            <span className="text-[var(--accent-text)]">جستجو</span>
           </nav>
           <h1 className="text-3xl md:text-4xl font-black text-white mb-2">جستجو</h1>
           <p className="text-slate-400 text-sm">جستجو در محصولات، مقالات و پروژه‌ها</p>

@@ -44,10 +44,10 @@ export function ServicesSection() {
                 </button>
                 <div className="grid grid-cols-1 min-[400px]:grid-cols-[1.45fr_1fr] gap-3">
                   <a href={phoneHref} className="min-w-0 h-12 px-3 rounded-2xl border border-white/15 bg-white/5 font-bold flex items-center justify-center gap-2 hover:bg-white/10">
-                    <Phone className="w-4 h-4 shrink-0 text-[var(--accent)]" />
+                    <Phone className="w-4 h-4 shrink-0 text-[var(--accent-text)]" />
                     <span dir="ltr" className="num text-sm truncate">{faDigits(phone)}</span>
                   </a>
-                  <a href={whatsappUrl} target="_blank" rel="noopener" className="min-w-0 h-12 px-3 rounded-2xl border border-white/15 bg-white/5 font-bold flex items-center justify-center gap-2 hover:bg-[#25D366] hover:border-transparent">
+                  <a href={whatsappUrl} target="_blank" rel="noopener" className="min-w-0 h-12 px-3 rounded-2xl border border-white/15 bg-white/5 font-bold flex items-center justify-center gap-2 hover:bg-[#128C7E] hover:border-transparent">
                     <MessageCircle className="w-4 h-4 shrink-0" />
                     <span className="text-sm">واتس‌اپ</span>
                   </a>
@@ -65,7 +65,7 @@ export function ServicesSection() {
                   transition={{ delay: i * 0.07 }}
                   className={`rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur p-3.5 sm:p-5 ${i === services.length - 1 ? 'col-span-2' : ''}`}
                 >
-                  <span className="grid place-items-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[var(--accent)]/15 text-[var(--accent)]">
+                  <span className="grid place-items-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[var(--accent)]/15 text-[var(--accent-text)]">
                     <Icon className="w-5 h-5" />
                   </span>
                   <h3 className="mt-2.5 sm:mt-3 font-bold text-[14px] sm:text-base text-white leading-6">{title}</h3>

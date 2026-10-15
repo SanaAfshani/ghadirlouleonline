@@ -17,7 +17,7 @@ export async function saveImage(file: File): Promise<string> {
     output = await sharp(input, { animated: file.type === 'image/gif' })
       .rotate() // جهت درست بر اساس EXIF عکس موبایل
       .resize({ width: MAX_SIDE, height: MAX_SIDE, fit: 'inside', withoutEnlargement: true })
-      .webp({ quality: 82 })
+      .webp({ quality: 90 })
       .toBuffer({ resolveWithObject: true });
   } catch {
     throw new InvalidImageError('فایل تصویر معتبر نیست');

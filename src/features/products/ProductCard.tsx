@@ -32,6 +32,7 @@ export function ProductCard({ product, className }: { product: ProductListItem; 
               alt={product.name}
               fill
               sizes="(max-width: 640px) 70vw, (max-width: 1024px) 40vw, 25vw"
+              quality={90}
               className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
           ) : (
@@ -43,7 +44,7 @@ export function ProductCard({ product, className }: { product: ProductListItem; 
                 به زودی
               </span>
             ) : (
-              <span className={cn('h-7 px-2.5 rounded-lg text-[11px] font-bold flex items-center backdrop-blur', product.inStock ? 'bg-emerald-500/90 text-white' : 'bg-slate-900/70 text-slate-200')}>
+              <span className={cn('h-7 px-2.5 rounded-lg text-[11px] font-bold flex items-center backdrop-blur', product.inStock ? 'bg-emerald-700/90 text-white' : 'bg-slate-900/70 text-slate-200')}>
                 {product.inStock ? 'موجود در انبار' : 'ناموجود'}
               </span>
             )}
@@ -57,8 +58,8 @@ export function ProductCard({ product, className }: { product: ProductListItem; 
         </div>
 
         <div className="flex-1 flex flex-col p-4 sm:p-5">
-          <span className="text-[11px] font-bold text-[var(--accent)]">{product.categoryName}</span>
-          <h3 className="mt-1 font-black text-[15px] sm:text-base leading-7 line-clamp-2 group-hover:text-[var(--accent)] transition-colors">
+          <span className="text-[11px] font-bold text-[var(--accent-text)]">{product.categoryName}</span>
+          <h3 className="mt-1 font-black text-[15px] sm:text-base leading-7 line-clamp-2 group-hover:text-[var(--accent-text)] transition-colors">
             {faDigits(product.name)}
           </h3>
 

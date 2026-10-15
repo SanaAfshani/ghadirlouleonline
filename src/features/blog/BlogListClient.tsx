@@ -42,8 +42,8 @@ export function BlogListClient({ posts }: { posts: BlogPostCard[] }) {
                 <Cover src={featured.coverImage} alt={featured.title} sizes="(max-width:768px) 100vw, 55vw" />
               </div>
               <div className="p-6 sm:p-10 flex flex-col justify-center">
-                <span className="text-xs font-bold text-[var(--accent)]">{featured.tag}</span>
-                <h2 className="mt-2 text-xl sm:text-[1.75rem] font-black leading-snug group-hover:text-[var(--accent)] transition-colors">{faDigits(featured.title)}</h2>
+                <span className="text-xs font-bold text-[var(--accent-text)]">{featured.tag}</span>
+                <h2 className="mt-2 text-xl sm:text-[1.75rem] font-black leading-snug group-hover:text-[var(--accent-text)] transition-colors">{faDigits(featured.title)}</h2>
                 {featured.excerpt && <p className="mt-3 text-[15px] leading-8 text-[var(--muted-foreground)] line-clamp-3">{faDigits(featured.excerpt)}</p>}
                 <div className="mt-6 flex items-center gap-4 text-xs text-[var(--muted-foreground)] num">
                   <span>{featured.date}</span>
@@ -66,11 +66,11 @@ export function BlogListClient({ posts }: { posts: BlogPostCard[] }) {
                     <Cover src={post.coverImage} alt={post.title} sizes="(max-width:640px) 100vw, 33vw" />
                   </div>
                   <div className="mt-4 flex items-center gap-3 text-xs text-[var(--muted-foreground)] num">
-                    <span className="font-bold text-[var(--accent)]">{post.tag}</span>
+                    <span className="font-bold text-[var(--accent-text)]">{post.tag}</span>
                     <span>{post.date}</span>
                     <span>{faDigits(post.readTime)} دقیقه</span>
                   </div>
-                  <h3 className="mt-2 font-black text-[17px] leading-8 line-clamp-2 group-hover:text-[var(--accent)] transition-colors">{faDigits(post.title)}</h3>
+                  <h3 className="mt-2 font-black text-[17px] leading-8 line-clamp-2 group-hover:text-[var(--accent-text)] transition-colors">{faDigits(post.title)}</h3>
                   {post.excerpt && <p className="mt-1.5 text-sm leading-7 text-[var(--muted-foreground)] line-clamp-2">{faDigits(post.excerpt)}</p>}
                 </Link>
               </motion.article>

@@ -20,6 +20,8 @@
   --accent-hover:    hsl(var(--accent-h), var(--accent-s), calc(var(--accent-l) - 8%));
   --accent-light:    hsl(var(--accent-h), var(--accent-s), 95%);
   --accent-foreground: #0F172A;
+  /* رنگ accent برای متن روی زمینه روشن — خود accent (مثلاً کهربایی) روی سفید خوانا نیست */
+  --accent-text:     hsl(var(--accent-h), var(--accent-s), calc(var(--accent-l) - 20%));
   --accent-rgb: 245, 158, 11;
 
   /* Layout */
@@ -61,7 +63,6 @@
 /* ─── DARK MODE ──────────────────────────────────────────────────── */
 .dark {
   --accent-light:    hsl(var(--accent-h), var(--accent-s), 15%);
-  --accent-foreground: #ffffff;
 
   --background:      #080F1A;
   --foreground:      #F1F5F9;
@@ -81,11 +82,22 @@
 [data-theme-color="blue"]   { --accent-h: 217; --accent-s: 91%; --accent-l: 60%; --accent-rgb: 59, 130, 246; }
 [data-theme-color="green"]  { --accent-h: 142; --accent-s: 71%; --accent-l: 45%; --accent-rgb: 34, 197, 94; }
 [data-theme-color="red"]    { --accent-h: 0;   --accent-s: 84%; --accent-l: 60%; --accent-rgb: 239, 68, 68; }
-[data-theme-color="purple"] { --accent-h: 262; --accent-s: 83%; --accent-l: 58%; --accent-rgb: 139, 92, 246; }
+[data-theme-color="purple"] { --accent-h: 262; --accent-s: 83%; --accent-l: 58%; --accent-rgb: 139, 92, 246; --accent-foreground: #ffffff; }
 [data-theme-color="teal"]   { --accent-h: 174; --accent-s: 77%; --accent-l: 37%; --accent-rgb: 20, 184, 166; }
 [data-theme-color="amber"]  { --accent-h: 38;  --accent-s: 92%; --accent-l: 50%; --accent-rgb: 245, 158, 11; }
-[data-theme-color="indigo"] { --accent-h: 239; --accent-s: 84%; --accent-l: 67%; --accent-rgb: 99, 102, 241; }
+[data-theme-color="indigo"] { --accent-h: 239; --accent-s: 84%; --accent-l: 67%; --accent-rgb: 99, 102, 241; --accent-foreground: #ffffff; }
 [data-theme-color="rose"]   { --accent-h: 350; --accent-s: 89%; --accent-l: 60%; --accent-rgb: 244, 63, 94; }
+
+/* روی زمینه تیره (حالت تیره، فوتر و کادرهای تیره در حالت روشن) خود accent روشن خواناست */
+.dark,
+.surface-dark,
+.bg-\[var\(--ink\)\],
+.bg-\[var\(--ink-2\)\],
+.bg-slate-900,
+.bg-slate-950,
+.bg-\[\#0A1120\] {
+  --accent-text: var(--accent);
+}
 
 /* ─── RESET & BASE ───────────────────────────────────────────────── */
 /*
@@ -141,13 +153,11 @@ body {
     font-family: var(--font-sans);
     font-weight: 700;
     line-height: 1.35;
-    color: var(--foreground);
     text-align: right;
   }
 
   p {
     line-height: 1.85;
-    color: var(--foreground);
     text-align: right;
   }
 
@@ -183,12 +193,12 @@ body {
   }
 
   .surface-dark a:hover {
-    color: var(--accent);
+    color: var(--accent-text);
   }
 
   /* Theme-aware accents (follow admin color picker / data-theme-color) */
   .text-theme-accent {
-    color: var(--accent);
+    color: var(--accent-text);
   }
 
   .bg-theme-accent {
@@ -211,7 +221,7 @@ body {
   }
 
   .icon-star {
-    color: var(--accent);
+    color: var(--accent-text);
     fill: var(--accent);
   }
 
@@ -231,7 +241,7 @@ body {
 
   .btn-accent-outline:hover {
     border-color: var(--accent);
-    color: var(--accent);
+    color: var(--accent-text);
   }
 }
 
@@ -462,7 +472,7 @@ body {
 
 .btn-outline {
   background: transparent;
-  color: var(--accent);
+  color: var(--accent-text);
   border: 2px solid var(--accent);
 }
 
@@ -507,7 +517,7 @@ input, textarea, select {
 
 .badge-accent {
   background: rgba(var(--accent-rgb), 0.12);
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 /* ─── GLOW EFFECTS (legacy compat) ──────────────────────────────── */
@@ -759,7 +769,7 @@ input, textarea, select {
 .article-content em { font-style: italic; }
 
 .article-content a {
-  color: var(--accent);
+  color: var(--accent-text);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -1046,7 +1056,7 @@ input, textarea, select {
   gap: 0.5rem;
   font-size: 0.8rem;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 .eyebrow::before {
   content: '';

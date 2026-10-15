@@ -234,7 +234,7 @@ export default function AdminCategoriesPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center">
-                          <Layers className="w-4 h-4 text-[var(--accent)]" />
+                          <Layers className="w-4 h-4 text-[var(--accent-text)]" />
                         </div>
                         <span className="text-[var(--foreground)] font-medium">{cat.name}</span>
                       </div>

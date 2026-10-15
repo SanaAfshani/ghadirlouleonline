@@ -205,7 +205,7 @@ function MessagesInbox() {
                     {current.sourcePath && (
                       <>
                         {' · از صفحه '}
-                        <a href={current.sourcePath} target="_blank" rel="noopener" className="underline hover:text-[var(--accent)]">
+                        <a href={current.sourcePath} target="_blank" rel="noopener" className="underline hover:text-[var(--accent-text)]">
                           <bdi dir="ltr">{safeDecode(current.sourcePath)}</bdi>
                         </a>
                       </>
@@ -226,7 +226,7 @@ function MessagesInbox() {
                   </a>
                 )}
                 {whatsapp && (
-                  <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="h-12 px-4 rounded-xl bg-[#25D366] text-white text-sm font-bold flex items-center justify-center gap-2">
+                  <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="h-12 px-4 rounded-xl bg-[#128C7E] text-white text-sm font-bold flex items-center justify-center gap-2">
                     <MessageCircle className="w-4 h-4" /> واتس‌اپ
                   </a>
                 )}

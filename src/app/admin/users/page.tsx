@@ -17,7 +17,7 @@ type UserRow = {
 };
 
 const roleMap: Record<UserRow['role'], { label: string; cls: string }> = {
-  ADMIN: { label: 'مدیر', cls: 'bg-[var(--accent)]/10 text-[var(--accent)]' },
+  ADMIN: { label: 'مدیر', cls: 'bg-[var(--accent)]/10 text-[var(--accent-text)]' },
   EDITOR: { label: 'ویرایشگر', cls: 'bg-blue-500/10 text-blue-700 dark:text-blue-400' },
   VIEWER: { label: 'بازدیدکننده', cls: 'bg-purple-500/10 text-purple-700 dark:text-purple-400' },
 };
@@ -198,7 +198,7 @@ export default function AdminUsersPage() {
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-[var(--muted)] flex items-center justify-center">
                           {user.role === 'ADMIN' ? (
-                            <Shield className="w-5 h-5 text-[var(--accent)]" />
+                            <Shield className="w-5 h-5 text-[var(--accent-text)]" />
                           ) : (
                             <User className="w-5 h-5 text-[var(--muted-foreground)]" />
                           )}
@@ -220,7 +220,7 @@ export default function AdminUsersPage() {
                         <button
                           type="button"
                           onClick={() => openEdit(user)}
-                          className="w-8 h-8 rounded-lg bg-[var(--muted)] flex items-center justify-center text-[var(--muted-foreground)] hover:text-[var(--accent)]"
+                          className="w-8 h-8 rounded-lg bg-[var(--muted)] flex items-center justify-center text-[var(--muted-foreground)] hover:text-[var(--accent-text)]"
                         >
                           <Pencil className="w-4 h-4" />
                         </button>

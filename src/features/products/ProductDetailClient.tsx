@@ -70,11 +70,11 @@ export function ProductDetailClient({ slug }: Props) {
     <div className="container-main py-8">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-[var(--muted-foreground)] mb-8">
-        <Link href="/" className="hover:text-[var(--accent)]">خانه</Link>
+        <Link href="/" className="hover:text-[var(--accent-text)]">خانه</Link>
         <span>/</span>
-        <Link href="/products" className="hover:text-[var(--accent)]">محصولات</Link>
+        <Link href="/products" className="hover:text-[var(--accent-text)]">محصولات</Link>
         <span>/</span>
-        <Link href={`/products/${product.categorySlug}`} className="hover:text-[var(--accent)]">{product.category}</Link>
+        <Link href={`/products/${product.categorySlug}`} className="hover:text-[var(--accent-text)]">{product.category}</Link>
         <span>/</span>
         <span className="text-[var(--foreground)]">{product.name}</span>
       </nav>
@@ -97,7 +97,7 @@ export function ProductDetailClient({ slug }: Props) {
         {/* Product info */}
         <div className="lg:col-span-3 space-y-6">
           <motion.div>
-            <div className="text-[var(--accent)] text-sm font-medium mb-2">{product.category}</div>
+            <div className="text-[var(--accent-text)] text-sm font-medium mb-2">{product.category}</div>
             <h1 className="text-3xl font-black text-[var(--foreground)] mb-3">{product.name}</h1>
             <p className="text-[var(--muted-foreground)] leading-relaxed">{product.shortDesc}</p>
           </motion.div>
@@ -115,7 +115,7 @@ export function ProductDetailClient({ slug }: Props) {
             </div>
             {product.price !== '0' ? (
               <div className="bg-[var(--accent)]/10 border border-[var(--accent)]/20 rounded-2xl px-5 py-3">
-                <div className="text-2xl font-black text-[var(--accent)]">{product.price} تومان</div>
+                <div className="text-2xl font-black text-[var(--accent-text)]">{product.price} تومان</div>
                 <div className="text-xs text-[var(--muted-foreground)]">قیمت هر شاخه</div>
               </div>
             ) : (
@@ -154,7 +154,7 @@ export function ProductDetailClient({ slug }: Props) {
             </button>
             <a
               href={phoneHref}
-              className="flex items-center gap-2 h-12 px-6 rounded-2xl border-2 border-[var(--border)] text-[var(--foreground)] font-medium hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all"
+              className="flex items-center gap-2 h-12 px-6 rounded-2xl border-2 border-[var(--border)] text-[var(--foreground)] font-medium hover:border-[var(--accent)] hover:text-[var(--accent-text)] transition-all"
             >
               <Phone className="w-5 h-5" />
               {phone}
@@ -164,7 +164,7 @@ export function ProductDetailClient({ slug }: Props) {
                 navigator.clipboard.writeText(window.location.href);
                 toast.success('لینک کپی شد!');
               }}
-              className="h-12 w-12 rounded-2xl border-2 border-[var(--border)] flex items-center justify-center text-[var(--muted-foreground)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all"
+              className="h-12 w-12 rounded-2xl border-2 border-[var(--border)] flex items-center justify-center text-[var(--muted-foreground)] hover:border-[var(--accent)] hover:text-[var(--accent-text)] transition-all"
             >
               <Share2 className="w-5 h-5" />
             </button>

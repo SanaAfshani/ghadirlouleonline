@@ -23,7 +23,7 @@ export function SeoContent({ html }: { html: string }) {
           <button
             onClick={() => setOpen((o) => !o)}
             aria-expanded={open}
-            className="mt-3 mx-auto flex items-center gap-1.5 h-10 px-5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm font-bold hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            className="mt-3 mx-auto flex items-center gap-1.5 h-10 px-5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm font-bold hover:border-[var(--accent)] hover:text-[var(--accent-text)]"
           >
             {open ? 'بستن' : 'ادامه مطلب'}
             <ChevronDown className={cn('w-4 h-4 transition-transform', open && 'rotate-180')} />

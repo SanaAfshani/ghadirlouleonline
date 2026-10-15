@@ -56,7 +56,7 @@ export function AboutContent() {
             {stats.map((s, i) => (
               <motion.div key={s.label} {...reveal} transition={{ ...reveal.transition, delay: i * 0.06 }} className="py-8 sm:py-10 px-4 text-center bg-[var(--background)]">
                 <dd className="text-3xl sm:text-4xl font-black num tracking-tight">
-                  {s.value.toLocaleString('fa-IR')}<span className="text-[var(--accent)]">+</span>
+                  {s.value.toLocaleString('fa-IR')}<span className="text-[var(--accent-text)]">+</span>
                 </dd>
                 <dt className="mt-1 text-sm text-[var(--muted-foreground)]">{s.label}</dt>
               </motion.div>
@@ -119,7 +119,7 @@ export function AboutContent() {
                   {m.name.replace(/^(مهندس|خانم|آقای)\s+/, '').charAt(0)}
                 </span>
                 <p className="mt-4 font-bold">{m.name}</p>
-                <p className="text-sm text-[var(--accent)] font-semibold">{m.role}</p>
+                <p className="text-sm text-[var(--accent-text)] font-semibold">{m.role}</p>
                 <p className="mt-2 text-xs leading-6 text-[var(--muted-foreground)]">{m.desc}</p>
               </motion.div>
             ))}

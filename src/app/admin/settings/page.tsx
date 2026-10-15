@@ -178,7 +178,7 @@ export default function AdminSettingsPage() {
           className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 space-y-4"
         >
           <h2 className="text-[var(--foreground)] font-bold flex items-center gap-2">
-            <Globe className="w-5 h-5 text-[var(--accent)]" />
+            <Globe className="w-5 h-5 text-[var(--accent-text)]" />
             اطلاعات عمومی
           </h2>
           <SettingsField label="نام سایت" value={settings.siteName} onChange={updateField('siteName')} />
@@ -194,7 +194,7 @@ export default function AdminSettingsPage() {
           className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 space-y-4"
         >
           <h2 className="text-[var(--foreground)] font-bold flex items-center gap-2">
-            <Phone className="w-5 h-5 text-[var(--accent)]" />
+            <Phone className="w-5 h-5 text-[var(--accent-text)]" />
             اطلاعات تماس
           </h2>
           <SettingsField label="تلفن فروش (هدر و دکمه تماس)" type="tel" icon={<Phone className="w-4 h-4" />} value={settings.phone} onChange={updateField('phone')} />

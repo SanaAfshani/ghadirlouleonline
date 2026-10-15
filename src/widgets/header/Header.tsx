@@ -122,9 +122,9 @@ export function Header({ categories }: { categories: NavCategory[] }) {
         <div className="hidden lg:block h-[38px] bg-[var(--ink)] text-[12px] text-slate-300">
           <div className="container-main h-full flex items-center justify-between">
             <div className="flex items-center gap-5">
-              <span className="flex items-center gap-1.5"><Factory className="w-3.5 h-3.5 text-[var(--accent)]" />فروش مستقیم از کارخانه {siteConfig.legalName}</span>
-              <span className="flex items-center gap-1.5"><Truck className="w-3.5 h-3.5 text-[var(--accent)]" />ارسال از انبار به سراسر کشور</span>
-              <span className="hidden xl:flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-[var(--accent)]" />{siteConfig.workingHours}</span>
+              <span className="flex items-center gap-1.5"><Factory className="w-3.5 h-3.5 text-[var(--accent-text)]" />فروش مستقیم از کارخانه {siteConfig.legalName}</span>
+              <span className="flex items-center gap-1.5"><Truck className="w-3.5 h-3.5 text-[var(--accent-text)]" />ارسال از انبار به سراسر کشور</span>
+              <span className="hidden xl:flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-[var(--accent-text)]" />{siteConfig.workingHours}</span>
             </div>
             <div className="flex items-center gap-5">
               {companyPhones[0] && (
@@ -132,7 +132,7 @@ export function Header({ categories }: { categories: NavCategory[] }) {
                   <Building2 className="w-3.5 h-3.5" />دفتر مرکزی: <span dir="ltr" className="num">{faDigits(companyPhones[0])}</span>
                 </a>
               )}
-              <a href={phoneHref} className="flex items-center gap-1.5 hover:text-white font-bold"><Phone className="w-3.5 h-3.5 text-[var(--accent)]" /><span dir="ltr" className="num">{faDigits(phone)}</span></a>
+              <a href={phoneHref} className="flex items-center gap-1.5 hover:text-white font-bold"><Phone className="w-3.5 h-3.5 text-[var(--accent-text)]" /><span dir="ltr" className="num">{faDigits(phone)}</span></a>
             </div>
           </div>
         </div>
@@ -166,7 +166,7 @@ export function Header({ categories }: { categories: NavCategory[] }) {
                       aria-expanded={mega}
                       className={cn(
                         'flex items-center gap-1 h-10 px-3.5 rounded-xl text-[15px] font-semibold transition-colors',
-                        isActive(pathname, item.href) ? 'text-[var(--accent)]' : 'text-[var(--foreground)] hover:bg-[var(--muted)]',
+                        isActive(pathname, item.href) ? 'text-[var(--accent-text)]' : 'text-[var(--foreground)] hover:bg-[var(--muted)]',
                       )}
                     >
                       {item.label}
@@ -180,7 +180,7 @@ export function Header({ categories }: { categories: NavCategory[] }) {
                     onClick={closeAll}
                     className={cn(
                       'relative h-10 px-3.5 rounded-xl text-[15px] font-semibold flex items-center transition-colors',
-                      isActive(pathname, item.href) ? 'text-[var(--accent)]' : 'text-[var(--foreground)] hover:bg-[var(--muted)]',
+                      isActive(pathname, item.href) ? 'text-[var(--accent-text)]' : 'text-[var(--foreground)] hover:bg-[var(--muted)]',
                     )}
                   >
                     {item.label}
@@ -242,9 +242,9 @@ export function Header({ categories }: { categories: NavCategory[] }) {
                         >
                           <CategoryThumb category={c} className="w-12 h-12 rounded-xl" />
                           <span className="min-w-0">
-                            <span className="block font-bold text-sm truncate group-hover:text-[var(--accent)]">{c.name}</span>
+                            <span className="block font-bold text-sm truncate group-hover:text-[var(--accent-text)]">{c.name}</span>
                             {c.comingSoon ? (
-                              <span className="block text-xs font-bold text-[var(--accent)]">به زودی</span>
+                              <span className="block text-xs font-bold text-[var(--accent-text)]">به زودی</span>
                             ) : (
                               <span className="block text-xs text-[var(--muted-foreground)] num">{faDigits(c.productCount)} محصول</span>
                             )}
@@ -261,7 +261,7 @@ export function Header({ categories }: { categories: NavCategory[] }) {
                         <span className="eyebrow">به‌روز</span>
                         <span className="block mt-2 text-xl font-black leading-snug">لیست قیمت روز لوله و اتصالات</span>
                       </span>
-                      <span className="relative flex items-center gap-1.5 text-sm font-bold text-[var(--accent)]">
+                      <span className="relative flex items-center gap-1.5 text-sm font-bold text-[var(--accent-text)]">
                         مشاهده قیمت‌ها <ArrowLeft className="w-4 h-4" />
                       </span>
                     </Link>
@@ -318,7 +318,7 @@ export function Header({ categories }: { categories: NavCategory[] }) {
                     <span className="block font-black">لیست قیمت روز</span>
                     <span className="block text-xs text-slate-400">قیمت لحظه‌ای و نمودار نوسان</span>
                   </span>
-                  <ArrowLeft className="w-4 h-4 text-[var(--accent)]" />
+                  <ArrowLeft className="w-4 h-4 text-[var(--accent-text)]" />
                 </Link>
 
                 <nav aria-label="ناوبری موبایل" className="px-4 mt-3 grid grid-cols-3 gap-2">
@@ -351,13 +351,13 @@ export function Header({ categories }: { categories: NavCategory[] }) {
                       <Link
                         href={`/products/${c.slug}`}
                         onClick={closeAll}
-                        className={cn('flex items-center gap-3 py-2.5 active:bg-[var(--muted)]', pathname.startsWith(`/products/${c.slug}`) && 'text-[var(--accent)]')}
+                        className={cn('flex items-center gap-3 py-2.5 active:bg-[var(--muted)]', pathname.startsWith(`/products/${c.slug}`) && 'text-[var(--accent-text)]')}
                       >
                         <CategoryThumb category={c} className="w-11 h-11 rounded-lg" />
                         <span className="flex-1 min-w-0">
                           <span className="block text-[14px] font-bold truncate">{c.name}</span>
                           {c.comingSoon ? (
-                            <span className="block text-[11px] font-bold text-[var(--accent)]">به زودی</span>
+                            <span className="block text-[11px] font-bold text-[var(--accent-text)]">به زودی</span>
                           ) : (
                             <span className="block text-[11px] text-[var(--muted-foreground)] num">{faDigits(c.productCount)} محصول</span>
                           )}
@@ -374,7 +374,7 @@ export function Header({ categories }: { categories: NavCategory[] }) {
                   <Phone className="w-5 h-5 shrink-0" /><span dir="ltr" className="num truncate">{faDigits(phone)}</span>
                 </a>
                 {whatsappUrl && (
-                  <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" aria-label="واتس‌اپ" className="w-12 h-12 rounded-xl bg-[#25D366] text-white grid place-items-center">
+                  <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" aria-label="واتس‌اپ" className="w-12 h-12 rounded-xl bg-[#128C7E] text-white grid place-items-center">
                     <MessageCircle className="w-5 h-5" />
                   </a>
                 )}
@@ -415,7 +415,7 @@ export function Header({ categories }: { categories: NavCategory[] }) {
               <p className="mt-6 text-xs font-bold text-[var(--muted-foreground)]">دسته‌های پرجستجو</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {categories.map((c) => (
-                  <Link key={c.slug} href={`/products/${c.slug}`} onClick={closeAll} className="h-10 px-4 rounded-lg border border-[var(--border)] flex items-center text-sm font-semibold hover:border-[var(--accent)] hover:text-[var(--accent)]">
+                  <Link key={c.slug} href={`/products/${c.slug}`} onClick={closeAll} className="h-10 px-4 rounded-lg border border-[var(--border)] flex items-center text-sm font-semibold hover:border-[var(--accent)] hover:text-[var(--accent-text)]">
                     {c.name}
                   </Link>
                 ))}
@@ -434,7 +434,7 @@ export function CategoryThumb({ category, className }: { category: Pick<NavCateg
   if (category.image) {
     return (
       <span className={cn('relative block overflow-hidden bg-[var(--muted)] shrink-0', className)}>
-        <Image src={category.image} alt={category.name} fill sizes="200px" quality={60} className="object-cover" />
+        <Image src={category.image} alt={category.name} fill sizes="200px" quality={75} className="object-cover" />
       </span>
     );
   }

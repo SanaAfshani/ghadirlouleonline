@@ -161,13 +161,13 @@ export default function AdminProductsPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      {product.featured && <span className="text-[var(--accent)] text-xs">⭐ ویژه</span>}
+                      {product.featured && <span className="text-[var(--accent-text)] text-xs">⭐ ویژه</span>}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <Link
                           href={`/admin/products/${product.id}/edit`}
-                          className="w-8 h-8 rounded-lg bg-[var(--muted)] flex items-center justify-center text-[var(--muted-foreground)] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-all"
+                          className="w-8 h-8 rounded-lg bg-[var(--muted)] flex items-center justify-center text-[var(--muted-foreground)] hover:text-[var(--accent-text)] hover:bg-[var(--accent)]/10 transition-all"
                         >
                           <Pencil className="w-4 h-4" />
                         </Link>

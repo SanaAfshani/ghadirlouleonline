@@ -82,16 +82,16 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
           </div>
 
           <ul className="mt-8 hidden sm:flex flex-wrap gap-x-7 gap-y-3 text-sm text-slate-300">
-            <li className="flex items-center gap-2"><Factory className="w-4.5 h-4.5 text-[var(--accent)]" />بارگیری از انبار کارخانه گرمسار</li>
-            <li className="flex items-center gap-2"><ShieldCheck className="w-4.5 h-4.5 text-[var(--accent)]" />خرید بدون واسطه از تولیدکننده</li>
-            <li className="flex items-center gap-2"><Truck className="w-4.5 h-4.5 text-[var(--accent)]" />ارسال به سراسر کشور</li>
+            <li className="flex items-center gap-2"><Factory className="w-4.5 h-4.5 text-[var(--accent-text)]" />بارگیری از انبار کارخانه گرمسار</li>
+            <li className="flex items-center gap-2"><ShieldCheck className="w-4.5 h-4.5 text-[var(--accent-text)]" />خرید بدون واسطه از تولیدکننده</li>
+            <li className="flex items-center gap-2"><Truck className="w-4.5 h-4.5 text-[var(--accent-text)]" />ارسال به سراسر کشور</li>
           </ul>
         </div>
 
         <div className="min-w-0">
           <HeroBoard initial={board} />
           <button onClick={() => open()} className="mt-3 w-full h-12 rounded-2xl border border-white/15 bg-white/5 backdrop-blur text-sm font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors">
-            <Headphones className="w-4.5 h-4.5 text-[var(--accent)]" />
+            <Headphones className="w-4.5 h-4.5 text-[var(--accent-text)]" />
             مشاوره رایگان و استعلام قیمت عمده
           </button>
         </div>

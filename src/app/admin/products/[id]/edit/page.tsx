@@ -241,7 +241,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-[var(--foreground)] font-bold">مشخصات فنی</h2>
-                <button type="button" onClick={addSpec} className="text-[var(--accent)] hover:text-[var(--accent)] text-sm transition-colors">
+                <button type="button" onClick={addSpec} className="text-[var(--accent-text)] hover:text-[var(--accent-text)] text-sm transition-colors">
                   + افزودن ردیف
                 </button>
               </div>

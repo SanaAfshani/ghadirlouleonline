@@ -12,7 +12,7 @@ const stats = [
 ];
 
 const colorMap: Record<string, { icon: string; value: string; bg: string; border: string }> = {
-  amber: { icon: 'text-[var(--accent)]',  value: 'text-[var(--accent)]',  bg: 'bg-[var(--accent)]/8',  border: 'border-[var(--accent)]/20' },
+  amber: { icon: 'text-[var(--accent-text)]',  value: 'text-[var(--accent-text)]',  bg: 'bg-[var(--accent)]/8',  border: 'border-[var(--accent)]/20' },
   blue:  { icon: 'text-blue-400',   value: 'text-blue-400',   bg: 'bg-blue-400/8',   border: 'border-blue-400/20'  },
   green: { icon: 'text-green-500',  value: 'text-green-500',  bg: 'bg-green-500/8',  border: 'border-green-500/20' },
   teal:  { icon: 'text-teal-400',   value: 'text-teal-400',   bg: 'bg-teal-400/8',   border: 'border-teal-400/20'  },

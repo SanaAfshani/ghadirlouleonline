@@ -11,7 +11,7 @@ const buttonVariants = cva(
       variant: {
         default: 'bg-[var(--accent)] text-[var(--accent-foreground)] hover:bg-[var(--accent-hover)] shadow-lg shadow-accent hover:-translate-y-0.5',
         primary: 'bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 shadow-lg hover:-translate-y-0.5',
-        outline: 'border-2 border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] hover:-translate-y-0.5',
+        outline: 'border-2 border-[var(--accent)] text-[var(--accent-text)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] hover:-translate-y-0.5',
         ghost: 'hover:bg-[var(--muted)] text-[var(--foreground)]',
         destructive: 'bg-red-500 text-white hover:bg-red-600 shadow-lg hover:-translate-y-0.5',
         glass: 'glass text-[var(--foreground)] hover:bg-white/10 border border-white/20',

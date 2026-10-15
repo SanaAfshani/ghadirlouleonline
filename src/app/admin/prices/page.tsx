@@ -590,7 +590,7 @@ function PriceBoardPage() {
       </div>
 
       <p className="text-xs text-[var(--muted-foreground)]">
-        محصول جدید را از <Link href="/admin/products/new" className="text-[var(--accent)]">افزودن محصول</Link> بسازید و سپس جدول قیمتش را اینجا وارد کنید.
+        محصول جدید را از <Link href="/admin/products/new" className="text-[var(--accent-text)]">افزودن محصول</Link> بسازید و سپس جدول قیمتش را اینجا وارد کنید.
       </p>
     </div>
   );

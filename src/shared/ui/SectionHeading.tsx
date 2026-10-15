@@ -44,7 +44,7 @@ export function SectionHeading({ id, label, title, description, className, align
       {action && (
         <Link
           href={action.href}
-          className="shrink-0 flex items-center gap-1.5 h-10 px-4 rounded-lg border border-[var(--border)] text-sm font-bold hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
+          className="shrink-0 flex items-center gap-1.5 h-10 px-4 rounded-lg border border-[var(--border)] text-sm font-bold hover:border-[var(--accent)] hover:text-[var(--accent-text)] transition-colors"
         >
           <span className="hidden sm:inline">{action.label}</span>
           <span className="sm:hidden">همه</span>

@@ -113,7 +113,7 @@ function ConsultSheet({ open, product, onClose }: { open: boolean; product: stri
             <div className="sm:hidden mx-auto mt-3 h-1.5 w-12 rounded-full bg-[var(--border)]" />
             <div className="flex items-start justify-between gap-4 px-6 pt-5">
               <div className="flex items-center gap-3">
-                <span className="grid place-items-center w-11 h-11 rounded-2xl bg-[var(--accent)]/15 text-[var(--accent)]">
+                <span className="grid place-items-center w-11 h-11 rounded-2xl bg-[var(--accent)]/15 text-[var(--accent-text)]">
                   <Headphones className="w-5 h-5" />
                 </span>
                 <div>

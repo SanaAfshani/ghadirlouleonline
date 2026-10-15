@@ -90,7 +90,7 @@ export function BlogPageClient() {
       <div className="bg-gradient-to-br from-slate-900 to-slate-800 py-16">
         <div className="container-main">
           <motion.div className="max-w-2xl">
-            <div className="text-[var(--accent)] text-sm font-semibold mb-3 flex items-center gap-2">
+            <div className="text-[var(--accent-text)] text-sm font-semibold mb-3 flex items-center gap-2">
               <span className="w-8 h-0.5 bg-[var(--accent)]" />
               وبلاگ
             </div>
@@ -116,8 +116,8 @@ export function BlogPageClient() {
                   </div>
                 </div>
                 <div className="md:col-span-2 p-8 flex flex-col justify-center">
-                  <span className="text-[var(--accent)] text-xs font-semibold mb-3">{featured.tag}</span>
-                  <h2 className="text-white font-bold text-xl mb-3 group-hover:text-[var(--accent)] transition-colors leading-relaxed">
+                  <span className="text-[var(--accent-text)] text-xs font-semibold mb-3">{featured.tag}</span>
+                  <h2 className="text-white font-bold text-xl mb-3 group-hover:text-[var(--accent-text)] transition-colors leading-relaxed">
                     {featured.title}
                   </h2>
                   <p className="text-slate-400 text-sm leading-relaxed mb-4">{featured.excerpt}</p>
@@ -182,11 +182,11 @@ export function BlogPageClient() {
                     <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{post.readTime} دقیقه</span>
                     <span>{post.date}</span>
                   </div>
-                  <h3 className="font-bold text-[var(--foreground)] mb-2 line-clamp-2 group-hover:text-[var(--accent)] transition-colors leading-relaxed">
+                  <h3 className="font-bold text-[var(--foreground)] mb-2 line-clamp-2 group-hover:text-[var(--accent-text)] transition-colors leading-relaxed">
                     {post.title}
                   </h3>
                   <p className="text-[var(--muted-foreground)] text-sm line-clamp-2 leading-relaxed mb-4">{post.excerpt}</p>
-                  <div className="flex items-center gap-2 text-[var(--accent)] text-sm font-medium">
+                  <div className="flex items-center gap-2 text-[var(--accent-text)] text-sm font-medium">
                     ادامه مطلب
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                   </div>

@@ -54,7 +54,7 @@ export function ProjectsPageClient({ projects }: Props) {
                       )}
                       <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{formatPersianNumber(project.year)}</span>
                     </div>
-                    <h3 className="mt-2 font-black text-[17px] leading-8 line-clamp-2 group-hover:text-[var(--accent)] transition-colors">{project.title}</h3>
+                    <h3 className="mt-2 font-black text-[17px] leading-8 line-clamp-2 group-hover:text-[var(--accent-text)] transition-colors">{project.title}</h3>
                     {project.description && (
                       <p className="mt-1.5 text-sm leading-7 text-[var(--muted-foreground)] line-clamp-2">{project.description}</p>
                     )}

@@ -34,10 +34,10 @@ export function BlogPreview({ posts }: { posts: BlogPost[] }) {
                 </span>
                 <span className="min-w-0">
                   <span className="flex items-center gap-2 text-[11px] text-[var(--muted-foreground)] num">
-                    {post.tags[0] && <span className="font-bold text-[var(--accent)] truncate">{post.tags[0]}</span>}
+                    {post.tags[0] && <span className="font-bold text-[var(--accent-text)] truncate">{post.tags[0]}</span>}
                     <span className="whitespace-nowrap">{formatDate(post.createdAt)}</span>
                   </span>
-                  <span className="mt-1 block font-bold text-[14px] leading-6 line-clamp-2 group-hover:text-[var(--accent)] transition-colors">
+                  <span className="mt-1 block font-bold text-[14px] leading-6 line-clamp-2 group-hover:text-[var(--accent-text)] transition-colors">
                     {faDigits(post.title)}
                   </span>
                 </span>

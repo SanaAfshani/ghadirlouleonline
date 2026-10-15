@@ -189,10 +189,10 @@ export function BannerDialog({ open, onClose, onInsert }: Props) {
                 type="button"
                 onClick={() => fileRef.current?.click()}
                 disabled={uploading}
-                className="w-full border-2 border-dashed border-[var(--border)] rounded-xl p-5 flex flex-col items-center gap-2 text-[var(--muted-foreground)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors disabled:opacity-50"
+                className="w-full border-2 border-dashed border-[var(--border)] rounded-xl p-5 flex flex-col items-center gap-2 text-[var(--muted-foreground)] hover:border-[var(--accent)] hover:text-[var(--accent-text)] transition-colors disabled:opacity-50"
               >
                 {uploading ? (
-                  <Loader2 className="w-6 h-6 animate-spin text-[var(--accent)]" />
+                  <Loader2 className="w-6 h-6 animate-spin text-[var(--accent-text)]" />
                 ) : (
                   <ImagePlus className="w-6 h-6" />
                 )}

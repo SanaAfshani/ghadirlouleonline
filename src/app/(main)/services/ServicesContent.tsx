@@ -67,7 +67,7 @@ export function ServicesContent() {
                 <ul className="mt-5 pt-5 border-t border-[var(--border)] grid grid-cols-2 gap-y-2.5 gap-x-4">
                   {features.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
-                      <Check className="w-4 h-4 text-[var(--accent)] shrink-0" strokeWidth={2.5} />
+                      <Check className="w-4 h-4 text-[var(--accent-text)] shrink-0" strokeWidth={2.5} />
                       {f}
                     </li>
                   ))}
