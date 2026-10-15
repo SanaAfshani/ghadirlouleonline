@@ -2,7 +2,8 @@ import { ImageResponse } from 'next/og';
 import { siteConfig } from '@/shared/config/site';
 
 export const runtime = 'nodejs';
-export const alt = `${siteConfig.name} | تامین کننده لوله و اتصالات صنعتی`;
+export const dynamic = 'force-dynamic';
+export const alt =`${siteConfig.name} | تامین کننده لوله و اتصالات صنعتی`;
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
