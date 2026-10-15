@@ -14,7 +14,10 @@ const nextConfig: NextConfig = {
         hostname: 'localhost',
       },
     ],
-    formats: ['image/avif', 'image/webp'],
+    // فقط WebP: ساخت AVIF روی سرور هر عکس ~۱۶ ثانیه طول می‌کشید و عکس‌ها در اولین بازدید لود نمی‌شدند
+    formats: ['image/webp'],
+    // آدرس /media/<id> هرگز محتوایش عوض نمی‌شود؛ نسخه بهینه‌شده را دوباره نسازد
+    minimumCacheTTL: 31536000,
     // کیفیت‌های مجاز (Next 16 فقط همین‌ها را می‌پذیرد): ۵۰ برای تصویر پس‌زمینه زیر لایه تیره، ۹۰ برای عکس محصولات
     qualities: [50, 75, 90],
   },
