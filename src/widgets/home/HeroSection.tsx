@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Factory, Headphones, Search, ShieldCheck, Truck } from 'lucide-react';
+import { ChevronDown, Factory, Headphones, Search, ShieldCheck, Truck } from 'lucide-react';
 import { siteConfig } from '@/shared/config/site';
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
 import { useConsult } from '@/features/consult/ConsultProvider';
@@ -44,7 +44,7 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(270deg,var(--ink)_0%,rgba(14,18,23,0.94)_38%,rgba(14,18,23,0.72)_70%,rgba(14,18,23,0.55)_100%)]" />
       <div className="absolute inset-x-0 bottom-0 h-40 -z-10 bg-gradient-to-t from-[var(--ink)] to-transparent" />
 
-      <div className="container-main grid grid-cols-1 lg:grid-cols-[1fr_470px] items-center gap-8 lg:gap-14 pt-8 pb-10 sm:pt-12 lg:py-20">
+      <div className="container-main grid grid-cols-1 lg:grid-cols-[1fr_470px] items-center gap-8 lg:gap-14 pt-8 pb-16 sm:pt-12 sm:pb-20 lg:pt-20 lg:pb-28">
         <div className="min-w-0">
           <p className="eyebrow">
             فروش مستقیم از کارخانه {siteConfig.legalName}
@@ -73,7 +73,26 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
             </button>
           </form>
 
-          <div className="mt-4 -mx-4 px-4 snap-row sm:mx-0 sm:px-0 sm:flex-wrap">
+          {/* موبایل: نوار گردشی بی‌پایان (لیست دوبار تکرار شده و نصف عرضش جابه‌جا می‌شود) */}
+          <div className="sm:hidden mt-4 -mx-4 overflow-hidden motion-reduce:overflow-x-auto [mask-image:linear-gradient(to_left,transparent,black_6%,black_94%,transparent)]">
+            <div className="flex w-max animate-[hero-marquee_28s_linear_infinite] motion-reduce:animate-none active:[animation-play-state:paused]">
+              {[...categories, ...categories].map((c, i) => {
+                const copy = i >= categories.length;
+                return (
+                  <Link
+                    key={`${c.slug}-${i}`}
+                    href={`/products/${c.slug}`}
+                    aria-hidden={copy || undefined}
+                    tabIndex={copy ? -1 : undefined}
+                    className="me-2 h-9 px-3.5 rounded-lg border border-white/15 text-[13px] text-slate-200 flex items-center whitespace-nowrap"
+                  >
+                    {c.name}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+          <div className="hidden sm:flex flex-wrap gap-2 mt-4">
             {categories.slice(0, 6).map((c) => (
               <Link key={c.slug} href={`/products/${c.slug}`} className="h-9 px-3.5 rounded-lg border border-white/15 text-[13px] text-slate-200 flex items-center hover:bg-white hover:text-[var(--ink)] transition-colors">
                 {c.name}
@@ -96,6 +115,23 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
           </button>
         </div>
       </div>
+
+      {/* لبه منحنی پایین — هم‌رنگ پس‌زمینه بخش بعد (قیمت روز) */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 -bottom-px leading-[0] text-[var(--card)]">
+        <svg viewBox="0 0 1351 52.39" preserveAspectRatio="none" fill="currentColor" className="hidden sm:block w-full h-11 lg:h-[52px]">
+          <path d="M709.5,11.22h0a57.13,57.13,0,0,0-68,0h0a140.24,140.24,0,0,1-86.18,27.5C347.74,34.67,161.05,20.57,0,2.75V52.39H1351V2.75c-161.19,17.84-347.64,31.94-555.32,36A140.24,140.24,0,0,1,709.5,11.22Z" />
+        </svg>
+        <svg viewBox="0 0 711.85 52.39" preserveAspectRatio="none" fill="currentColor" className="sm:hidden w-full h-9">
+          <path d="M389.93,11.23l0,0a57.11,57.11,0,0,0-68,0h0A126.87,126.87,0,0,1,237.75,35.8,1738.72,1738.72,0,0,1,0,2.75V52.39H711.85V2.75A1736.55,1736.55,0,0,1,474.12,35.81,126.79,126.79,0,0,1,389.93,11.23Z" />
+        </svg>
+      </div>
+      <a
+        href="#prices"
+        aria-label="رفتن به قیمت روز"
+        className="absolute bottom-1 lg:bottom-2 left-1/2 -translate-x-1/2 grid place-items-center w-8 h-8 text-[var(--accent)] motion-safe:animate-bounce"
+      >
+        <ChevronDown className="w-5 h-5" strokeWidth={3} />
+      </a>
     </section>
   );
 }

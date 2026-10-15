@@ -18,7 +18,7 @@ export function LatestPrices({ board: initial }: { board: PriceBoard }) {
   const line = board.lines.find((l) => l.productId === active) ?? board.lines[0];
 
   return (
-    <section id="prices" className="section-padding bg-[var(--card)] border-y border-[var(--border)]" aria-labelledby="prices-title">
+    <section id="prices" className="section-padding bg-[var(--card)] border-b border-[var(--border)]" aria-labelledby="prices-title">
       <div className="container-main">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
           <div>

@@ -1164,3 +1164,9 @@ input, textarea, select {
    تا خالی است placeholder فارسی راست‌به‌چپ نمایش داده می‌شود */
 .ltr-field { direction: ltr; text-align: right; }
 .ltr-field:placeholder-shown { direction: rtl; }
+
+/* نوار گردشی دسته‌ها در hero موبایل — RTL: لیست به راست می‌رود و نیمه تکراری جایش را می‌گیرد */
+@keyframes hero-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(50%); }
+}
