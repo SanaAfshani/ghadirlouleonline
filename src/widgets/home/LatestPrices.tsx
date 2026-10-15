@@ -24,7 +24,7 @@ export function LatestPrices({ board: initial }: { board: PriceBoard }) {
           <div>
             <span className="eyebrow">قیمت روز</span>
             <h2 id="prices-title" className="mt-2 text-[1.35rem] sm:text-3xl font-black">آخرین قیمت‌های لوله و اتصالات</h2>
-            <p className="mt-2 text-sm text-[var(--muted-foreground)]">تاریخ آخرین تغییر هر قیمت کنار آن درج شده؛ قیمت نهایی هنگام ثبت سفارش تایید می‌شود.</p>
+            <p className="mt-2 text-sm text-[var(--muted-foreground)]">قیمت نهایی هنگام ثبت سفارش تایید می‌شود.</p>
           </div>
           <MarketStatus market={board.market} className="self-start sm:self-auto" />
         </div>

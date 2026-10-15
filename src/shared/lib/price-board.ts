@@ -28,7 +28,7 @@ export const getPriceBoard = cache(async (): Promise<PriceBoard> => {
       // فقط دسته‌های فعال — قیمت دسته‌های «به زودی» حتی در API زنده هم بیرون نمی‌رود
       where: {
         published: true,
-        category: { published: true, slug: { in: [...siteConfig.activeCategorySlugs] } },
+        category: { published: true, slug: { notIn: [...siteConfig.comingSoonCategorySlugs] } },
         priceItems: { some: {} },
       },
       select: {

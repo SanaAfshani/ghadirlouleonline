@@ -73,8 +73,8 @@ function Price({ price, open }: { price: number | null; open: boolean }) {
 function downloadCsv(name: string, rows: ReturnType<typeof findItems>) {
   const cell = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
   const lines = [
-    ['عنوان', 'محصول', 'قیمت (تومان)', 'توضیحات', 'آخرین تغییر'],
-    ...rows.map((r) => [r.title, r.productName, r.price ?? 'استعلام', r.note, priceTime(r.priceChangedAt)]),
+    ['عنوان', 'محصول', 'قیمت (تومان)', 'توضیحات'],
+    ...rows.map((r) => [r.title, r.productName, r.price ?? 'استعلام', r.note]),
   ];
   const blob = new Blob(['\uFEFF' + lines.map((l) => l.map(cell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a');
@@ -189,7 +189,6 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
               {showProduct && <th scope="col" className="text-right font-bold px-4 py-3">محصول</th>}
               <th scope="col" className="text-right font-bold px-4 py-3">قیمت</th>
               <th scope="col" className="text-right font-bold px-4 py-3">توضیحات</th>
-              <th scope="col" className="text-right font-bold px-4 py-3 whitespace-nowrap">آخرین تغییر</th>
               <th scope="col" className="text-center font-bold px-2 py-3">نمودار</th>
               <th scope="col" className="px-4 py-3"><span className="sr-only">اقدام</span></th>
             </tr>
@@ -212,7 +211,6 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
                     </div>
                   </td>
                   <td className="px-4 py-3.5 text-xs text-[var(--muted-foreground)] leading-6 max-w-[16rem]">{faDigits(r.note) || '—'}</td>
-                  <td className="px-4 py-3.5 text-xs text-[var(--muted-foreground)] whitespace-nowrap num">{priceTime(r.priceChangedAt)}</td>
                   <td className="px-2 py-3.5 text-center">
                     {open && r.price != null ? (
                       <button
@@ -275,10 +273,7 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
                   </button>
                 </div>
               </div>
-              <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[var(--muted-foreground)] num">
-                <span>{priceTime(r.priceChangedAt)}</span>
-                {r.note && <span className="basis-full leading-5">{faDigits(r.note)}</span>}
-              </div>
+              {r.note && <p className="mt-2 text-[11px] leading-5 text-[var(--muted-foreground)] num">{faDigits(r.note)}</p>}
             </li>
           );
         })}

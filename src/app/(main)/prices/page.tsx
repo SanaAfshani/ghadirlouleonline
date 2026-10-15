@@ -20,14 +20,14 @@ function persianYear() {
 /** نام دسته‌هایی که الان در تابلوی قیمت هستند (فقط دسته‌های فعال) — عنوان صفحه با محتوای واقعی آن یکی بماند */
 function boardCategoryNames(board: Awaited<ReturnType<typeof getPriceBoard>>) {
   const names = [...new Set(board.lines.map((l) => l.categoryName))];
-  return names.length ? names.join('، ') : 'لوله و اتصالات';
+  return names.length && names.length <= 3 ? names.join('، ') : 'لوله و اتصالات';
 }
 
 export async function generateMetadata(): Promise<Metadata> {
   const year = persianYear();
   const names = boardCategoryNames(await getPriceBoard());
   const title = `لیست قیمت روز ${names} ${year}`;
-  const description = `قیمت روز ${names} در سال ${year} به تفکیک سایز، با تاریخ آخرین تغییر هر ردیف. فروش مستقیم از کارخانه، استعلام قیمت عمده و ارسال به سراسر کشور.`;
+  const description = `قیمت روز ${names} در سال ${year} به تفکیک سایز. فروش مستقیم از کارخانه، استعلام قیمت عمده و ارسال به سراسر کشور.`;
   return {
     title,
     description,
@@ -42,11 +42,10 @@ export default async function PricesPage() {
   return (
     <>
       <JsonLd data={breadcrumbSchema([{ name: 'لیست قیمت', path: '/prices' }])} />
-      {/* تاریخ کنار هر ردیف «آخرین تغییر قیمت» است، نه تایید امروز — پس قیمت نباید مبلغ نهایی خرید به نظر برسد (همان متن قوانین خرید) */}
       <PageHero
         label="قیمت لحظه‌ای"
         title={`لیست قیمت ${boardCategoryNames(board)} ${persianYear()}`}
-        description="قیمت هر محصول به تفکیک سایز و فشار کاری، با تاریخ آخرین تغییر هر ردیف. با دکمه «سفارش» ردیف را به پیش‌فاکتور اضافه کنید؛ پس از تأیید کارشناس، پیش‌فاکتور قابل چاپ و دانلود صادر می‌شود. هزینه حمل جداگانه اعلام می‌گردد."
+        description="قیمت هر محصول به تفکیک سایز و فشار کاری. با دکمه «سفارش» ردیف را به پیش‌فاکتور اضافه کنید؛ پس از تأیید کارشناس، پیش‌فاکتور قابل چاپ و دانلود صادر می‌شود. هزینه حمل جداگانه اعلام می‌گردد."
       />
 
       <div className="container-main section-padding-sm">

@@ -11,6 +11,7 @@ import { siteConfig } from '@/shared/config/site';
 import { JsonLd } from '@/shared/ui/JsonLd';
 import { absoluteUrl, breadcrumbSchema, faqPageSchema, toMetaDescription } from '@/shared/lib/seo';
 import { isComingSoon } from '@/shared/lib/catalog';
+import { withImageDimensions } from '@/shared/lib/media';
 
 type Props = { params: Promise<{ category: string; slug: string }> };
 
@@ -75,6 +76,8 @@ export default async function ProductDetailPage({ params }: Props) {
     if (moved) permanentRedirect(moved);
     notFound();
   }
+
+  if (product.description) product.description = await withImageDimensions(product.description);
 
   // product.images توسط serializeProduct از قبل به آرایه تبدیل شده است
   const images = (product.images ?? []).map((src) => absoluteUrl(src));

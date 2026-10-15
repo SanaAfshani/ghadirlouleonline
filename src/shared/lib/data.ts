@@ -12,7 +12,7 @@ import {
 } from '@/shared/lib/serializers';
 
 /**
- * دسته‌های فعال (siteConfig.activeCategorySlugs) همیشه اول؛ بقیه به ترتیب پنل ادمین.
+ * دسته‌های اولویت‌دار (siteConfig.priorityCategorySlugs) همیشه اول؛ بقیه به ترتیب پنل ادمین.
  * با cache: layout (منو و فوتر) و صفحه در یک درخواست فقط یک بار به دیتابیس می‌روند.
  */
 export const getPublishedCategories = cache(async () => {
@@ -59,18 +59,22 @@ export async function getPublishedProducts(options?: {
   featured?: boolean;
   search?: string;
   limit?: number;
+  /** فقط محصولاتی که عکس خودشان را دارند */
+  withImage?: boolean;
 }) {
   const where: {
     published: boolean;
     featured?: boolean;
     category?: { slug: string };
     OR?: { name?: { contains: string }; shortDescription?: { contains: string } }[];
+    images?: { not: string };
   } = { published: true };
 
   if (options?.categorySlug && options.categorySlug !== 'all') {
     where.category = { slug: options.categorySlug };
   }
   if (options?.featured) where.featured = true;
+  if (options?.withImage) where.images = { not: '[]' };
   if (options?.search) {
     where.OR = [
       { name: { contains: options.search } },

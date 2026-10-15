@@ -19,7 +19,7 @@ export function CategoriesSection({ categories }: { categories: NavCategory[] })
           align="right"
           label="دسته‌بندی محصولات"
           title="خرید لوله و اتصالات"
-          description="لوله کاروگیت با قیمت روز و مشخصات فنی؛ سایر دسته‌ها به زودی عرضه می‌شوند."
+          description="همه دسته‌ها با قیمت روز و مشخصات فنی."
           action={{ href: '/categories', label: 'همه دسته‌ها' }}
         />
 

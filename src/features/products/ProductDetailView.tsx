@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { m as motion } from 'framer-motion';
+import { AnimatePresence, m as motion } from 'framer-motion';
 import {
-  CalendarClock, Check, ChevronLeft, Clock, Headphones, MessageCircle, Phone, ShieldCheck, Table2, Truck, X,
+  CalendarClock, Check, ChevronLeft, ChevronRight, Clock, Headphones, MessageCircle, Phone, ShieldCheck, Table2, Truck, X,
 } from 'lucide-react';
 import type { Product } from '@/shared/types';
 import type { ProductListItem } from '@/shared/lib/serializers';
@@ -25,8 +25,77 @@ import { cn, faDigits } from '@/shared/lib/utils';
 
 type Section = { id: string; label: string };
 
+/** نمایش تمام‌صفحه عکس‌ها — RTL: «بعدی» سمت چپ است و با کشیدن به راست می‌آید */
+function Lightbox({ images, name, index, onIndex, onClose }: { images: string[]; name: string; index: number | null; onIndex: (i: number) => void; onClose: () => void }) {
+  const isOpen = index != null;
+  const count = images.length;
+  const go = useCallback((delta: number) => index != null && onIndex((index + delta + count) % count), [index, count, onIndex]);
+  const touchX = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      else if (e.key === 'ArrowLeft') go(1);
+      else if (e.key === 'ArrowRight') go(-1);
+    };
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, onClose, go]);
+
+  return (
+    <AnimatePresence>
+      {index != null && (
+        <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`تصاویر ${name}`}
+          className="fixed inset-0 z-[80] bg-black/90 backdrop-blur-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
+          onTouchEnd={(e) => {
+            if (touchX.current == null) return;
+            const dx = e.changedTouches[0].clientX - touchX.current;
+            touchX.current = null;
+            if (Math.abs(dx) > 50) go(dx > 0 ? 1 : -1);
+          }}
+        >
+          <button aria-label="بستن" onClick={onClose} className="absolute inset-0 cursor-zoom-out" />
+          <div className="pointer-events-none absolute inset-4 sm:inset-12">
+            <Image key={images[index]} src={images[index]} alt={`${name} — تصویر ${faDigits(index + 1)}`} fill sizes="100vw" quality={90} className="object-contain" />
+          </div>
+          <button onClick={onClose} aria-label="بستن" className="absolute top-4 left-4 grid place-items-center w-11 h-11 rounded-full bg-black/60 ring-1 ring-white/25 text-white hover:bg-black/80">
+            <X className="w-5 h-5" />
+          </button>
+          {count > 1 && (
+            <>
+              <button onClick={() => go(-1)} aria-label="تصویر قبلی" className="absolute right-3 top-1/2 -translate-y-1/2 grid place-items-center w-11 h-11 rounded-full bg-black/60 ring-1 ring-white/25 text-white hover:bg-black/80">
+                <ChevronRight className="w-6 h-6" />
+              </button>
+              <button onClick={() => go(1)} aria-label="تصویر بعدی" className="absolute left-3 top-1/2 -translate-y-1/2 grid place-items-center w-11 h-11 rounded-full bg-black/60 ring-1 ring-white/25 text-white hover:bg-black/80">
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <span className="absolute bottom-5 inset-x-0 text-center text-sm text-white/80 num pointer-events-none">
+                {faDigits(index + 1)} / {faDigits(count)}
+              </span>
+            </>
+          )}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 function Gallery({ images, name }: { images: string[]; name: string }) {
   const [active, setActive] = useState(0);
+  const [zoom, setZoom] = useState<number | null>(null);
+  const closeZoom = useCallback(() => setZoom(null), []);
 
   if (!images.length) {
     return <CategoryThumb category={{ name, image: null }} className="w-full aspect-[4/3] rounded-3xl" />;
@@ -45,9 +114,9 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
           }}
         >
           {images.map((src, i) => (
-            <div key={src} className="relative w-full aspect-[4/3] bg-[var(--muted)]">
+            <button key={src} type="button" onClick={() => setZoom(i)} aria-label={`بزرگ‌نمایی تصویر ${faDigits(i + 1)}`} className="relative block w-full aspect-[4/3] bg-[var(--muted)] cursor-zoom-in">
               <Image src={src} alt={i === 0 ? name : `${name} — تصویر ${faDigits(i + 1)}`} fill sizes="100vw" quality={90} className="object-cover" priority={i === 0} />
-            </div>
+            </button>
           ))}
         </div>
         {images.length > 1 && (
@@ -61,9 +130,9 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
 
       {/* دسکتاپ: تصویر اصلی + بندانگشتی */}
       <div className="hidden lg:block">
-        <div className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-[var(--muted)] border border-[var(--border)]">
+        <button type="button" onClick={() => setZoom(active)} aria-label="بزرگ‌نمایی تصویر" className="relative block w-full aspect-[4/3] rounded-3xl overflow-hidden bg-[var(--muted)] border border-[var(--border)] cursor-zoom-in">
           <Image src={images[active]} alt={name} fill sizes="(max-width: 1024px) 100vw, 50vw" quality={90} className="object-cover" priority />
-        </div>
+        </button>
         {images.length > 1 && (
           <div className="mt-3 grid grid-cols-5 gap-2">
             {images.map((src, i) => (
@@ -79,6 +148,8 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
           </div>
         )}
       </div>
+
+      <Lightbox images={images} name={name} index={zoom} onIndex={setZoom} onClose={closeZoom} />
     </div>
   );
 }

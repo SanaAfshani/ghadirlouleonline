@@ -43,7 +43,7 @@ export default async function HomePage() {
   const [categories, board, products, posts, rawSettings] = await Promise.all([
     getNavCategories(),
     getPriceBoard(),
-    getPublishedProducts({ limit: 8 }),
+    getPublishedProducts({ limit: 8, withImage: true }),
     getPublishedBlogPosts({ limit: 3 }),
     getSiteSettingsMap(),
   ]);

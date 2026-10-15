@@ -38,7 +38,7 @@ export function ProductCard({ product, className }: { product: ProductListItem; 
           ) : (
             <CategoryThumb category={{ name: product.name, image: null }} className="absolute inset-0 w-full h-full" />
           )}
-          <span className="absolute top-3 right-3 flex gap-1.5">
+          <span className="absolute top-3 right-3 left-3 flex flex-wrap gap-1.5">
             {product.comingSoon ? (
               <span className="h-7 px-2.5 rounded-lg text-[11px] font-bold flex items-center backdrop-blur bg-[var(--accent)] text-[var(--accent-foreground)]">
                 به زودی
@@ -58,7 +58,7 @@ export function ProductCard({ product, className }: { product: ProductListItem; 
         </div>
 
         <div className="flex-1 flex flex-col p-4 sm:p-5">
-          <span className="text-[11px] font-bold text-[var(--accent-text)]">{product.categoryName}</span>
+          <span className="block truncate text-[11px] font-bold text-[var(--accent-text)]">{product.categoryName}</span>
           <h3 className="mt-1 font-black text-[15px] sm:text-base leading-7 line-clamp-2 group-hover:text-[var(--accent-text)] transition-colors">
             {faDigits(product.name)}
           </h3>
@@ -66,7 +66,7 @@ export function ProductCard({ product, className }: { product: ProductListItem; 
           {specs.length > 0 && (
             <div className="mt-2.5 flex flex-wrap gap-1.5">
               {specs.map(([k, v]) => (
-                <span key={k} className="h-6 px-2 rounded-md bg-[var(--muted)] text-[11px] text-[var(--muted-foreground)] flex items-center num">
+                <span key={k} className="max-w-full min-h-6 px-2 py-0.5 rounded-md bg-[var(--muted)] text-[11px] leading-5 text-[var(--muted-foreground)] break-words num">
                   {k}: {faDigits(v)}
                 </span>
               ))}
