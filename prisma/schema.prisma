@@ -270,6 +270,12 @@ model Quote {
   /// اعتبار پیش‌فاکتور صادرشده؛ قبل از صدور می‌تواند null باشد
   validUntil      DateTime?
   issuedAt        DateTime?
+  /// پیگیری سفارش بعد از صدور فاکتور: '' | PREPARING | LOADING | SHIPPED | DELIVERED (lib/order-status.ts)
+  orderStatus     String      @default("")
+  /// تاریخچه مراحل برای خط زمانی صفحه پیگیری: JSON [{ status, at }]
+  orderLog        String      @default("[]")
+  /// توضیح عمومی برای مشتری (مثلاً پلاک یا شماره راننده) — برخلاف adminNote روی صفحه پیگیری دیده می‌شود
+  trackingNote    String      @default("")
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   items           QuoteItem[]

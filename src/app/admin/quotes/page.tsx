@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import {
-  Check, Copy, ExternalLink, FileSpreadsheet, Loader2, Mail, MessageCircle, Plus, Trash2, X,
+  Check, Copy, ExternalLink, FileSpreadsheet, Loader2, Mail, MessageCircle, Plus, Trash2, Truck, X,
 } from 'lucide-react';
 import { cn, faDigits, formatPersianNumber, latinDigits } from '@/shared/lib/utils';
 import { DEFAULT_VAT_RATE, statusLabel } from '@/shared/lib/quote-constants';
 import { useConfirm } from '@/shared/ui/ConfirmDialog';
 import { siteConfig } from '@/shared/config/site';
+import { ORDER_STEPS, type OrderLogEntry } from '@/shared/lib/order-status';
+import { IconTile } from '@/shared/ui/IconTile';
 
 type Item = {
   id?: string;
@@ -43,6 +45,9 @@ type Quote = {
   issuedAt: string | null;
   createdAt: string;
   publicUrl: string;
+  orderStatus: string;
+  orderLog: OrderLogEntry[];
+  trackingNote: string;
   items: Item[];
 };
 
@@ -222,6 +227,78 @@ export default function AdminQuotesPage() {
   );
 }
 
+/** مرحله سفارش برای صفحه «پیگیری سفارش» مشتری — هر کلیک فوراً ذخیره می‌شود */
+function OrderTrackingPanel({ quote, onChange }: { quote: Quote; onChange: (q: Quote) => void }) {
+  const [note, setNote] = useState(quote.trackingNote);
+  const [saving, setSaving] = useState(false);
+
+  const save = async (patch: { orderStatus?: string; trackingNote?: string }) => {
+    setSaving(true);
+    try {
+      const q = await api<Quote>(`/api/admin/quotes/${quote.id}/order`, {
+        method: 'PUT',
+        body: JSON.stringify({ orderStatus: quote.orderStatus, trackingNote: note, ...patch }),
+      });
+      onChange(q);
+      toast.success('وضعیت سفارش ذخیره شد — مشتری در صفحه پیگیری می‌بیند');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'خطا');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const at = (key: string) => quote.orderLog.find((e) => e.status === key)?.at;
+  return (
+    <div className="p-5 border-b border-[var(--border)] bg-emerald-500/[0.04]">
+      <div className="flex items-center gap-2.5 mb-3">
+        <IconTile icon={Truck} tone="emerald" size="sm" />
+        <p className="font-black text-sm">پیگیری سفارش</p>
+        {saving && <Loader2 className="w-4 h-4 animate-spin text-[var(--muted-foreground)]" />}
+        <a href={`/track?n=${quote.number}`} target="_blank" rel="noopener" className="ms-auto text-xs font-bold text-[var(--accent-text)] flex items-center gap-1">
+          صفحه پیگیری مشتری <ExternalLink className="w-3.5 h-3.5" />
+        </a>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {ORDER_STEPS.map((s) => {
+          const on = quote.orderStatus === s.key;
+          const when = at(s.key);
+          return (
+            <button
+              key={s.key}
+              type="button"
+              disabled={saving}
+              onClick={() => save({ orderStatus: on ? '' : s.key })}
+              aria-pressed={on}
+              className={cn(
+                'rounded-xl border px-3 py-2.5 text-right transition-colors disabled:opacity-60',
+                on ? 'bg-emerald-500 border-transparent text-white' : 'border-[var(--border)] bg-[var(--background)] hover:border-emerald-500/60',
+              )}
+            >
+              <span className="block text-sm font-black">{s.label}</span>
+              <span className={cn('block text-[10px] num', on ? 'text-white/80' : 'text-[var(--muted-foreground)]')}>
+                {when ? new Date(when).toLocaleString('fa-IR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'ثبت نشده'}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <input
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="توضیح برای مشتری (اختیاری) — مثلاً پلاک خودرو یا شماره راننده"
+          className={cn(inputCls, 'flex-1 min-w-[220px] bg-[var(--background)]')}
+        />
+        <button type="button" disabled={saving || note === quote.trackingNote} onClick={() => save({ trackingNote: note })} className="h-10 px-4 rounded-xl bg-[var(--foreground)] text-[var(--background)] text-xs font-bold disabled:opacity-40">
+          ذخیره توضیح
+        </button>
+      </div>
+      <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">با کلیک روی هر مرحله، همان مرحله و زمانش برای مشتری ثبت می‌شود. کلیک دوباره، مرحله را برمی‌دارد.</p>
+    </div>
+  );
+}
+
 function QuoteEditor({
   quote, busy, onChange, onSaveDraft, onIssue, onReject, onDelete, onCopyLink, waHref, mailHref,
 }: {
@@ -274,6 +351,8 @@ function QuoteEditor({
           )}
         </div>
       </div>
+
+      {quote.status === 'ISSUED' && <OrderTrackingPanel quote={quote} onChange={onChange} />}
 
       <div className="p-5 grid sm:grid-cols-2 gap-3 border-b border-[var(--border)]">
         <Field label="نام مشتری"><input disabled={locked} value={quote.customerName} onChange={(e) => set({ customerName: e.target.value })} className={cn(inputCls, 'w-full')} /></Field>

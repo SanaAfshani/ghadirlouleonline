@@ -3,6 +3,7 @@ import { prisma } from '@/shared/lib/prisma';
 import { siteConfig } from '@/shared/config/site';
 import type { Quote, QuoteItem, QuoteStatus } from '@/generated/prisma/client';
 import { DEFAULT_VAT_RATE } from '@/shared/lib/quote-constants';
+import { parseOrderLog } from '@/shared/lib/order-status';
 
 export { DEFAULT_VAT_RATE, DEFAULT_VALIDITY_HOURS, statusLabel } from '@/shared/lib/quote-constants';
 
@@ -77,6 +78,9 @@ export function serializeQuote(q: QuoteWithItems) {
     createdAt: q.createdAt.toISOString(),
     updatedAt: q.updatedAt.toISOString(),
     publicUrl: publicQuoteUrl(q.token),
+    orderStatus: q.orderStatus,
+    orderLog: parseOrderLog(q.orderLog),
+    trackingNote: q.trackingNote,
     items: q.items
       .slice()
       .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -114,4 +118,11 @@ export async function getQuoteById(id: string) {
     where: { id },
     include: { items: { orderBy: { sortOrder: 'asc' } } },
   });
+}
+
+/** شماره پیش‌فاکتور از ورودی کاربر: «Q-1405-0003»، «q۱۴۰۵۰۰۰۳» یا «1405-3» → Q-1405-0003 */
+export function normalizeQuoteNumber(raw: unknown) {
+  const digits = String(raw ?? '').replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
+  const m = digits.match(/(\d{4})\D*(\d{1,6})/);
+  return m ? `Q-${m[1]}-${m[2].padStart(4, '0')}` : null;
 }

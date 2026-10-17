@@ -6,6 +6,8 @@ import { CheckCircle2, Clock, Download, Factory, Mail, MapPin, MessageCircle, Ph
 import { faDigits } from '@/shared/lib/utils';
 import type { SiteSettings } from '@/shared/lib/site-settings';
 import { siteConfig } from '@/shared/config/site';
+import type { OrderLogEntry } from '@/shared/lib/order-status';
+import { OrderTimeline } from './OrderTimeline';
 
 const subscribeNoop = () => () => {};
 const clientNow = () => Date.now();
@@ -27,6 +29,9 @@ export type PublicQuote = {
   issuedAt: string | null;
   createdAt: string;
   publicUrl: string;
+  orderStatus: string;
+  orderLog: OrderLogEntry[];
+  trackingNote: string;
   items: {
     title: string;
     unitPrice: number;
@@ -85,6 +90,15 @@ export function QuoteView({ quote, settings }: { quote: PublicQuote; settings: S
             قیمت روز
           </a>
         </div>
+      )}
+
+      {/* پیگیری سفارش — بعد از صدور فاکتور */}
+      {issued && (
+        <section className="print:hidden mb-5 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 sm:p-5">
+          <p className="font-black text-sm mb-4">وضعیت سفارش</p>
+          <OrderTimeline status={quote.status} createdAt={quote.createdAt} issuedAt={quote.issuedAt} orderStatus={quote.orderStatus} orderLog={quote.orderLog} />
+          {quote.trackingNote && <p className="mt-4 rounded-xl bg-[var(--muted)] px-4 py-2.5 text-sm leading-7 num">{faDigits(quote.trackingNote)}</p>}
+        </section>
       )}
 
       <div className="print:hidden mb-5 flex flex-wrap gap-2">
