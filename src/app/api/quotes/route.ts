@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { after, NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/shared/lib/prisma';
 import { recordLead } from '@/shared/lib/lead-events';
 import { cleanPath } from '@/shared/lib/leads';
@@ -14,6 +14,7 @@ import { DEFAULT_VAT_RATE } from '@/shared/lib/quote-constants';
 import { latinDigits } from '@/shared/lib/utils';
 import { getMarketNow } from '@/shared/lib/price-board';
 import { itemLabel } from '@/shared/lib/price-item';
+import { notifyQuoteRequested } from '@/shared/lib/sms';
 
 const MAX_ITEMS = 40;
 
@@ -110,6 +111,8 @@ export async function POST(request: NextRequest) {
     });
 
     await recordLead('form', sourcePath ?? '', `پیش‌فاکتور ${quote.number}`).catch((e) => console.error('Lead record error:', e));
+    // پیامک بعد از پاسخ — کندی یا خطای پنل پیامک ثبت درخواست را معطل نمی‌کند
+    after(() => notifyQuoteRequested(quote));
 
     return NextResponse.json({
       success: true,

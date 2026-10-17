@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { after, NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/shared/lib/prisma';
 import { requireAdmin } from '@/shared/lib/admin-auth';
 import { serverErrorResponse } from '@/shared/lib/api-errors';
@@ -11,6 +11,7 @@ import {
   type QuoteLineInput,
 } from '@/shared/lib/quotes';
 import { latinDigits } from '@/shared/lib/utils';
+import { notifyQuoteIssued } from '@/shared/lib/sms';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -146,6 +147,9 @@ export async function PATCH(request: NextRequest, { params }: Props) {
         include: { items: { orderBy: { sortOrder: 'asc' } } },
       });
     });
+
+    // فقط صدور اول — صدور دوباره بعد از ویرایش پیامک تکراری نمی‌فرستد
+    if (action === 'issue' && current.status !== 'ISSUED') after(() => notifyQuoteIssued(quote));
 
     return NextResponse.json({ success: true, data: serializeQuote(quote) });
   } catch (error) {

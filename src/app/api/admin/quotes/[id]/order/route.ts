@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { after, NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/shared/lib/prisma';
 import { requireAdmin } from '@/shared/lib/admin-auth';
 import { serverErrorResponse } from '@/shared/lib/api-errors';
 import { getQuoteById, serializeQuote } from '@/shared/lib/quotes';
 import { isOrderStatus, parseOrderLog } from '@/shared/lib/order-status';
+import { notifyOrderStatus } from '@/shared/lib/sms';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -39,6 +40,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
       },
       include: { items: { orderBy: { sortOrder: 'asc' } } },
     });
+    if (orderStatus && orderStatus !== current.orderStatus) after(() => notifyOrderStatus(quote, orderStatus));
     return NextResponse.json({ success: true, data: serializeQuote(quote) });
   } catch (error) {
     return serverErrorResponse(error, 'Admin quote order error:');
