@@ -1,8 +1,7 @@
 export const dynamic = 'force-dynamic';
 
-import { notFound, permanentRedirect } from 'next/navigation';
 import { safeDecode } from '@/shared/lib/utils';
-import { findRedirect } from '@/shared/lib/redirects';
+import { ensureProject } from '@/shared/lib/route-guards';
 import type { Metadata } from 'next';
 import { ProjectDetailView } from '@/features/projects/ProjectDetailView';
 import { getProjectBySlug } from '@/shared/lib/data';
@@ -43,12 +42,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProjectDetailPage({ params }: Props) {
   const { slug: rawSlug } = await params;
   const slug = safeDecode(rawSlug);
-  const project = await getProjectBySlug(slug);
-  if (!project) {
-    const moved = await findRedirect(`/projects/${slug}`);
-    if (moved) permanentRedirect(moved);
-    notFound();
-  }
+  // ریدایرکت/۴۰۴ قبلاً در layout همین مسیر انجام شده
+  const project = await ensureProject(slug);
 
   const canonical = `${siteConfig.url}/projects/${encodeURIComponent(slug)}`;
   const images = (project.images ?? []).map((src) => absoluteUrl(src));

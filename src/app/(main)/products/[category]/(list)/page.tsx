@@ -1,8 +1,7 @@
 export const dynamic = 'force-dynamic';
 
-import { notFound, permanentRedirect } from 'next/navigation';
 import { safeDecode } from '@/shared/lib/utils';
-import { findRedirect } from '@/shared/lib/redirects';
+import { ensureCategory } from '@/shared/lib/route-guards';
 import type { Metadata } from 'next';
 import { CategoryProductsClient } from '@/features/products/CategoryProductsClient';
 import { getCategoryBySlug, getPublishedProducts, resolveCategoryImage } from '@/shared/lib/data';
@@ -46,12 +45,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CategoryPage({ params }: Props) {
   const { category: rawSlug } = await params;
   const slug = safeDecode(rawSlug);
-  const category = await getCategoryBySlug(slug);
-  if (!category) {
-    const moved = await findRedirect(`/products/${slug}`);
-    if (moved) permanentRedirect(moved);
-    notFound();
-  }
+  // ریدایرکت/۴۰۴ قبلاً در layout همین مسیر انجام شده
+  const category = await ensureCategory(slug);
 
   const [products, board] = await Promise.all([getPublishedProducts({ categorySlug: slug }), getPriceBoard()]);
   const priceProductIds = board.lines.filter((l) => l.categorySlug === slug).map((l) => l.productId);

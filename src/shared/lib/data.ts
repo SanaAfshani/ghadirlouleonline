@@ -47,12 +47,13 @@ export async function getNavCategories(): Promise<NavCategory[]> {
   }));
 }
 
-export async function getCategoryBySlug(slug: string) {
+// cache: layout (بررسی وجود/ریدایرکت)، متادیتا و صفحه در یک درخواست فقط یک بار به دیتابیس می‌روند
+export const getCategoryBySlug = cache(async (slug: string) => {
   return prisma.category.findFirst({
     where: { slug, published: true },
     include: { _count: { select: { products: { where: { published: true } } } } },
   });
-}
+});
 
 export async function getPublishedProducts(options?: {
   categorySlug?: string;
@@ -97,7 +98,8 @@ export async function getPublishedProducts(options?: {
   return sorted.slice(0, options?.limit).map((p) => toProductListItem(p, { showPrices: market.open }));
 }
 
-export async function getProductBySlug(slug: string, categorySlug?: string) {
+// cache: layout (بررسی وجود/ریدایرکت)، متادیتا و صفحه در یک درخواست فقط یک بار به دیتابیس می‌روند
+export const getProductBySlug = cache(async (slug: string, categorySlug?: string) => {
   const product = await prisma.product.findFirst({
     where: {
       slug,
@@ -108,7 +110,7 @@ export async function getProductBySlug(slug: string, categorySlug?: string) {
   });
 
   return product ? serializeProduct(product) : null;
-}
+});
 
 export async function getPublishedBlogPosts(options?: { featured?: boolean; limit?: number }) {
   const posts = await prisma.blogPost.findMany({
@@ -126,7 +128,8 @@ export async function getPublishedBlogPosts(options?: { featured?: boolean; limi
  * خطای دیتابیس عمداً بالا می‌رود: ۵۰۰ یعنی «موقت، دوباره بیا» برای گوگل؛
  * قبلاً catch آن را به null و در نتیجه ۴۰۴ تبدیل می‌کرد و یک قطعی لحظه‌ای Neon صفحه را از ایندکس خارج می‌کرد.
  */
-export async function getBlogPostBySlug(slug: string) {
+// cache: layout (بررسی وجود/ریدایرکت)، متادیتا و صفحه در یک درخواست فقط یک بار به دیتابیس می‌روند
+export const getBlogPostBySlug = cache(async (slug: string) => {
   const post = await prisma.blogPost.findFirst({
     where: { slug, published: true },
     include: { author: { select: { id: true, name: true, email: true } } },
@@ -140,7 +143,7 @@ export async function getBlogPostBySlug(slug: string) {
   }).catch(() => {});
 
   return serializeBlogPost(post);
-}
+});
 
 export async function getPublishedFaqs() {
   const faqs = await prisma.fAQ.findMany({
@@ -175,13 +178,14 @@ export async function getPublishedProjects(options?: { featured?: boolean; limit
   return projects.map(serializeProject);
 }
 
-export async function getProjectBySlug(slug: string) {
+// cache: layout (بررسی وجود/ریدایرکت)، متادیتا و صفحه در یک درخواست فقط یک بار به دیتابیس می‌روند
+export const getProjectBySlug = cache(async (slug: string) => {
   const project = await prisma.project.findFirst({
     where: { slug, published: true },
   });
 
   return project ? serializeProject(project) : null;
-}
+});
 
 /**
  * فقط داده لازم سایت‌مپ با تاریخ آخرین تغییر واقعی هر آدرس.

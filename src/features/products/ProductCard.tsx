@@ -2,9 +2,9 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, CalendarClock, Table2 } from 'lucide-react';
+import { ArrowLeft, Table2 } from 'lucide-react';
 import { CategoryThumb } from '@/widgets/header/Header';
-import { cn, faDigits, formatDate } from '@/shared/lib/utils';
+import { cn, faDigits } from '@/shared/lib/utils';
 import type { ProductListItem } from '@/shared/lib/serializers';
 
 function priceLabel(p: ProductListItem) {
@@ -83,12 +83,6 @@ export function ProductCard({ product, className }: { product: ProductListItem; 
                 </p>
               ) : (
                 <p className="font-bold text-sm text-[var(--muted-foreground)]">{product.comingSoon ? 'به زودی' : 'استعلام قیمت'}</p>
-              )}
-              {product.priceUpdatedAt && (
-                <p className="mt-0.5 flex items-center gap-1 text-[11px] text-[var(--muted-foreground)] num">
-                  <CalendarClock className="w-3 h-3" />
-                  {formatDate(product.priceUpdatedAt)}
-                </p>
               )}
             </div>
             <span className="shrink-0 hidden min-[400px]:grid place-items-center w-10 h-10 rounded-2xl bg-[var(--muted)] group-hover:bg-[var(--accent)] group-hover:text-[var(--accent-foreground)] transition-colors">

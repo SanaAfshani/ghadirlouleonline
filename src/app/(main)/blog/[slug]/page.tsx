@@ -1,6 +1,5 @@
-import { notFound, permanentRedirect } from 'next/navigation';
 import { safeDecode } from '@/shared/lib/utils';
-import { findRedirect } from '@/shared/lib/redirects';
+import { ensureBlogPost } from '@/shared/lib/route-guards';
 import type { Metadata } from 'next';
 import { BlogPostView } from '@/features/blog/BlogPostView';
 import { getBlogPostBySlug, getNavCategories } from '@/shared/lib/data';
@@ -54,12 +53,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function BlogPostPage({ params }: Props) {
   const { slug: rawSlug } = await params;
   const slug = safeDecode(rawSlug);
-  const post = await getBlogPostBySlug(slug);
-  if (!post) {
-    const moved = await findRedirect(`/blog/${slug}`);
-    if (moved) permanentRedirect(moved);
-    notFound();
-  }
+  // ریدایرکت/۴۰۴ قبلاً در layout همین مسیر انجام شده
+  const post = await ensureBlogPost(slug);
 
   // مقاله اطلاعاتی بن‌بست نباشد: دسته‌هایی که در مقاله از آن‌ها نام برده شده، به صفحه خرید همان دسته لینک می‌شوند.
   // نام کامل دسته («منهول و دریچه») در متن کم می‌آید؛ هسته نام («منهول») جستجو می‌شود و پرتکرارترها اول می‌آیند

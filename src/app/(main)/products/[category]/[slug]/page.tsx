@@ -1,8 +1,7 @@
 export const dynamic = 'force-dynamic';
 
-import { notFound, permanentRedirect } from 'next/navigation';
 import { safeDecode } from '@/shared/lib/utils';
-import { findRedirect } from '@/shared/lib/redirects';
+import { ensureProduct } from '@/shared/lib/route-guards';
 import type { Metadata } from 'next';
 import { ProductDetailView } from '@/features/products/ProductDetailView';
 import { getProductBySlug, getPublishedProducts } from '@/shared/lib/data';
@@ -63,19 +62,8 @@ export default async function ProductDetailPage({ params }: Props) {
   const { category: rawCat, slug: rawSlug } = await params;
   const category = safeDecode(rawCat);
   const slug = safeDecode(rawSlug);
-  const product = await getProductBySlug(slug, category);
-  if (!product) {
-    // اسلاگ محصول یکتاست؛ اگر فقط دسته عوض شده، محصول را بدون دسته پیدا و به آدرس درست منتقل کن
-    const elsewhere = await getProductBySlug(slug);
-    if (elsewhere) {
-      permanentRedirect(
-        `/products/${encodeURIComponent(elsewhere.category.slug)}/${encodeURIComponent(elsewhere.slug)}`,
-      );
-    }
-    const moved = await findRedirect(`/products/${category}/${slug}`);
-    if (moved) permanentRedirect(moved);
-    notFound();
-  }
+  // ریدایرکت/۴۰۴ قبلاً در layout همین مسیر انجام شده؛ اینجا فقط داده (از cache)
+  const product = await ensureProduct(category, slug);
 
   if (product.description) product.description = await withImageDimensions(product.description);
 
