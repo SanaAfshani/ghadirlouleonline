@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 import { prisma } from '@/shared/lib/prisma';
+import { SPLIT_SKIP, splitTitle } from '@/shared/lib/price-title-split';
 
 /**
  * انتقال یک‌باره محتوای مهر ۱۴۰۵ به دیتابیس هر محیط (سرور اصلی دیتابیس جدای خودش را دارد و این تغییرات فقط روی
@@ -143,4 +144,36 @@ export async function syncContent() {
 
   await markDone();
   return done.join(', ') || 'nothing to change';
+}
+
+const PRICE_SPLIT_KEY = 'price_split_2026_10';
+/** نسخه پشتیبان عنوان‌های قبلی — در Media تا در /api/settings (که به همه صفحات می‌رود) بار اضافه نباشد */
+const PRICE_SPLIT_BACKUP_ID = 'pricesplitbackup202610z0';
+
+/**
+ * تفکیک عنوان‌های بلند ردیف‌های قیمت به مدل/سایز/کلاس (سبک/سنگین)/مشخصات/ابعاد — همان scripts/split-price-titles.mjs
+ * برای دیتابیس سرور که از اینجا در دسترس نیست. فقط ردیف‌هایی که هیچ‌کدام از این ستون‌ها را ندارند؛ updatedAt دست نمی‌خورد.
+ */
+export async function syncPriceTitles() {
+  if (await prisma.siteSettings.findUnique({ where: { key: PRICE_SPLIT_KEY }, select: { key: true } })) return 'already done';
+  const rows = await prisma.priceItem.findMany({
+    where: { size: '', grade: '', spec: '', dimensions: '', product: { name: { notIn: SPLIT_SKIP } } },
+    select: { id: true, title: true },
+  });
+  const changes = rows.map((r) => ({ id: r.id, before: r.title, ...splitTitle(r.title) })).filter((c) => c.size && c.title);
+  const backup = Buffer.from(JSON.stringify(changes.map(({ id, before }) => ({ id, title: before }))));
+
+  await prisma.$transaction([
+    prisma.media.upsert({
+      where: { id: PRICE_SPLIT_BACKUP_ID },
+      update: {},
+      create: { id: PRICE_SPLIT_BACKUP_ID, data: new Uint8Array(backup), mime: 'application/json', size: backup.length, originalName: 'price-titles-backup.json' },
+    }),
+    prisma.$executeRaw`
+      UPDATE "PriceItem" i SET title = c.title, size = c.size, grade = c.grade, spec = c.spec, dimensions = c.dimensions
+      FROM jsonb_to_recordset(${JSON.stringify(changes)}::jsonb) AS c(id text, title text, size text, grade text, spec text, dimensions text)
+      WHERE i.id = c.id`,
+    prisma.siteSettings.create({ data: { key: PRICE_SPLIT_KEY, value: new Date().toISOString(), type: 'text' } }),
+  ]);
+  return `${changes.length} price rows split`;
 }
