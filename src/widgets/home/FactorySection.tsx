@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Building2, Factory, Navigation, Phone } from 'lucide-react';
+import { Building2, Factory, MapPin, Navigation, Phone } from 'lucide-react';
 import { siteConfig } from '@/shared/config/site';
 import { phoneHref, type SiteSettings } from '@/shared/lib/site-settings';
 import { faDigits } from '@/shared/lib/utils';
@@ -19,6 +19,28 @@ export function FactorySection({ address, factoryAddress, companyPhones, mapUrl 
     <section className="relative bg-[var(--ink)] text-white overflow-hidden" aria-labelledby="factory-title">
       <div className="absolute inset-0 bp-grid" aria-hidden />
       <div className="relative h-1.5 hazard" aria-hidden />
+
+      {/* نمای هوایی کارخانه — نشان می‌دهد فروش مستقیم از خود کارخانه است */}
+      <div className="relative container-main pt-12 lg:pt-16">
+        <figure className="group relative aspect-[4/3] sm:aspect-[16/8] lg:aspect-[21/9] rounded-[var(--radius-panel)] overflow-hidden border border-white/10 shadow-2xl">
+          <Image
+            src="/images/site/factory-aerial-wm.webp"
+            alt={`نمای هوایی کارخانه ${siteConfig.legalName} در شهرک صنعتی گرمسار`}
+            fill
+            quality={90}
+            sizes="(min-width: 1280px) 1232px, 100vw"
+            className="object-cover object-[50%_60%] transition-transform duration-[1.2s] group-hover:scale-[1.03]"
+          />
+          <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
+          <figcaption className="text-legible absolute inset-x-0 bottom-0 p-5 sm:p-8 flex flex-wrap items-end justify-between gap-3">
+            <span>
+              <span className="inline-flex items-center gap-1.5 h-7 px-3 rounded-full bg-[var(--accent)] text-[var(--accent-foreground)] text-xs font-black">نمای هوایی کارخانه</span>
+              <span className="block mt-2 text-xl sm:text-3xl font-black text-white">کارخانه {siteConfig.legalName}</span>
+              <span className="mt-1 flex items-center gap-1.5 text-sm text-white/85"><MapPin className="w-4 h-4 shrink-0" />{factoryAddress}</span>
+            </span>
+          </figcaption>
+        </figure>
+      </div>
 
       <div className="relative container-main py-12 lg:py-16 grid grid-cols-1 lg:grid-cols-[1.15fr_1fr] gap-10 lg:gap-14 items-start">
         <div>
@@ -45,7 +67,7 @@ export function FactorySection({ address, factoryAddress, companyPhones, mapUrl 
           <div className="mt-6 grid grid-cols-[1.7fr_1fr] gap-3">
             <figure className="group relative aspect-[16/10] rounded-2xl overflow-hidden border border-white/10">
               <Image
-                src="/images/site/yard-branded.webp"
+                src="/images/site/yard-branded-wm.webp"
                 alt={`انبار لوله کاروگیت ${siteConfig.legalName} در شهرک صنعتی گرمسار`}
                 fill
                 sizes="(min-width: 1024px) 420px, 62vw"
@@ -55,7 +77,7 @@ export function FactorySection({ address, factoryAddress, companyPhones, mapUrl 
             </figure>
             <figure className="group relative rounded-2xl overflow-hidden border border-white/10">
               <Image
-                src="/images/site/truck-loading.webp"
+                src="/images/site/truck-loading-wm.webp"
                 alt="بارگیری لوله کاروگیت برای ارسال به پروژه"
                 fill
                 sizes="(min-width: 1024px) 250px, 36vw"

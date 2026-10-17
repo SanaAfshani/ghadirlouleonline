@@ -31,10 +31,10 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
     <section className="relative isolate overflow-hidden bg-[var(--ink)] text-white">
       {/*
         عکس روز انبار کارخانه، کامل و روشن. اصل عکس ۱۰۸۰ پیکسلی است؛ نسخه ۲۱۶۰ پیکسلی با فیلتر lanczos و شارپ
-        از قبل ساخته شده تا مرورگر آن را کش ندهد و روی رتینا تیزتر بماند. قرینه شده تا لوله‌ها سمت چپِ بی‌متن بیفتند.
+        از قبل ساخته شده تا مرورگر آن را کش ندهد و روی رتینا تیزتر بماند. فایل از قبل قرینه شده (نه CSS) تا لوله‌ها سمت چپِ بی‌متن بیفتند و متن واترمارک برعکس نشود.
       */}
       <Image
-        src="/images/site/hero.webp"
+        src="/images/site/hero-wm.webp"
         alt=""
         fill
         // تصویر LCP صفحه اصلی: preload + اولویت بالا
@@ -42,7 +42,7 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
         fetchPriority="high"
         quality={90}
         sizes="100vw"
-        className="object-cover object-center -scale-x-100 -z-20"
+        className="object-cover object-center -z-20"
       />
       {/* پوشش فقط پشت متن: موبایل یکنواخت (متن کل عرض را می‌گیرد)، دسکتاپ از راست تیره به چپ تقریباً شفاف */}
       <div className="absolute inset-0 -z-10 max-lg:bg-[rgba(14,18,23,0.5)] lg:bg-[linear-gradient(270deg,rgba(14,18,23,0.84)_0%,rgba(14,18,23,0.7)_35%,rgba(14,18,23,0.45)_58%,rgba(14,18,23,0.15)_80%,rgba(14,18,23,0.05)_100%)]" />

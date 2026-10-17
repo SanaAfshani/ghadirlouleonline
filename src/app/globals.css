@@ -1138,6 +1138,23 @@ input, textarea, select {
 }
 .text-legible input, .text-legible button { text-shadow: none; }
 
+/* باز شدن منوی انتخاب سفارشی (shared/ui/Select) */
+@keyframes select-pop {
+  from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* عکس‌های سایت: بدون کشیدن، انتخاب و منوی لمس طولانی «ذخیره تصویر» (همراه ImageGuard) */
+.site main img {
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* چک‌باکس و رادیو هم‌رنگ برند */
+.site input[type='checkbox'], .site input[type='radio'] { accent-color: var(--accent); }
+
 /* نقطه «آنلاین» با موج */
 @keyframes ping-soft { 75%, 100% { transform: scale(2.2); opacity: 0; } }
 .live-dot { position: relative; display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: #22c55e; }

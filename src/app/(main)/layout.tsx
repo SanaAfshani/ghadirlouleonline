@@ -8,6 +8,8 @@ import { SiteSettingsProvider } from '@/shared/providers/SiteSettingsProvider';
 import { ConsultProvider } from '@/features/consult/ConsultProvider';
 import { QuoteCartProvider } from '@/features/quotes/QuoteCartProvider';
 import { LeadTracker } from '@/features/leads/LeadTracker';
+import { RouteSkeleton } from '@/shared/ui/RouteSkeleton';
+import { ImageGuard } from '@/shared/ui/ImageGuard';
 
 /** Render at request time — required for Prisma/Postgres on Vercel */
 export const dynamic = 'force-dynamic';
@@ -30,6 +32,8 @@ export default async function MainLayout({
             <div className="flex flex-col min-h-screen">
               <Header categories={categories} />
               <main className="flex-1 pt-[var(--nav-height)]">{children}</main>
+              <RouteSkeleton />
+              <ImageGuard />
               <Footer categories={categories} />
             </div>
             <MobileBottomNav />
