@@ -149,6 +149,7 @@ export async function GET(_request: NextRequest, { params }: Props) {
             ),
             React.createElement(View, { style: { flex: 1 } },
               React.createElement(Text, { style: styles.bold }, 'دفتر فروش'),
+              React.createElement(Text, null, `${siteConfig.salesExpert.role}: ${siteConfig.salesExpert.name}`),
               React.createElement(Text, null, settings.address || siteConfig.address),
               React.createElement(Text, null, phones),
               React.createElement(Text, null, settings.email),

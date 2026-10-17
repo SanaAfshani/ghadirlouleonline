@@ -1,5 +1,5 @@
 import { prisma } from '@/shared/lib/prisma';
-import { priceFromWeight } from '@/shared/lib/price-admin';
+import { priceFromWeight, toWeight } from '@/shared/lib/price-admin';
 
 /**
  * قیمت روز هر کیلوی محصول را ثبت و همه ردیف‌های وزن‌دار را با فرمول وزن × قیمت روز دوباره حساب می‌کند.
@@ -22,5 +22,6 @@ export async function applyPricePerKg(productId: string, pricePerKg: number | nu
       });
     }
   }, { timeout: 30_000 });
-  return { updated: changed.length };
+  // ردیف بی‌وزن با فرمول حساب نمی‌شود — ادمین باید بداند چرا «۰ ردیف به‌روز شد»
+  return { updated: changed.length, missingWeight: items.filter((i) => toWeight(i.weight) == null).length };
 }

@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { AnimatePresence, m as motion } from 'framer-motion';
 import {
-  CalendarClock, Check, ChevronLeft, ChevronRight, Clock, Headphones, MessageCircle, Phone, ShieldCheck, Table2, Truck, X,
+  Check, ChevronLeft, ChevronRight, Clock, FileText, Headphones, ListChecks, MessageCircle, Phone, Table2, X,
 } from 'lucide-react';
 import type { Product } from '@/shared/types';
 import type { ProductListItem } from '@/shared/lib/serializers';
@@ -16,11 +16,12 @@ import { FaqAccordion } from '@/shared/ui/FaqAccordion';
 import { LivePriceTable } from '@/features/prices/LivePriceTable';
 import { MarketStatus } from '@/features/prices/MarketStatus';
 import { useLiveBoard } from '@/features/prices/live-store';
-import { priceTime } from '@/features/prices/LivePriceTable';
 import { summarizeLine, type PriceBoard } from '@/shared/lib/price-board-types';
 import { ProductCard } from '@/features/products/ProductCard';
 import { CategoryThumb } from '@/widgets/header/Header';
 import { siteConfig } from '@/shared/config/site';
+import { IconTile } from '@/shared/ui/IconTile';
+import { SpecCards, specMeta } from '@/features/products/SpecCards';
 import { cn, faDigits } from '@/shared/lib/utils';
 
 type Section = { id: string; label: string };
@@ -134,13 +135,14 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
           <Image src={images[active]} alt={name} fill sizes="(max-width: 1024px) 100vw, 50vw" quality={90} className="object-cover" priority />
         </button>
         {images.length > 1 && (
-          <div className="mt-3 grid grid-cols-5 gap-2">
+          // نوار افقی بندانگشتی — با عکس‌های زیاد چند ردیف نمی‌شود
+          <div className="mt-3 snap-row gap-2 pb-1">
             {images.map((src, i) => (
               <button
                 key={src}
                 onClick={() => setActive(i)}
                 aria-label={`تصویر ${faDigits(i + 1)}`}
-                className={cn('relative aspect-square rounded-2xl overflow-hidden border-2 transition-colors', i === active ? 'border-[var(--accent)]' : 'border-transparent opacity-70 hover:opacity-100')}
+                className={cn('relative w-20 xl:w-24 aspect-square rounded-2xl overflow-hidden border-2 transition-colors', i === active ? 'border-[var(--accent)]' : 'border-transparent opacity-70 hover:opacity-100')}
               >
                 <Image src={src} alt="" fill sizes="10vw" className="object-cover" />
               </button>
@@ -245,16 +247,21 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
               <p className="mt-3 text-[15px] leading-8 text-[var(--muted-foreground)]">{faDigits(product.shortDescription)}</p>
             )}
 
-            {specs.length > 0 && (
-              <dl className="mt-5 grid grid-cols-2 gap-2">
-                {specs.slice(0, 4).map(([k, v]) => (
-                  <div key={k} className="rounded-2xl bg-[var(--muted)] px-3.5 py-2.5">
-                    <dt className="text-[11px] text-[var(--muted-foreground)]">{k}</dt>
-                    <dd className="mt-0.5 font-bold text-sm num">{faDigits(v)}</dd>
-                  </div>
-                ))}
-              </dl>
-            )}
+            <SpecCards specs={specs.slice(0, 4)} />
+
+            {/* کارشناس فروش — موبایل (در دسکتاپ سایدبار همین کار را می‌کند) */}
+            <div className="lg:hidden mt-4 flex items-center gap-3 rounded-3xl border border-[var(--border)] bg-[var(--card)] p-3">
+              <span className="relative shrink-0">
+                <Image src="/images/site/sales-expert-avatar.webp" alt={siteConfig.salesExpert.name} width={56} height={56} className="w-14 h-14 rounded-2xl object-cover ring-2 ring-[var(--accent)]" />
+                <span className="live-dot absolute -bottom-0.5 -left-0.5 ring-2 ring-[var(--card)]" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-black text-[15px] leading-6">{siteConfig.salesExpert.name}</p>
+                <p className="text-[11px] text-[var(--muted-foreground)]">{siteConfig.salesExpert.role} · مشاوره و خرید</p>
+              </div>
+              <a href={phoneHref} aria-label="تماس" className="w-11 h-11 rounded-2xl bg-[var(--ink)] text-white grid place-items-center shrink-0"><Phone className="w-5 h-5" /></a>
+              <a href={whatsappUrl} target="_blank" rel="noopener" aria-label="واتس‌اپ" className="w-11 h-11 rounded-2xl bg-[#128C7E] text-white grid place-items-center shrink-0"><MessageCircle className="w-5 h-5" /></a>
+            </div>
 
             {/* خلاصه قیمت — زنده */}
             <div className="mt-5 rounded-3xl border border-[var(--border)] bg-[var(--card)] p-4 sm:p-5">
@@ -275,19 +282,13 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
                         )}
                       </p>
                     </div>
-                    <span className="h-8 px-3 rounded-lg bg-[var(--muted)] text-xs font-bold flex items-center gap-1 num shrink-0">
-                      <Table2 className="w-3.5 h-3.5" />
-                      {faDigits(summary.count)} نوع
+                    <span className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs font-bold num">{faDigits(summary.count)} نوع</span>
+                      <IconTile icon={Table2} size="sm" />
                     </span>
                   </div>
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <MarketStatus market={board.market} />
-                    {summary.updatedAt && (
-                      <span className="flex items-center gap-1 text-xs text-[var(--muted-foreground)] num">
-                        <CalendarClock className="w-3.5 h-3.5" />
-                        آخرین تغییر: {priceTime(summary.updatedAt)}
-                      </span>
-                    )}
                   </div>
                   <button onClick={() => scrollTo('price-table')} className="mt-3 text-sm font-bold text-[var(--accent-text)] hover:underline">
                     مشاهده جدول کامل قیمت ←
@@ -327,18 +328,6 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
               </a>
             </div>
 
-            <ul className="mt-5 grid grid-cols-3 gap-2">
-              {[
-                { icon: ShieldCheck, label: 'ضمانت اصالت کالا' },
-                { icon: Truck, label: 'ارسال سراسر کشور' },
-                { icon: Headphones, label: 'مشاوره فنی رایگان' },
-              ].map(({ icon: Icon, label }) => (
-                <li key={label} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-[var(--card)] border border-[var(--border)] text-center">
-                  <Icon className="w-5 h-5 text-[var(--accent-text)]" />
-                  <span className="text-[11px] leading-tight text-[var(--muted-foreground)] font-semibold">{label}</span>
-                </li>
-              ))}
-            </ul>
           </motion.div>
         </div>
       </div>
@@ -368,7 +357,7 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
           {summary.count > 0 && (
             <section id="price-table" aria-labelledby="price-table-title" className="scroll-mt-40">
               <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                <h2 id="price-table-title" className="text-xl sm:text-2xl font-black">جدول قیمت {faDigits(product.name)}</h2>
+                <h2 id="price-table-title" className="text-xl sm:text-2xl font-black flex items-center gap-3"><IconTile icon={Table2} size="sm" />جدول قیمت {faDigits(product.name)}</h2>
                 <MarketStatus market={board.market} />
               </div>
               <LivePriceTable initial={initialBoard} productIds={[product.id]} caption={`قیمت ${product.name}`} toolbar />
@@ -377,21 +366,24 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
 
           {product.description && (
             <section id="overview" aria-labelledby="overview-title" className="scroll-mt-40">
-              <h2 id="overview-title" className="text-xl sm:text-2xl font-black mb-4">معرفی {faDigits(product.name)}</h2>
+              <h2 id="overview-title" className="text-xl sm:text-2xl font-black mb-4 flex items-center gap-3"><IconTile icon={FileText} tone="sky" size="sm" />معرفی {faDigits(product.name)}</h2>
               <div className="article-content" dangerouslySetInnerHTML={{ __html: product.description }} />
             </section>
           )}
 
           {specs.length > 0 && (
             <section id="specs" aria-labelledby="specs-title" className="scroll-mt-40">
-              <h2 id="specs-title" className="text-xl sm:text-2xl font-black mb-4">مشخصات فنی</h2>
+              <h2 id="specs-title" className="text-xl sm:text-2xl font-black mb-4 flex items-center gap-3"><IconTile icon={ListChecks} tone="emerald" size="sm" />مشخصات فنی</h2>
               <dl className="rounded-2xl border border-[var(--border)] overflow-hidden">
-                {specs.map(([k, v], i) => (
-                  <div key={k} className={cn('grid grid-cols-[40%_1fr] sm:grid-cols-[220px_1fr] text-sm', i > 0 && 'border-t border-[var(--border)]')}>
-                    <dt className="px-4 py-3.5 bg-[var(--muted)] font-semibold text-[var(--muted-foreground)]">{k}</dt>
+                {specs.map(([k, v], i) => {
+                  const SpecIcon = specMeta(k).icon;
+                  return (
+                  <div key={k} className={cn('grid grid-cols-[40%_1fr] sm:grid-cols-[220px_1fr] text-sm transition-colors hover:bg-[var(--muted)]/40', i > 0 && 'border-t border-[var(--border)]')}>
+                    <dt className="px-4 py-3.5 bg-[var(--muted)] font-semibold text-[var(--muted-foreground)] flex items-center gap-2"><SpecIcon className="w-4 h-4 shrink-0 text-[var(--accent-text)]" />{k}</dt>
                     <dd className="px-4 py-3.5 font-bold num">{faDigits(v)}</dd>
                   </div>
-                ))}
+                  );
+                })}
               </dl>
             </section>
           )}
@@ -405,11 +397,26 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
 
         {/* سایدبار کارشناس فروش — دسکتاپ */}
         <aside className="hidden lg:block sticky top-[calc(var(--nav-height)+72px)]">
-          <div className="rounded-3xl bg-[var(--ink)] text-white p-6 relative overflow-hidden">
-            <div className="absolute inset-0 bp-grid opacity-60" />
-            <div className="relative">
-              <p className="eyebrow">کارشناسان فروش</p>
-              <p className="mt-2 font-black text-lg leading-8">برای استعلام قیمت و خرید این محصول تماس بگیرید</p>
+          <div className="rounded-3xl bg-[var(--ink)] text-white relative overflow-hidden">
+            {/* عکس کارشناس فروش */}
+            <div className="group relative aspect-[4/3.4] overflow-hidden">
+              <Image
+                src="/images/site/sales-expert.webp"
+                alt={`${siteConfig.salesExpert.name}، ${siteConfig.salesExpert.role}`}
+                fill
+                sizes="320px"
+                quality={90}
+                className="object-cover object-[50%_20%] transition-transform duration-700 group-hover:scale-105"
+              />
+              <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-[var(--ink)] via-[var(--ink)]/20 to-transparent" />
+              <div className="text-legible absolute inset-x-0 bottom-0 px-6 pb-3">
+                <p className="text-[11px] text-white/85 flex items-center gap-1.5"><span className="live-dot" />{siteConfig.salesExpert.role} · پاسخگو</p>
+                <p className="font-black text-xl leading-8 text-white">{siteConfig.salesExpert.name}</p>
+              </div>
+            </div>
+            <div className="absolute inset-x-0 bottom-0 top-[60%] bp-grid opacity-60 pointer-events-none" />
+            <div className="relative px-6 pb-6">
+              <p className="mt-2 text-sm text-slate-300 leading-7">برای استعلام قیمت و خرید این محصول تماس بگیرید</p>
               <div className="mt-5 space-y-2">
                 <a href={phoneHref} className="flex items-center justify-between h-12 px-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10">
                   <Phone className="w-4.5 h-4.5 text-[var(--accent-text)]" />

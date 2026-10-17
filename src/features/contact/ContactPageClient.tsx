@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { PageHero } from '@/shared/ui/PageHero';
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
 import { cn, faDigits } from '@/shared/lib/utils';
+import { IconTile, type IconTone } from '@/shared/ui/IconTile';
 
 export type ContactInfoItem = {
   icon: 'phone' | 'mail' | 'map' | 'clock';
@@ -24,6 +25,7 @@ export type ContactLocation = {
 };
 
 const iconMap: Record<ContactInfoItem['icon'], LucideIcon> = { phone: Phone, mail: Mail, map: MapPin, clock: Clock };
+const iconTone: Record<ContactInfoItem['icon'], IconTone> = { phone: 'emerald', mail: 'sky', map: 'rose', clock: 'violet' };
 
 type Props = { contactInfo: ContactInfoItem[]; locations: ContactLocation[]; whatsappUrl?: string };
 
@@ -88,9 +90,9 @@ export function ContactPageClient({ contactInfo, locations, whatsappUrl }: Props
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.06 }}
-                  className="flex gap-4 p-5 rounded-3xl border border-[var(--border)]"
+                  className="group flex gap-4 p-5 rounded-3xl border border-[var(--border)] transition-colors hover:border-[var(--accent)]/40"
                 >
-                  <span className="grid place-items-center w-11 h-11 rounded-2xl bg-[var(--muted)] shrink-0"><Icon className="w-5 h-5" /></span>
+                  <IconTile icon={Icon} tone={iconTone[icon]} />
                   <div className="min-w-0">
                     <p className="text-xs text-[var(--muted-foreground)]">{title}</p>
                     {/* هر مورد در li جدا — در متن قابل خزش شماره‌ها به هم نمی‌چسبند */}
@@ -158,7 +160,7 @@ export function ContactPageClient({ contactInfo, locations, whatsappUrl }: Props
                   className={cn('rounded-3xl border border-[var(--border)] overflow-hidden flex flex-col', l.kind === 'factory' && 'lg:row-span-2')}
                 >
                   <div className="p-5 sm:p-6 flex gap-4">
-                    <span className="grid place-items-center w-11 h-11 rounded-2xl bg-[var(--ink)] text-[var(--accent-text)] shrink-0"><Icon className="w-5 h-5" /></span>
+                    <IconTile icon={Icon} tone={l.kind === 'factory' ? 'accent' : 'slate'} />
                     <div className="min-w-0 flex-1">
                       <h3 className="font-black">{l.title}</h3>
                       <p className="mt-1 text-sm leading-7 text-[var(--muted-foreground)] num">

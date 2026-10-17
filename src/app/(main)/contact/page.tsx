@@ -24,7 +24,7 @@ export default async function ContactPage() {
     },
     {
       icon: 'phone',
-      title: 'کارشناس فروش (تماس و واتس‌اپ)',
+      title: `${siteConfig.salesExpert.role}: ${siteConfig.salesExpert.name} (تماس و واتس‌اپ)`,
       items: [settings.phone, settings.mobile]
         .filter((p, i, all) => p && all.indexOf(p) === i)
         .map((p) => ({ text: p, href: phoneHref(p), ltr: true })),

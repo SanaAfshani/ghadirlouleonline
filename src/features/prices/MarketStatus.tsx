@@ -43,21 +43,23 @@ export function MarketStatus({ market, tone = 'light', className }: { market: St
       role="status"
       aria-live="polite"
       className={cn(
-        'inline-flex items-center gap-2.5 rounded-full ps-2.5 pe-3.5 h-9 text-xs border',
+        // یک خط، همیشه: متن کوچک و بدون شکستن — در کارت‌های باریک (هیرو) دو خط می‌شد
+        'inline-flex max-w-full items-center gap-1.5 rounded-full ps-2 pe-3 h-8 text-[11px] whitespace-nowrap border',
         dark ? 'bg-white/5 border-white/10 text-slate-200' : 'bg-[var(--background)] border-[var(--border)] text-[var(--muted-foreground)]',
         className,
       )}
     >
-      <span className="relative flex w-2.5 h-2.5">
+      <span className="relative flex w-2 h-2 shrink-0">
         {market.open && <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-60" />}
-        <span className={cn('relative w-2.5 h-2.5 rounded-full', market.open ? 'bg-emerald-500' : 'bg-slate-400')} />
+        <span className={cn('relative w-2 h-2 rounded-full', market.open ? 'bg-emerald-500' : 'bg-slate-400')} />
       </span>
-      <span className={cn('font-bold', market.open ? (dark ? 'text-emerald-300' : 'text-emerald-600 dark:text-emerald-400') : dark ? 'text-white' : 'text-[var(--foreground)]')}>
+      <span className={cn('font-bold shrink-0', market.open ? (dark ? 'text-emerald-300' : 'text-emerald-600 dark:text-emerald-400') : dark ? 'text-white' : 'text-[var(--foreground)]')}>
         {market.open ? 'فروش باز است' : 'فروش بسته است'}
       </span>
-      <span className="hidden sm:inline-flex items-center gap-1 opacity-80">
-        <Clock className="w-3.5 h-3.5" />
-        {detail}
+      <span className="hidden sm:inline-flex min-w-0 items-center gap-1 opacity-80 text-[10.5px]">
+        <span aria-hidden className="opacity-50">·</span>
+        <Clock className="w-3 h-3 shrink-0" />
+        <span className="truncate">{detail}</span>
       </span>
     </div>
   );

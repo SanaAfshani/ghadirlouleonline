@@ -13,6 +13,7 @@ import {
 import { DEFAULT_VAT_RATE } from '@/shared/lib/quote-constants';
 import { latinDigits } from '@/shared/lib/utils';
 import { getMarketNow } from '@/shared/lib/price-board';
+import { itemLabel } from '@/shared/lib/price-item';
 
 const MAX_ITEMS = 40;
 
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
     const live = priceItemIds.length
       ? await prisma.priceItem.findMany({
           where: { id: { in: priceItemIds } },
-          select: { id: true, title: true, price: true, note: true, productId: true, product: { select: { name: true } } },
+          select: { id: true, title: true, size: true, grade: true, spec: true, dimensions: true, price: true, note: true, productId: true, product: { select: { name: true } } },
         })
       : [];
     const byId = new Map(live.map((i) => [i.id, i]));
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
       items.push({
         priceItemId: liveRow.id,
         productId: liveRow.productId,
-        title: liveRow.title,
+        title: itemLabel(liveRow),
         unitPrice: liveRow.price,
         quantity: qty,
         unit: 'متر',

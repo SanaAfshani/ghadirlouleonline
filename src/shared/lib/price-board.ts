@@ -54,6 +54,10 @@ export const getPriceBoard = cache(async (): Promise<PriceBoard> => {
       items: p.priceItems.map((i) => ({
         id: i.id,
         title: i.title,
+        size: i.size,
+        grade: i.grade,
+        spec: i.spec,
+        dimensions: i.dimensions,
         price: market.open ? i.price : null,
         previousPrice: market.open ? i.previousPrice : null,
         note: i.note,

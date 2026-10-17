@@ -802,6 +802,9 @@ input, textarea, select {
   margin: 1.5rem 0;
 }
 .article-content figure { margin: 1.5rem 0; }
+/* عکس عمودی داخل متن (مثلاً بارگیری کامیون) — تمام‌عرض نشود که صفحه را دراز کند.
+   عرض ثابت لازم است: با width:auto قبل از لود ۰×۰ بود و lazy-load هیچ‌وقت شروع نمی‌شد */
+.article-content img.img-portrait { width: min(100%, 18rem); height: auto; margin-inline: auto; display: block; }
 .article-content figcaption {
   font-size: 0.85rem;
   color: var(--muted-foreground);
@@ -1073,8 +1076,77 @@ input, textarea, select {
   50%      { transform: rotate(46deg); }
 }
 
+/* ورود نرم صفحه‌های وضعیت (ErrorState) */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+.page-enter { animation: page-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* کاشی آیکون گرافیکی (IconTile) — گرادیان، هایلایت شیشه‌ای و درخشش؛ در هاور کمی بالا می‌آید و می‌چرخد */
+.icon-tile {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: #fff;
+  background: linear-gradient(145deg, var(--tile-from), var(--tile-to));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -6px 12px rgba(0, 0, 0, 0.18),
+    0 10px 24px -10px var(--tile-glow);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s ease;
+}
+.icon-tile::before {
+  content: '';
+  position: absolute;
+  inset: 1px 1px 45% 1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.32), transparent);
+}
+.icon-tile::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  z-index: -2;
+  border-radius: inherit;
+  border: 1px dashed var(--tile-glow);
+  opacity: 0;
+  transform: scale(0.85) rotate(0deg);
+  transition: opacity 0.45s ease, transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.icon-tile svg { filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25)); }
+.group:hover .icon-tile, .icon-tile:hover {
+  transform: translateY(-3px) rotate(-6deg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -6px 12px rgba(0, 0, 0, 0.18), 0 16px 32px -10px var(--tile-glow);
+}
+.group:hover .icon-tile::after, .icon-tile:hover::after { opacity: 0.9; transform: scale(1) rotate(45deg); }
+.icon-tile--float { animation: float 5s ease-in-out infinite; }
+
+.tile-accent  { --tile-from: hsl(var(--accent-h), 95%, 58%); --tile-to: hsl(calc(var(--accent-h) - 14), 90%, 44%); --tile-glow: rgba(var(--accent-rgb), 0.55); }
+.tile-sky     { --tile-from: #38bdf8; --tile-to: #2563eb; --tile-glow: rgba(37, 99, 235, 0.5); }
+.tile-emerald { --tile-from: #34d399; --tile-to: #059669; --tile-glow: rgba(5, 150, 105, 0.5); }
+.tile-rose    { --tile-from: #fb7185; --tile-to: #e11d48; --tile-glow: rgba(225, 29, 72, 0.5); }
+.tile-violet  { --tile-from: #a78bfa; --tile-to: #7c3aed; --tile-glow: rgba(124, 58, 237, 0.5); }
+.tile-slate   { --tile-from: #475569; --tile-to: #0f172a; --tile-glow: rgba(15, 23, 42, 0.45); }
+
+/* متن سفید روی عکس: سایه نرم تا روی بخش روشن عکس (آسمان، بتن) هم خوانا بماند */
+.text-legible :where(h1, h2, h3, p, li, dt, dd, span:not([class*="bg-"])) {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55), 0 2px 14px rgba(0, 0, 0, 0.45);
+}
+.text-legible input, .text-legible button { text-shadow: none; }
+
+/* نقطه «آنلاین» با موج */
+@keyframes ping-soft { 75%, 100% { transform: scale(2.2); opacity: 0; } }
+.live-dot { position: relative; display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: #22c55e; }
+.live-dot::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: inherit; animation: ping-soft 1.6s cubic-bezier(0, 0, 0.2, 1) infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   .flow-dash, .float-y { animation: none; }
+  .page-enter, .icon-tile--float, .live-dot::after { animation: none; }
+  .icon-tile, .icon-tile::after { transition: none; }
   [style*="pipe-spin"], [style*="gauge"] { animation: none !important; }
   .scene-3d-inner, .tilt-card { transition: none; transform: none; }
   .shine::after { display: none; }

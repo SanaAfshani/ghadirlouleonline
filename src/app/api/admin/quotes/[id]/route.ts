@@ -106,6 +106,10 @@ export async function PATCH(request: NextRequest, { params }: Props) {
     if (issuing && !validUntil) {
       validUntil = new Date(Date.now() + DEFAULT_VALIDITY_HOURS * 3600_000);
     }
+    // تاریخ گذشته یعنی مشتری از همان لحظه صدور «منقضی شده» می‌بیند — قبلاً با کلیک روی تقویم، اعتبار = همین لحظه ثبت می‌شد
+    if (issuing && validUntil && validUntil.getTime() <= Date.now()) {
+      return NextResponse.json({ success: false, error: 'تاریخ «اعتبار تا» باید بعد از الان باشد — خالی بگذارید تا ۴۸ ساعت در نظر گرفته شود' }, { status: 400 });
+    }
 
     const quote = await prisma.$transaction(async (tx) => {
       if (parsedItems) {

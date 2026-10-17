@@ -294,7 +294,7 @@ function QuoteEditor({
             className={cn(inputCls, 'w-full text-left')}
           />
         </Field>
-        <Field label="اعتبار تا">
+        <Field label="اعتبار تا (خالی = ۴۸ ساعت بعد از صدور)">
           <input
             disabled={locked}
             type="datetime-local"

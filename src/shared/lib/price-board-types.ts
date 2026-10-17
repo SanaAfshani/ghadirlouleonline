@@ -4,7 +4,13 @@ import type { MarketStatus } from '@/shared/lib/market';
 
 export type LiveItem = {
   id: string;
+  /** مدل — سایز و کلاس و مشخصات جدا هستند؛ نام کامل با itemLabel */
   title: string;
+  size: string;
+  /** سبک / نیمه‌سنگین / سنگین */
+  grade: string;
+  spec: string;
+  dimensions: string;
   /** وقتی بازار بسته است سرور null می‌فرستد — قیمت حتی در HTML صفحه هم نیست */
   price: number | null;
   previousPrice: number | null;

@@ -2,9 +2,11 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { AnimatePresence, m as motion } from 'framer-motion';
-import { CheckCircle2, Headphones, Loader2, X } from 'lucide-react';
+import Image from 'next/image';
+import { CheckCircle2, Loader2, X } from 'lucide-react';
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
 import { faDigits } from '@/shared/lib/utils';
+import { siteConfig } from '@/shared/config/site';
 
 type ConsultContext = { open: (product?: string) => void };
 
@@ -113,12 +115,19 @@ function ConsultSheet({ open, product, onClose }: { open: boolean; product: stri
             <div className="sm:hidden mx-auto mt-3 h-1.5 w-12 rounded-full bg-[var(--border)]" />
             <div className="flex items-start justify-between gap-4 px-6 pt-5">
               <div className="flex items-center gap-3">
-                <span className="grid place-items-center w-11 h-11 rounded-2xl bg-[var(--accent)]/15 text-[var(--accent-text)]">
-                  <Headphones className="w-5 h-5" />
-                </span>
+                <Image
+                  src="/images/site/sales-expert-avatar.webp"
+                  alt={siteConfig.salesExpert.name}
+                  width={48}
+                  height={48}
+                  className="w-12 h-12 rounded-2xl object-cover ring-2 ring-[var(--accent)] shrink-0"
+                />
                 <div>
                   <h2 id="consult-title" className="text-lg font-black">درخواست مشاوره و خرید</h2>
-                  <p className="text-xs text-[var(--muted-foreground)]">کارشناسان ما در کمترین زمان تماس می‌گیرند</p>
+                  <p className="text-xs text-[var(--muted-foreground)] flex items-center gap-1.5">
+                    <span className="live-dot" />
+                    {siteConfig.salesExpert.name}، {siteConfig.salesExpert.role}، در کمترین زمان تماس می‌گیرد
+                  </p>
                 </div>
               </div>
               <button onClick={onClose} aria-label="بستن" className="grid place-items-center w-9 h-9 rounded-xl hover:bg-[var(--muted)]">

@@ -5,6 +5,7 @@ import { FileText, Headphones, MessageCircle, Phone, Scissors, ShieldCheck, Truc
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
 import { useConsult } from '@/features/consult/ConsultProvider';
 import { faDigits } from '@/shared/lib/utils';
+import { IconTile, type IconTone } from '@/shared/ui/IconTile';
 
 /** همان خدماتی که در صفحه «خدمات» سایت اعلام شده */
 const services = [
@@ -14,6 +15,8 @@ const services = [
   { icon: ShieldCheck, title: 'ضمانت اصالت کالا', desc: 'تامین مستقیم از کارخانه‌های معتبر ایرانی و خارجی.' },
   { icon: Scissors, title: 'برش و تبدیل لوله', desc: 'آماده‌سازی لوله در طول و اتصال مورد نیاز پروژه.' },
 ];
+
+const TONES: IconTone[] = ['accent', 'sky', 'emerald', 'violet', 'rose', 'slate'];
 
 export function ServicesSection() {
   const { phone, phoneHref, whatsappUrl } = useSiteSettings();
@@ -63,11 +66,9 @@ export function ServicesSection() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.07 }}
-                  className={`rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur p-3.5 sm:p-5 ${i === services.length - 1 ? 'col-span-2' : ''}`}
+                  className={`group rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur p-3.5 sm:p-5 transition-colors hover:bg-white/[0.07] hover:border-white/20 ${i === services.length - 1 ? 'col-span-2' : ''}`}
                 >
-                  <span className="grid place-items-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[var(--accent)]/15 text-[var(--accent-text)]">
-                    <Icon className="w-5 h-5" />
-                  </span>
+                  <IconTile icon={Icon} tone={TONES[i % TONES.length]} />
                   <h3 className="mt-2.5 sm:mt-3 font-bold text-[14px] sm:text-base text-white leading-6">{title}</h3>
                   <p className="mt-1 text-xs sm:text-sm text-slate-400 leading-6 sm:leading-7">{desc}</p>
                 </motion.li>

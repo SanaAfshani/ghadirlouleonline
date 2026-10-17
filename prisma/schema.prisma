@@ -204,6 +204,12 @@ model PriceItem {
   price          Int?
   /// قیمت قبل از آخرین تغییر — برای فلش بالا/پایین و درصد تغییر
   previousPrice  Int?
+  /// مشخصات جدا از عنوان — title فقط «مدل» است؛ نام کامل ردیف از کنار هم گذاشتن این‌ها ساخته می‌شود
+  size           String   @default("")
+  /// کلاس وزنی: سبک / نیمه‌سنگین / سنگین — ترتیب مرتب‌سازی در price-item.ts
+  grade          String   @default("")
+  spec           String   @default("")
+  dimensions     String   @default("")
   weight         String   @default("")
   note           String   @default("")
   sortOrder      Int      @default(0)

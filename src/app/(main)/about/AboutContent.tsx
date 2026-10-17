@@ -4,6 +4,8 @@ import { m as motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowLeft, Check, Eye, Heart, Target } from 'lucide-react';
 import { PageHero } from '@/shared/ui/PageHero';
+import { siteConfig } from '@/shared/config/site';
+import { IconTile, type IconTone } from '@/shared/ui/IconTile';
 
 const stats = [
   { value: 20, label: 'سال تجربه' },
@@ -18,10 +20,12 @@ const values = [
   { icon: Heart, title: 'ارزش‌های ما', desc: 'صداقت، کیفیت تضمین‌شده، تحویل به‌موقع و رضایت مشتری اصول اساسی ما هستند.' },
 ];
 
+const TONES: IconTone[] = ['accent', 'sky', 'emerald', 'violet', 'rose', 'slate'];
+
 const team = [
   { name: 'مهندس الهی', role: 'مدیرعامل', desc: '۲۰ سال تجربه در صنعت لوله آب و فاضلاب' },
   { name: 'مهندس کاظمی', role: 'مدیر فنی', desc: 'متخصص در انواع لوله‌های PVC، PE و چدن' },
-  { name: 'خانم محمدی', role: 'مدیر فروش', desc: 'کارشناس ارشد فروش با ۱۵ سال تجربه' },
+  { name: siteConfig.salesExpert.name, role: siteConfig.salesExpert.role, desc: 'مشاوره خرید، اعلام قیمت روز و صدور پیش‌فاکتور' },
 ];
 
 const advantages = [
@@ -91,10 +95,8 @@ export function AboutContent() {
 
           <div className="space-y-3">
             {values.map(({ icon: Icon, title, desc }, i) => (
-              <motion.div key={title} {...reveal} transition={{ ...reveal.transition, delay: i * 0.08 }} className="flex gap-4 p-5 sm:p-6 rounded-3xl border border-[var(--border)]">
-                <span className="grid place-items-center w-11 h-11 rounded-2xl bg-[var(--muted)] shrink-0">
-                  <Icon className="w-5 h-5" />
-                </span>
+              <motion.div key={title} {...reveal} transition={{ ...reveal.transition, delay: i * 0.08 }} className="group flex gap-4 p-5 sm:p-6 rounded-3xl border border-[var(--border)] transition-colors hover:border-[var(--accent)]/40">
+                <IconTile icon={Icon} tone={TONES[i % TONES.length]} />
                 <div>
                   <h3 className="font-bold">{title}</h3>
                   <p className="mt-1 text-sm leading-7 text-[var(--muted-foreground)]">{desc}</p>

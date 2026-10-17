@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/shared/lib/prisma';
 import { requireAdmin } from '@/shared/lib/admin-auth';
 import { serverErrorResponse } from '@/shared/lib/api-errors';
-import { priceFromWeight, text, toPrice } from '@/shared/lib/price-admin';
+import { priceFromWeight, specFields, text, toPrice } from '@/shared/lib/price-admin';
 
 /** همه محصولات با ردیف‌های قیمت (قیمت کامل، مستقل از باز/بسته بودن بازار) */
 export async function GET(request: NextRequest) {
@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
       data: {
         productId, title, price,
         ...(price != null && { history: { create: { price } } }),
+        ...specFields(body),
         weight,
         note: text(body.note),
         sortOrder: (last?.sortOrder ?? -1) + 1,

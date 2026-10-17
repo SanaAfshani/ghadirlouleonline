@@ -1,7 +1,9 @@
+import Image from 'next/image';
 import { Building2, Factory, Navigation, Phone } from 'lucide-react';
 import { siteConfig } from '@/shared/config/site';
 import { phoneHref, type SiteSettings } from '@/shared/lib/site-settings';
 import { faDigits } from '@/shared/lib/utils';
+import { IconTile } from '@/shared/ui/IconTile';
 
 const STEPS = [
   { title: 'ثبت سفارش یا استعلام', desc: 'آنلاین از جدول قیمت یا تماس با دفتر فروش' },
@@ -38,12 +40,36 @@ export function FactorySection({ address, factoryAddress, companyPhones, mapUrl 
               </li>
             ))}
           </ol>
+
+          {/* عکس‌های واقعی انبار و بارگیری کارخانه */}
+          <div className="mt-6 grid grid-cols-[1.7fr_1fr] gap-3">
+            <figure className="group relative aspect-[16/10] rounded-2xl overflow-hidden border border-white/10">
+              <Image
+                src="/images/site/yard-branded.webp"
+                alt={`انبار لوله کاروگیت ${siteConfig.legalName} در شهرک صنعتی گرمسار`}
+                fill
+                sizes="(min-width: 1024px) 420px, 62vw"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <figcaption className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/75 to-transparent text-xs font-bold">انبار کارخانه</figcaption>
+            </figure>
+            <figure className="group relative rounded-2xl overflow-hidden border border-white/10">
+              <Image
+                src="/images/site/truck-loading.webp"
+                alt="بارگیری لوله کاروگیت برای ارسال به پروژه"
+                fill
+                sizes="(min-width: 1024px) 250px, 36vw"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <figcaption className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/75 to-transparent text-xs font-bold">بارگیری و ارسال</figcaption>
+            </figure>
+          </div>
         </div>
 
         <div className="grid gap-3">
           <article className="corner-marks rounded-2xl border border-white/10 bg-white/[0.04] p-5">
             <div className="flex items-start gap-3.5">
-              <span className="grid place-items-center w-11 h-11 rounded-xl bg-[var(--accent)] text-[var(--accent-foreground)] shrink-0"><Factory className="w-5 h-5" /></span>
+              <IconTile icon={Factory} />
               <div className="min-w-0">
                 <h3 className="font-black text-white">کارخانه و انبار</h3>
                 <p className="mt-1 text-sm leading-7 text-slate-300">{factoryAddress}</p>
@@ -61,7 +87,7 @@ export function FactorySection({ address, factoryAddress, companyPhones, mapUrl 
 
           <article className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
             <div className="flex items-start gap-3.5">
-              <span className="grid place-items-center w-11 h-11 rounded-xl bg-white/10 text-[var(--accent-text)] shrink-0"><Building2 className="w-5 h-5" /></span>
+              <IconTile icon={Building2} tone="sky" />
               <div className="min-w-0">
                 <h3 className="font-black text-white">دفتر مرکزی و فروش</h3>
                 <p className="mt-1 text-sm leading-7 text-slate-300 num">{faDigits(address)}</p>

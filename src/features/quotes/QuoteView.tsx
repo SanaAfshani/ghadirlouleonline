@@ -69,12 +69,21 @@ export function QuoteView({ quote, settings }: { quote: PublicQuote; settings: S
       {issued && !expired && (
         <div className="mb-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm flex items-start gap-3">
           <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-emerald-700 dark:text-emerald-400" />
-          <p className="font-bold leading-6">این فاکتور توسط کارشناس فروش تأیید و صادر شده است.</p>
+          <p className="font-bold leading-6">این فاکتور توسط {siteConfig.salesExpert.role}، {siteConfig.salesExpert.name}، تأیید و صادر شده است.</p>
         </div>
       )}
       {expired && (
-        <div className="mb-4 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm">
-          اعتبار این فاکتور به پایان رسیده است. برای به‌روزرسانی با فروش تماس بگیرید.
+        <div className="mb-4 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm flex flex-wrap items-center justify-between gap-3">
+          <p className="flex items-start gap-3">
+            <Clock className="w-5 h-5 shrink-0 mt-0.5 text-red-700 dark:text-red-400" />
+            <span>
+              <span className="font-bold">اعتبار این فاکتور به پایان رسیده است.</span>{' '}
+              <span className="text-[var(--muted-foreground)]">قیمت‌ها روزانه تغییر می‌کنند؛ با قیمت روز پیش‌فاکتور جدید بسازید یا برای تمدید تماس بگیرید.</span>
+            </span>
+          </p>
+          <a href="/prices" className="print:hidden shrink-0 h-9 px-4 rounded-xl bg-[var(--foreground)] text-[var(--background)] text-xs font-bold inline-flex items-center">
+            قیمت روز
+          </a>
         </div>
       )}
 
@@ -238,6 +247,7 @@ export function QuoteView({ quote, settings }: { quote: PublicQuote; settings: S
             </div>
             <div>
               <p className="font-bold text-slate-800 dark:text-[var(--foreground)] mb-1">دفتر فروش</p>
+              <p>{siteConfig.salesExpert.role}: {siteConfig.salesExpert.name}</p>
               <p>{settings.address || siteConfig.address}</p>
               <p className="num" dir="ltr">
                 {[settings.companyPhones[0], settings.mobile, settings.phone].filter(Boolean).map((p) => faDigits(p!)).join(' · ')}

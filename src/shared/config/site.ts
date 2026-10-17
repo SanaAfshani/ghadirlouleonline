@@ -32,6 +32,8 @@ export const siteConfig = {
    */
   comingSoonCategorySlugs: [] as string[],
   workingHours: 'شنبه تا پنجشنبه: ۸ صبح تا ۶ عصر',
+  /** کارشناس فروش — در سایدبار محصول، تماس، فرم مشاوره و پیش‌فاکتور نمایش داده می‌شود */
+  salesExpert: { name: 'آقای امیر یوسفی', role: 'کارشناس فروش' },
   socials: {
     // instagram: 'https://instagram.com/luleonlinemashhad',
     // telegram: 'https://t.me/luleonlinemashhad',

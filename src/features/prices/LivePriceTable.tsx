@@ -2,8 +2,12 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowDownLeft, ArrowUpLeft, ChartLine, Clock, FileSpreadsheet, Lock, MessageSquareText, Search, ShoppingBag } from 'lucide-react';
+import {
+  ArrowDownLeft, ArrowDownWideNarrow, ArrowUpLeft, ArrowUpNarrowWide, ChartLine, ChevronsUpDown, FileSpreadsheet, Lock,
+  MessageSquareText, Search, ShoppingBag,
+} from 'lucide-react';
 import { cn, faDigits, latinDigits } from '@/shared/lib/utils';
+import { GRADES, compareItems, itemLabel, type SortDir, type SortKey } from '@/shared/lib/price-item';
 import { useConsult } from '@/features/consult/ConsultProvider';
 import { useQuoteCart } from '@/features/quotes/QuoteCartProvider';
 import type { PriceBoard } from '@/shared/lib/price-board-types';
@@ -20,19 +24,11 @@ type Props = {
   /** فیلتر جستجو از این تعداد ردیف به بعد */
   searchFrom?: number;
   caption?: string;
-  /** نوار بالای جدول: آخرین تغییر قیمت + خروجی اکسل */
+  /** نوار بالای جدول: خروجی اکسل */
   toolbar?: boolean;
 };
 
-const tehranTime = new Intl.DateTimeFormat('fa-IR', { timeZone: 'Asia/Tehran', hour: '2-digit', minute: '2-digit' });
 const tehranDay = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tehran' });
-const faDate = new Intl.DateTimeFormat('fa-IR', { timeZone: 'Asia/Tehran', day: 'numeric', month: 'long' });
-
-/** «امروز ۱۰:۲۵» برای تغییرات امروز، وگرنه «۵ مهر» */
-export function priceTime(iso: string) {
-  const d = new Date(iso);
-  return tehranDay.format(d) === tehranDay.format(new Date()) ? `امروز ${tehranTime.format(d)}` : faDate.format(d);
-}
 
 function Change({ price, previous }: { price: number | null; previous: number | null }) {
   if (price == null || previous == null || previous === price) return null;
@@ -73,8 +69,8 @@ function Price({ price, open }: { price: number | null; open: boolean }) {
 function downloadCsv(name: string, rows: ReturnType<typeof findItems>) {
   const cell = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
   const lines = [
-    ['عنوان', 'محصول', 'قیمت (تومان)', 'توضیحات'],
-    ...rows.map((r) => [r.title, r.productName, r.price ?? 'استعلام', r.note]),
+    ['مدل', 'سایز', 'کلاس', 'مشخصات', 'ابعاد', 'محصول', 'قیمت (تومان)', 'توضیحات'],
+    ...rows.map((r) => [r.title, r.size, r.grade, r.spec, r.dimensions, r.productName, r.price ?? 'استعلام', r.note]),
   ];
   const blob = new Blob(['\uFEFF' + lines.map((l) => l.map(cell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a');
@@ -89,25 +85,81 @@ const flashBg: Record<Flash, string> = {
   down: 'bg-red-500/10',
 };
 
+/** رنگ هر کلاس وزنی — سبک روشن، سنگین پررنگ؛ کاربر با یک نگاه تفکیک را می‌بیند */
+const gradeTone: Record<string, string> = {
+  سبک: 'bg-sky-500/12 text-sky-700 dark:text-sky-300 ring-sky-500/25',
+  'نیمه‌سنگین': 'bg-amber-500/12 text-amber-700 dark:text-amber-300 ring-amber-500/25',
+  سنگین: 'bg-rose-500/12 text-rose-700 dark:text-rose-300 ring-rose-500/25',
+};
+
+function GradeBadge({ grade }: { grade: string }) {
+  if (!grade) return <span className="text-[var(--muted-foreground)]">—</span>;
+  return (
+    <span className={cn('inline-flex items-center h-6 px-2 rounded-md text-[11px] font-bold ring-1 ring-inset whitespace-nowrap', gradeTone[grade])}>
+      {grade}
+    </span>
+  );
+}
+
+type Sort = { key: SortKey; dir: SortDir };
+
+const SORT_OPTIONS: { value: string; label: string }[] = [
+  { value: 'default:asc', label: 'ترتیب پیش‌فرض' },
+  { value: 'grade:asc', label: 'سبک به سنگین' },
+  { value: 'grade:desc', label: 'سنگین به سبک' },
+  { value: 'size:asc', label: 'سایز: کوچک به بزرگ' },
+  { value: 'size:desc', label: 'سایز: بزرگ به کوچک' },
+  { value: 'price:asc', label: 'قیمت: کم به زیاد' },
+  { value: 'price:desc', label: 'قیمت: زیاد به کم' },
+];
+
+/** سرستون قابل مرتب‌سازی — کلیک اول صعودی، دوم نزولی، سوم برگشت به ترتیب پیش‌فرض */
+function SortHeader({ label, k, sort, onSort, className }: { label: string; k: SortKey; sort: Sort; onSort: (s: Sort) => void; className?: string }) {
+  const active = sort.key === k;
+  const next: Sort = !active ? { key: k, dir: 'asc' } : sort.dir === 'asc' ? { key: k, dir: 'desc' } : { key: 'default', dir: 'asc' };
+  const Icon = !active ? ChevronsUpDown : sort.dir === 'asc' ? ArrowUpNarrowWide : ArrowDownWideNarrow;
+  return (
+    <th scope="col" aria-sort={active ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'} className={cn('text-right font-bold px-4 py-3', className)}>
+      <button onClick={() => onSort(next)} className={cn('inline-flex items-center gap-1 hover:text-[var(--foreground)] transition-colors', active && 'text-[var(--accent-text)]')}>
+        {label}
+        <Icon className="w-3.5 h-3.5" />
+      </button>
+    </th>
+  );
+}
+
 export function LivePriceTable({ initial, productIds, limit, showProduct = false, searchFrom = 12, caption, toolbar = false }: Props) {
   const { board, flashes } = useLiveBoard(initial);
   const { open: openConsult } = useConsult();
   const { add: addToQuote } = useQuoteCart();
   const [q, setQ] = useState('');
+  const [grade, setGrade] = useState('');
+  const [sort, setSort] = useState<Sort>({ key: 'default', dir: 'asc' });
   const [chart, setChart] = useState<ChartTarget | null>(null);
   const closeChart = useCallback(() => setChart(null), []);
   const open = board.market.open;
 
   const all = useMemo(() => findItems(board, productIds), [board, productIds]);
+  // ستون‌ها فقط وقتی نمایش داده می‌شوند که دست‌کم یک ردیف مقدار داشته باشد
+  const has = {
+    size: all.some((r) => r.size),
+    grade: all.some((r) => r.grade),
+    spec: all.some((r) => r.spec),
+    dimensions: all.some((r) => r.dimensions),
+  };
+  const grades = GRADES.filter((g) => all.some((r) => r.grade === g));
   const rows = useMemo(() => {
     const term = latinDigits(q.trim()).toLowerCase();
-    const list = term ? all.filter((r) => latinDigits(`${r.title} ${r.note} ${r.productName}`).toLowerCase().includes(term)) : all;
+    let list = term
+      ? all.filter((r) => latinDigits(`${itemLabel(r)} ${r.note} ${r.productName}`).toLowerCase().includes(term))
+      : all;
+    if (grade) list = list.filter((r) => r.grade === grade);
+    if (sort.key !== 'default') list = [...list].sort((a, b) => compareItems(a, b, sort.key, sort.dir));
     return limit ? list.slice(0, limit) : list;
-  }, [all, q, limit]);
+  }, [all, q, grade, sort, limit]);
   // قیمت نمودار از تابلوی زنده خوانده می‌شود؛ بسته شدن فروش یا استعلامی شدن ردیف، پنجره را می‌بندد
   const liveRow = chart && all.find((r) => r.id === chart.id);
   const chartTarget = chart && open && liveRow?.price != null ? { ...chart, price: liveRow.price } : null;
-  const updatedAt = all.reduce<string | null>((a, r) => (!a || r.priceChangedAt > a ? r.priceChangedAt : a), null);
 
   if (!all.length) return null;
 
@@ -117,19 +169,20 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
         priceItemId: r.id,
         productId: r.productId,
         productName: r.productName,
-        title: r.title,
+        title: itemLabel(r),
         unitPrice: r.price,
         note: r.note,
       });
       return;
     }
-    openConsult(faDigits(r.title));
+    openConsult(faDigits(itemLabel(r)));
   };
   const showChart = (r: (typeof rows)[number]) =>
-    r.price != null && setChart({ id: r.id, title: r.title, productName: r.productName, price: r.price });
+    r.price != null && setChart({ id: r.id, title: itemLabel(r), productName: r.productName, price: r.price });
 
   return (
-    <div>
+    // @container: چیدمان جدول/کارت به عرض خود جدول بستگی دارد نه صفحه — در صفحه محصول کنار سایدبار ۳۲۰ پیکسلی است
+    <div className="@container">
       {!open && (
         <div className="mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--muted)]/60 px-4 py-3">
           <p className="flex items-start gap-2 text-sm leading-6">
@@ -144,7 +197,31 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
           </button>
         </div>
       )}
-      {(toolbar || all.length >= searchFrom) && (
+      {grades.length > 1 && (
+        <div role="tablist" aria-label="کلاس وزنی" className="mb-3 snap-row gap-1.5">
+          {['', ...grades].map((g) => {
+            const count = g ? all.filter((r) => r.grade === g).length : all.length;
+            return (
+              <button
+                key={g || 'all'}
+                role="tab"
+                aria-selected={grade === g}
+                onClick={() => setGrade(g)}
+                className={cn(
+                  'h-9 px-3.5 rounded-xl text-xs font-bold whitespace-nowrap inline-flex items-center gap-1.5 border transition-all',
+                  grade === g
+                    ? 'bg-[var(--foreground)] text-[var(--background)] border-transparent shadow-sm'
+                    : 'border-[var(--border)] hover:border-[var(--foreground)]/40',
+                )}
+              >
+                {g || 'همه'}
+                <span className={cn('num text-[10px] font-medium', grade === g ? 'opacity-70' : 'text-[var(--muted-foreground)]')}>{faDigits(count)}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+      {(toolbar || all.length >= searchFrom || has.size || has.grade) && (
         <div className="mb-3 flex flex-wrap items-center gap-2">
           {all.length >= searchFrom && (
             <div className="relative flex-1 min-w-[12rem] max-w-sm">
@@ -157,14 +234,24 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
               />
             </div>
           )}
+          {/* موبایل سرستون ندارد — مرتب‌سازی با منو */}
+          {(has.size || has.grade) && (
+            <select
+              value={`${sort.key}:${sort.dir}`}
+              onChange={(e) => {
+                const [key, dir] = e.target.value.split(':') as [SortKey, SortDir];
+                setSort({ key, dir });
+              }}
+              aria-label="مرتب‌سازی"
+              className="@3xl:hidden h-11 rounded-xl bg-[var(--muted)] border border-[var(--border)] px-3 text-sm min-w-0 flex-1 sm:flex-none"
+            >
+              {SORT_OPTIONS.filter((o) => (has.size || !o.value.startsWith('size')) && (has.grade || !o.value.startsWith('grade'))).map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          )}
           {toolbar && (
             <div className="ms-auto flex items-center gap-3">
-              {updatedAt && (
-                <span className="flex items-center gap-1.5 text-xs text-[var(--muted-foreground)] num">
-                  <Clock className="w-3.5 h-3.5" />
-                  آخرین تغییر قیمت: {priceTime(updatedAt)}
-                </span>
-              )}
               {open && (
                 <button
                   onClick={() => downloadCsv(caption ?? 'لیست قیمت', all)}
@@ -180,15 +267,19 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
       )}
 
       {/* دسکتاپ و تبلت */}
-      <div className="hidden md:block overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
+      <div className="hidden @3xl:block overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--background)]">
         <table className="w-full text-sm">
           {caption && <caption className="sr-only">{caption}</caption>}
           <thead className="bg-[var(--muted)] text-[var(--muted-foreground)] text-xs">
             <tr>
-              <th scope="col" className="text-right font-bold px-5 py-3">عنوان</th>
+              <th scope="col" className="text-right font-bold px-5 py-3">{has.size || has.grade ? 'مدل' : 'عنوان'}</th>
+              {has.size && <SortHeader label="سایز" k="size" sort={sort} onSort={setSort} />}
+              {has.grade && <SortHeader label="کلاس" k="grade" sort={sort} onSort={setSort} />}
+              {has.spec && <th scope="col" className="text-right font-bold px-4 py-3">مشخصات</th>}
+              {has.dimensions && <th scope="col" className="text-right font-bold px-4 py-3">ابعاد</th>}
               {showProduct && <th scope="col" className="text-right font-bold px-4 py-3">محصول</th>}
-              <th scope="col" className="text-right font-bold px-4 py-3">قیمت</th>
-              <th scope="col" className="text-right font-bold px-4 py-3">توضیحات</th>
+              <SortHeader label="قیمت" k="price" sort={sort} onSort={setSort} />
+              <th scope="col" className="hidden @5xl:table-cell text-right font-bold px-4 py-3">توضیحات</th>
               <th scope="col" className="text-center font-bold px-2 py-3">نمودار</th>
               <th scope="col" className="px-4 py-3"><span className="sr-only">اقدام</span></th>
             </tr>
@@ -198,7 +289,15 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
               const flash = flashes.get(r.id);
               return (
                 <tr key={r.id} className={cn('border-t border-[var(--border)] transition-colors duration-700', flash ? flashBg[flash] : 'hover:bg-[var(--muted)]/60')}>
-                  <td className="px-5 py-3.5 font-semibold leading-7">{faDigits(r.title)}</td>
+                  <td className="px-5 py-3.5 font-semibold leading-7">
+                    {faDigits(r.title)}
+                    {/* جدول باریک ستون توضیحات ندارد — توضیح زیر مدل */}
+                    {r.note && <span className="@5xl:hidden block text-[11px] font-normal leading-5 text-[var(--muted-foreground)]">{faDigits(r.note)}</span>}
+                  </td>
+                  {has.size && <td className="px-4 py-3.5 font-bold num whitespace-nowrap">{faDigits(r.size) || '—'}</td>}
+                  {has.grade && <td className="px-4 py-3.5"><GradeBadge grade={r.grade} /></td>}
+                  {has.spec && <td className="px-4 py-3.5 text-xs num leading-6">{faDigits(r.spec) || '—'}</td>}
+                  {has.dimensions && <td className="px-4 py-3.5 text-xs num leading-6">{faDigits(r.dimensions) || '—'}</td>}
                   {showProduct && (
                     <td className="px-4 py-3.5 whitespace-nowrap">
                       <Link href={r.href} className="text-[var(--accent-text)] font-semibold hover:underline">{r.productName}</Link>
@@ -210,12 +309,12 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
                       {open && <Change price={r.price} previous={r.previousPrice} />}
                     </div>
                   </td>
-                  <td className="px-4 py-3.5 text-xs text-[var(--muted-foreground)] leading-6 max-w-[16rem]">{faDigits(r.note) || '—'}</td>
+                  <td className="hidden @5xl:table-cell px-4 py-3.5 text-xs text-[var(--muted-foreground)] leading-6 max-w-[16rem]">{faDigits(r.note) || '—'}</td>
                   <td className="px-2 py-3.5 text-center">
                     {open && r.price != null ? (
                       <button
                         onClick={() => showChart(r)}
-                        aria-label={`نمودار قیمت ${r.title}`}
+                        aria-label={`نمودار قیمت ${itemLabel(r)}`}
                         title="نمودار نوسان قیمت"
                         className="inline-grid place-items-center w-9 h-9 rounded-xl text-[var(--muted-foreground)] hover:text-[var(--accent-text)] hover:bg-[var(--muted)] transition-colors"
                       >
@@ -241,12 +340,25 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
       </div>
 
       {/* موبایل: کارت با دکمه اقدام بزرگ */}
-      <ul className="md:hidden space-y-2">
+      <ul className="@3xl:hidden space-y-2">
         {rows.map((r) => {
           const flash = flashes.get(r.id);
           return (
             <li key={r.id} className={cn('rounded-2xl border border-[var(--border)] p-3.5 transition-colors duration-700', flash ? flashBg[flash] : 'bg-[var(--background)]')}>
-              <p className="font-bold text-[14px] leading-7">{faDigits(r.title)}</p>
+              <div className="flex items-start justify-between gap-2">
+                <p className="font-bold text-[14px] leading-7">
+                  {faDigits(r.title)}
+                  {r.size && <span className="num"> {faDigits(r.size)}</span>}
+                </p>
+                {r.grade && <GradeBadge grade={r.grade} />}
+              </div>
+              {(r.spec || r.dimensions) && (
+                <div className="mt-1 flex flex-wrap gap-1.5">
+                  {[r.spec, r.dimensions].filter(Boolean).map((t) => (
+                    <span key={t} className="h-6 px-2 rounded-md bg-[var(--muted)] text-[11px] text-[var(--muted-foreground)] num inline-flex items-center">{faDigits(t)}</span>
+                  ))}
+                </div>
+              )}
               {showProduct && (
                 <Link href={r.href} className="text-xs font-semibold text-[var(--accent-text)]">{r.productName}</Link>
               )}
@@ -259,7 +371,7 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
                   {open && r.price != null && (
                     <button
                       onClick={() => showChart(r)}
-                      aria-label={`نمودار قیمت ${r.title}`}
+                      aria-label={`نمودار قیمت ${itemLabel(r)}`}
                       className="grid place-items-center w-10 h-10 rounded-xl border border-[var(--border)] text-[var(--muted-foreground)] active:scale-95 transition-transform"
                     >
                       <ChartLine className="w-4.5 h-4.5" />
@@ -279,7 +391,7 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
         })}
       </ul>
 
-      {q && !rows.length && <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">موردی با «{q}» پیدا نشد.</p>}
+      {(q || grade) && !rows.length && <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">{q ? `موردی با «${q}» پیدا نشد.` : 'موردی پیدا نشد.'}</p>}
 
       {/* اگر وسط تماشای نمودار فروش بسته شود، پنجره بسته می‌شود */}
       <PriceChartDialog target={chartTarget} onClose={closeChart} />

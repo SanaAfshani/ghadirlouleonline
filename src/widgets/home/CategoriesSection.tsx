@@ -43,7 +43,13 @@ export function CategoriesSection({ categories }: { categories: NavCategory[] })
                       big ? 'aspect-[16/10] lg:aspect-auto' : 'aspect-[4/5] sm:aspect-square lg:aspect-auto',
                     )}
                   >
-                    <CategoryThumb category={c} className="absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105" />
+                    <CategoryThumb
+                      category={c}
+                      // کارت اول ۲×۲ (نصف عرض در دسکتاپ، تمام‌عرض در موبایل)، بقیه یک‌چهارم / نصف
+                      sizes={big ? '(min-width: 1024px) 640px, 100vw' : '(min-width: 1024px) 320px, 50vw'}
+                      quality={90}
+                      className="absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105"
+                    />
                     <span className="absolute inset-0 bg-gradient-to-t from-[var(--ink)] via-[var(--ink)]/40 to-transparent" />
                     {c.comingSoon && (
                       <span className="absolute top-3 right-3 h-7 px-2.5 rounded-lg bg-[var(--accent)] text-[var(--accent-foreground)] text-[11px] font-bold flex items-center">به زودی</span>

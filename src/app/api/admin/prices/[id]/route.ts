@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/shared/lib/prisma';
 import { requireAdmin } from '@/shared/lib/admin-auth';
 import { serverErrorResponse } from '@/shared/lib/api-errors';
-import { priceFromWeight, text, toPrice } from '@/shared/lib/price-admin';
+import { priceFromWeight, specFields, text, toPrice } from '@/shared/lib/price-admin';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -16,7 +16,7 @@ export async function PATCH(request: NextRequest, { params }: Props) {
     const current = await prisma.priceItem.findUnique({ where: { id }, include: { product: { select: { pricePerKg: true } } } });
     if (!current) return NextResponse.json({ success: false, error: 'ردیف یافت نشد' }, { status: 404 });
 
-    const data: Record<string, unknown> = {};
+    const data: Record<string, unknown> = { ...specFields(body) };
     const weight = body.weight !== undefined ? text(body.weight, 40) : current.weight;
     if (body.title !== undefined) data.title = text(body.title) || current.title;
     if (body.weight !== undefined) data.weight = weight;

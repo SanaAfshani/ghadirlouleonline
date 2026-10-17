@@ -29,7 +29,12 @@ export function CategoriesPageClient({ categories }: { categories: CategoryCard[
               <div className="h-full rounded-3xl">
                 <Link href={`/products/${cat.slug}`} className="group h-full flex flex-col rounded-3xl border border-[var(--border)] bg-[var(--background)] overflow-hidden hover:border-[var(--accent)]/50 transition-colors">
                   <div className="relative aspect-[4/3] sm:aspect-[16/10] overflow-hidden">
-                    <CategoryThumb category={cat} className="absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105" />
+                    <CategoryThumb
+                      category={cat}
+                      sizes="(min-width: 1024px) 420px, 50vw"
+                      quality={90}
+                      className="absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105"
+                    />
                     {cat.comingSoon ? (
                       <span className="absolute top-3 right-3 h-7 px-3 rounded-lg bg-[var(--accent)] text-[var(--accent-foreground)] text-[11px] font-bold flex items-center">به زودی</span>
                     ) : (

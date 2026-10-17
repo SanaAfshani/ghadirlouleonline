@@ -5,6 +5,7 @@ import { Check, FileText, Headphones, Headset, Shield, Wrench } from 'lucide-rea
 import { PageHero } from '@/shared/ui/PageHero';
 import { useConsult } from '@/features/consult/ConsultProvider';
 import { faDigits } from '@/shared/lib/utils';
+import { IconTile, type IconTone } from '@/shared/ui/IconTile';
 
 const services = [
   {
@@ -33,6 +34,8 @@ const services = [
   },
 ];
 
+const TONES: IconTone[] = ['accent', 'sky', 'emerald', 'violet', 'rose', 'slate'];
+
 export function ServicesContent() {
   const { open } = useConsult();
 
@@ -54,12 +57,10 @@ export function ServicesContent() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-60px' }}
                 transition={{ delay: i * 0.06, duration: 0.5 }}
-                className="relative p-6 sm:p-8 rounded-3xl border border-[var(--border)] bg-[var(--background)]"
+                className="group relative p-6 sm:p-8 rounded-3xl border border-[var(--border)] bg-[var(--background)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[var(--accent)]/40"
               >
                 <div className="flex items-start justify-between gap-4">
-                  <span className="grid place-items-center w-12 h-12 rounded-2xl bg-[var(--ink)] text-white">
-                    <Icon className="w-5 h-5" />
-                  </span>
+                  <IconTile icon={Icon} tone={TONES[i % TONES.length]} size="lg" />
                   <span className="text-4xl font-black text-[var(--border)] num leading-none">{faDigits(String(i + 1).padStart(2, '0'))}</span>
                 </div>
                 <h2 className="mt-5 text-lg sm:text-xl font-black">{title}</h2>

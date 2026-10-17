@@ -29,23 +29,27 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
 
   return (
     <section className="relative isolate overflow-hidden bg-[var(--ink)] text-white">
-      {/* عکس واقعی کارگاه — با پوشش تیره از سمت متن (راست) */}
+      {/*
+        عکس روز انبار کارخانه، کامل و روشن. اصل عکس ۱۰۸۰ پیکسلی است؛ نسخه ۲۱۶۰ پیکسلی با فیلتر lanczos و شارپ
+        از قبل ساخته شده تا مرورگر آن را کش ندهد و روی رتینا تیزتر بماند. قرینه شده تا لوله‌ها سمت چپِ بی‌متن بیفتند.
+      */}
       <Image
-        src="/images/categories/polyethylene-pipes.jpg"
+        src="/images/site/hero.webp"
         alt=""
         fill
-        // تصویر LCP صفحه اصلی: preload + اولویت بالا؛ زیر لایه تیره و opacity ۶۰٪ است، پس کیفیت ۵۰ تفاوتی دیده نمی‌شود
+        // تصویر LCP صفحه اصلی: preload + اولویت بالا
         preload
         fetchPriority="high"
-        quality={50}
+        quality={90}
         sizes="100vw"
-        className="object-cover object-[30%_center] -z-20 opacity-60"
+        className="object-cover object-center -scale-x-100 -z-20"
       />
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(270deg,var(--ink)_0%,rgba(14,18,23,0.94)_38%,rgba(14,18,23,0.72)_70%,rgba(14,18,23,0.55)_100%)]" />
-      <div className="absolute inset-x-0 bottom-0 h-40 -z-10 bg-gradient-to-t from-[var(--ink)] to-transparent" />
+      {/* پوشش فقط پشت متن: موبایل یکنواخت (متن کل عرض را می‌گیرد)، دسکتاپ از راست تیره به چپ تقریباً شفاف */}
+      <div className="absolute inset-0 -z-10 max-lg:bg-[rgba(14,18,23,0.5)] lg:bg-[linear-gradient(270deg,rgba(14,18,23,0.84)_0%,rgba(14,18,23,0.7)_35%,rgba(14,18,23,0.45)_58%,rgba(14,18,23,0.15)_80%,rgba(14,18,23,0.05)_100%)]" />
+      <div className="absolute inset-x-0 bottom-0 h-28 -z-10 bg-gradient-to-t from-[var(--ink)]/80 to-transparent" />
 
       <div className="container-main grid grid-cols-1 lg:grid-cols-[1fr_470px] items-center gap-8 lg:gap-14 pt-8 pb-16 sm:pt-12 sm:pb-20 lg:pt-20 lg:pb-28">
-        <div className="min-w-0">
+        <div className="min-w-0 text-legible">
           <p className="eyebrow">
             فروش مستقیم از کارخانه {siteConfig.legalName}
           </p>
@@ -54,7 +58,7 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
           >
             {heroTitle}
           </h1>
-          <p className="mt-4 text-[15px] sm:text-lg leading-8 text-slate-300 max-w-xl">
+          <p className="mt-4 text-[15px] sm:text-lg leading-8 text-white/90 max-w-xl">
             {heroSubtitle}
           </p>
 
@@ -84,7 +88,7 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
                     href={`/products/${c.slug}`}
                     aria-hidden={copy || undefined}
                     tabIndex={copy ? -1 : undefined}
-                    className="me-2 h-9 px-3.5 rounded-lg border border-white/15 text-[13px] text-slate-200 flex items-center whitespace-nowrap"
+                    className="me-2 h-9 px-3.5 rounded-lg border border-white/25 bg-black/30 backdrop-blur-sm text-[13px] text-white flex items-center whitespace-nowrap"
                   >
                     {c.name}
                   </Link>
@@ -94,13 +98,13 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
           </div>
           <div className="hidden sm:flex flex-wrap gap-2 mt-4">
             {categories.slice(0, 6).map((c) => (
-              <Link key={c.slug} href={`/products/${c.slug}`} className="h-9 px-3.5 rounded-lg border border-white/15 text-[13px] text-slate-200 flex items-center hover:bg-white hover:text-[var(--ink)] transition-colors">
+              <Link key={c.slug} href={`/products/${c.slug}`} className="h-9 px-3.5 rounded-lg border border-white/25 bg-black/30 backdrop-blur-sm text-[13px] text-white flex items-center hover:bg-white hover:text-[var(--ink)] transition-colors">
                 {c.name}
               </Link>
             ))}
           </div>
 
-          <ul className="mt-8 hidden sm:flex flex-wrap gap-x-7 gap-y-3 text-sm text-slate-300">
+          <ul className="mt-8 hidden sm:flex flex-wrap gap-x-7 gap-y-3 text-sm text-white/90">
             <li className="flex items-center gap-2"><Factory className="w-4.5 h-4.5 text-[var(--accent-text)]" />بارگیری از انبار کارخانه گرمسار</li>
             <li className="flex items-center gap-2"><ShieldCheck className="w-4.5 h-4.5 text-[var(--accent-text)]" />خرید بدون واسطه از تولیدکننده</li>
             <li className="flex items-center gap-2"><Truck className="w-4.5 h-4.5 text-[var(--accent-text)]" />ارسال به سراسر کشور</li>

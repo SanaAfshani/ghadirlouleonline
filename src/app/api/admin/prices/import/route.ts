@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/shared/lib/prisma';
 import { requireAdmin } from '@/shared/lib/admin-auth';
 import { serverErrorResponse } from '@/shared/lib/api-errors';
-import { priceFromWeight, text, toPrice } from '@/shared/lib/price-admin';
+import { priceFromWeight, specFields, text, toPrice } from '@/shared/lib/price-admin';
 
 /** ورود گروهی (پیست از اکسل). replace=true یعنی جدول قبلی محصول جایگزین شود */
 export async function POST(request: NextRequest) {
@@ -16,7 +16,13 @@ export async function POST(request: NextRequest) {
     const clean = rows
       .map((r: Record<string, unknown>) => {
         const weight = text(r.weight, 40);
-        return { title: text(r.title), price: priceFromWeight(weight, product?.pricePerKg) ?? toPrice(r.price), weight, note: text(r.note) };
+        return {
+          title: text(r.title),
+          price: priceFromWeight(weight, product?.pricePerKg) ?? toPrice(r.price),
+          ...specFields(r),
+          weight,
+          note: text(r.note),
+        };
       })
       .filter((r: { title: string }) => r.title)
       .slice(0, 500);

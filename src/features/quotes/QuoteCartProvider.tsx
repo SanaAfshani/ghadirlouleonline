@@ -6,6 +6,7 @@ import { CheckCircle2, FileSpreadsheet, Loader2, Minus, Plus, ShoppingBag, Trash
 import toast from 'react-hot-toast';
 import { cn, faDigits, formatPersianNumber, latinDigits } from '@/shared/lib/utils';
 import { DEFAULT_VAT_RATE } from '@/shared/lib/quote-constants';
+import { IconTile } from '@/shared/ui/IconTile';
 
 export type CartLine = {
   priceItemId: string;
@@ -197,9 +198,7 @@ function QuoteCartPanel({
             {/* هدر تراز */}
             <div className="h-16 shrink-0 px-5 border-b border-[var(--border)] flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 min-w-0">
-                <span className="grid place-items-center w-9 h-9 rounded-xl bg-[var(--accent)]/15 text-[var(--accent-text)] shrink-0">
-                  <FileSpreadsheet className="w-4.5 h-4.5" />
-                </span>
+                <IconTile icon={FileSpreadsheet} size="sm" />
                 <div className="min-w-0">
                   <h2 className="font-black text-base leading-none">پیش‌فاکتور</h2>
                   <p className="text-[11px] text-[var(--muted-foreground)] mt-1 num leading-none">

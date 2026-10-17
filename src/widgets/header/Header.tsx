@@ -429,12 +429,18 @@ export function Header({ categories }: { categories: NavCategory[] }) {
 }
 
 /** تصویر دسته؛ اگر تصویری ثبت نشده، کاشی گرافیکی با طرح لوله نمایش داده می‌شود (به جای عکس ۴۰۴) */
-export function CategoryThumb({ category, className }: { category: Pick<NavCategory, 'name' | 'image'>; className?: string }) {
+export function CategoryThumb({ category, className, sizes = '200px', quality = 75 }: {
+  category: Pick<NavCategory, 'name' | 'image'>;
+  className?: string;
+  /** عرض واقعی نمایش — پیش‌فرض برای آیکون کوچک منو است؛ کاشی‌های بزرگ باید عرض خودشان را بدهند وگرنه عکس ۲۰۰ پیکسلی کش می‌آید */
+  sizes?: string;
+  quality?: 75 | 90;
+}) {
   const gradientId = useId();
   if (category.image) {
     return (
       <span className={cn('relative block overflow-hidden bg-[var(--muted)] shrink-0', className)}>
-        <Image src={category.image} alt={category.name} fill sizes="200px" quality={75} className="object-cover" />
+        <Image src={category.image} alt={category.name} fill sizes={sizes} quality={quality} className="object-cover" />
       </span>
     );
   }
