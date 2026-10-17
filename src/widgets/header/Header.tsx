@@ -7,7 +7,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, m as motion } from 'framer-motion';
 import {
   ArrowLeft, Building2, ChartLine, ChevronDown, ChevronLeft, CircleHelp, Clock, Factory, Headphones, House, LayoutGrid, Menu, MessageCircle,
-  Moon, Newspaper, Phone, Search, Sun, Truck, Wrench, X, type LucideIcon,
+  Moon, Newspaper, PackageSearch, Phone, Search, Sun, Truck, Wrench, X, type LucideIcon,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { cn, faDigits } from '@/shared/lib/utils';
@@ -32,6 +32,8 @@ const DRAWER_LINKS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: '/products', label: 'محصولات', icon: LayoutGrid },
   { href: '/services', label: 'خدمات', icon: Wrench },
   { href: '/blog', label: 'مجله', icon: Newspaper },
+  { href: '/projects', label: 'پروژه‌های اجراشده', icon: Building2 },
+  { href: '/track', label: 'پیگیری سفارش', icon: PackageSearch },
   { href: '/faq', label: 'سوالات', icon: CircleHelp },
   { href: '/contact', label: 'تماس', icon: Phone },
 ];
@@ -127,6 +129,9 @@ export function Header({ categories }: { categories: NavCategory[] }) {
               <span className="hidden xl:flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-[var(--accent-text)]" />{siteConfig.workingHours}</span>
             </div>
             <div className="flex items-center gap-5">
+              <Link href="/track" className="flex items-center gap-1.5 h-6 px-2.5 rounded-full bg-white/10 text-white font-bold hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition-colors">
+                <PackageSearch className="w-3.5 h-3.5" />پیگیری سفارش
+              </Link>
               {companyPhones[0] && (
                 <a href={toTel(companyPhones[0])} className="flex items-center gap-1.5 hover:text-white">
                   <Building2 className="w-3.5 h-3.5" />دفتر مرکزی: <span dir="ltr" className="num">{faDigits(companyPhones[0])}</span>

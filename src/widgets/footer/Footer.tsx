@@ -9,11 +9,14 @@ import { siteConfig } from '@/shared/config/site';
 import { phoneHref as toTel } from '@/shared/lib/site-settings';
 import { faDigits } from '@/shared/lib/utils';
 import type { NavCategory } from '@/shared/lib/data';
+import { CertificateStrip } from '@/features/certificates/Certificates';
 
 const QUICK_LINKS = [
   { href: '/prices', label: 'لیست قیمت روز' },
   { href: '/services', label: 'خدمات ما' },
   { href: '/blog', label: 'مجله تخصصی' },
+  { href: '/projects', label: 'پروژه‌های اجراشده' },
+  { href: '/track', label: 'پیگیری سفارش' },
   { href: '/faq', label: 'سوالات متداول' },
   { href: '/contact', label: 'تماس با ما' },
 ];
@@ -40,7 +43,7 @@ function Column({ title, children }: { title: string; children: React.ReactNode 
 }
 
 export function Footer({ categories }: { categories: NavCategory[] }) {
-  const { siteName, siteDescription, phone, phoneHref, mobile, mobileHref, email, address, companyPhones, factoryAddress, mapUrl, whatsappUrl } = useSiteSettings();
+  const { siteName, siteDescription, phone, phoneHref, mobile, mobileHref, email, address, companyPhones, factoryAddress, mapUrl, whatsappUrl, certificates } = useSiteSettings();
   const year = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { year: 'numeric' }).format(new Date());
 
   const linkCls = 'block py-1.5 text-sm text-slate-400 hover:text-[var(--accent-text)] transition-colors';
@@ -140,6 +143,13 @@ export function Footer({ categories }: { categories: NavCategory[] }) {
             </ul>
           </Column>
         </div>
+
+        {/* گواهینامه‌ها — فقط وقتی عکس واقعی در پنل ثبت شده باشد */}
+        {certificates.length > 0 && (
+          <div className="mt-10 lg:mt-14 pt-6 border-t border-white/10">
+            <CertificateStrip certificates={certificates} tone="dark" />
+          </div>
+        )}
 
         <div className="mt-10 lg:mt-16 py-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
           <p>© <span className="num">{year}</span> {siteName} — فروش آنلاین {siteConfig.legalName}. تمامی حقوق محفوظ است.</p>

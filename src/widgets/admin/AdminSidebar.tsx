@@ -8,7 +8,7 @@ import { m as motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Package, Layers, FileText, FileSpreadsheet, HelpCircle,
   Star, Building2, MessageSquare, Settings, Users, LogOut,
-  Menu, Palette, ChevronLeft, SearchCheck, CandlestickChart, PhoneCall } from 'lucide-react';
+  Menu, Palette, ChevronLeft, SearchCheck, CandlestickChart, PhoneCall, BadgeCheck } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import toast from 'react-hot-toast';
 import { useAdminNotifications } from '@/widgets/admin/AdminNotifications';
@@ -31,6 +31,7 @@ const navGroups = [
       { href: '/admin/categories', label: 'دسته‌بندی‌ها', icon: Layers },
       { href: '/admin/blog', label: 'وبلاگ', icon: FileText },
       { href: '/admin/projects', label: 'پروژه‌ها', icon: Building2 },
+      { href: '/admin/certificates', label: 'گواهینامه‌ها', icon: BadgeCheck },
     ],
   },
   {

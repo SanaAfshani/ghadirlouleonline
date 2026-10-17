@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { MapPin, Calendar } from 'lucide-react';
 import { PageHero } from '@/shared/ui/PageHero';
 import type { Project } from '@/shared/types';
-import { formatPersianNumber } from '@/shared/lib/utils';
+import { faDigits } from '@/shared/lib/utils';
 
 type Props = {
   projects: Project[];
@@ -52,7 +52,7 @@ export function ProjectsPageClient({ projects }: Props) {
                       {project.location && (
                         <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{project.location}</span>
                       )}
-                      <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{formatPersianNumber(project.year)}</span>
+                      <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{faDigits(project.year)}</span>
                     </div>
                     <h3 className="mt-2 font-black text-[17px] leading-8 line-clamp-2 group-hover:text-[var(--accent-text)] transition-colors">{project.title}</h3>
                     {project.description && (

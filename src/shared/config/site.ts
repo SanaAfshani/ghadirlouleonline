@@ -9,7 +9,7 @@ export const siteConfig = {
   url: 'https://ghadirlouleonline.ir',
   phone: '09121184970',
   mobile: '09123837505',
-  email: 'ghadirlouleonline@gmail.com',
+  email: 'info@ghadirlouleonline.ir',
   /** تلفن‌های ثابت دفتر مرکزی شرکت */
   companyPhones: ['021-91094784'],
   /** دفتر مرکزی (فروش) */

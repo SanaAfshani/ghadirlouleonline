@@ -1,16 +1,19 @@
 import type { MetadataRoute } from 'next';
 import { getPublishedBlogPosts, getPublishedCategories, getSitemapData } from '@/shared/lib/data';
 import { siteConfig } from '@/shared/config/site';
+import { getSiteSettingsMap } from '@/shared/lib/site-settings-store';
+import { parseCertificates } from '@/shared/lib/site-settings';
 
 export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = siteConfig.url;
 
-  const [categories, { products, projects, pricesUpdatedAt }, posts] = await Promise.all([
+  const [categories, { products, projects, pricesUpdatedAt }, posts, settings] = await Promise.all([
     getPublishedCategories(),
     getSitemapData(),
     getPublishedBlogPosts(),
+    getSiteSettingsMap(),
   ]);
 
   // lastmod فقط وقتی تاریخ واقعی داریم؛ صفحات ثابت بدون lastmod (تاریخ ساختگی بدتر از نبودنش است)
@@ -27,6 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/blog`, lastModified: latestPost, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/services`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${baseUrl}/faq`, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${baseUrl}/track`, changeFrequency: 'yearly', priority: 0.4 },
     { url: `${baseUrl}/terms`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${baseUrl}/privacy`, changeFrequency: 'yearly', priority: 0.3 },
   ];
@@ -64,5 +68,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ? [{ url: `${baseUrl}/projects`, changeFrequency: 'monthly', priority: 0.6 }]
     : [];
 
-  return [...staticPages, ...categoryPages, ...productPages, ...blogPages, ...projectsIndex, ...projectPages];
+  // /certificates بدون گواهی ۴۰۴ است
+  const certificatesPage: MetadataRoute.Sitemap = parseCertificates(settings.certificates).length
+    ? [{ url: `${baseUrl}/certificates`, changeFrequency: 'yearly', priority: 0.5 }]
+    : [];
+
+  return [...staticPages, ...categoryPages, ...productPages, ...blogPages, ...projectsIndex, ...projectPages, ...certificatesPage];
 }

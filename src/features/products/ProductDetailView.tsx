@@ -22,6 +22,7 @@ import { CategoryThumb } from '@/widgets/header/Header';
 import { siteConfig } from '@/shared/config/site';
 import { IconTile } from '@/shared/ui/IconTile';
 import { SpecCards, specMeta } from '@/features/products/SpecCards';
+import { CertificateStrip } from '@/features/certificates/Certificates';
 import { cn, faDigits } from '@/shared/lib/utils';
 
 type Section = { id: string; label: string };
@@ -165,11 +166,17 @@ type Props = {
 };
 
 export function ProductDetailView({ product, related = [], board: initialBoard, comingSoon = false }: Props) {
-  const { phone, phoneHref, whatsappUrl, mobile, mobileHref } = useSiteSettings();
+  const { phone, phoneHref, whatsappUrl, mobile, mobileHref, certificates } = useSiteSettings();
   const { open } = useConsult();
 
   const images = product.images.length ? product.images : product.category.image ? [product.category.image] : [];
   const specs = Object.entries(product.specifications ?? {});
+  // «ISIRI 9116 / EN 13476» → دو نشان جدا
+  const standards = specs
+    .filter(([k]) => /استاندارد/.test(k))
+    .flatMap(([, v]) => v.split(/[\/،,]/))
+    .map((v) => v.trim())
+    .filter(Boolean);
   const { board } = useLiveBoard(initialBoard);
   const line = board.lines.find((l) => l.productId === product.id);
   const summary = summarizeLine(line?.items ?? []);
@@ -248,6 +255,11 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
             )}
 
             <SpecCards specs={specs.slice(0, 4)} />
+
+            {/* استانداردهای همین محصول (از مشخصات فنی) + گواهی‌های واقعی ثبت‌شده در پنل */}
+            <div className="mt-4 rounded-3xl border border-[var(--border)] bg-[var(--card)] p-4 empty:hidden">
+              <CertificateStrip certificates={certificates} standards={standards} />
+            </div>
 
             {/* کارشناس فروش — موبایل (در دسکتاپ سایدبار همین کار را می‌کند) */}
             <div className="lg:hidden mt-4 flex items-center gap-3 rounded-3xl border border-[var(--border)] bg-[var(--card)] p-3">
@@ -401,7 +413,7 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
             {/* عکس کارشناس فروش */}
             <div className="group relative aspect-[4/3.4] overflow-hidden">
               <Image
-                src="/images/site/sales-expert.webp"
+                src="/images/site/sales-expert-wm.webp"
                 alt={`${siteConfig.salesExpert.name}، ${siteConfig.salesExpert.role}`}
                 fill
                 sizes="320px"

@@ -1,5 +1,8 @@
 import { siteConfig } from '@/shared/config/site';
 
+/** گواهینامه / استاندارد با عکس واقعی سند — از پنل «گواهینامه‌ها» */
+export type Certificate = { title: string; code: string; image: string };
+
 export type SiteSettings = {
   siteName: string;
   siteDescription: string;
@@ -20,6 +23,7 @@ export type SiteSettings = {
   phoneHref: string;
   mobileHref: string;
   whatsappUrl: string;
+  certificates: Certificate[];
 };
 
 export const defaultSiteSettings: SiteSettings = {
@@ -48,7 +52,22 @@ export const defaultSiteSettings: SiteSettings = {
   phoneHref: phoneHref(siteConfig.phone),
   mobileHref: phoneHref(siteConfig.mobile),
   whatsappUrl: whatsappFromMobile(siteConfig.mobile) ?? siteConfig.socials.whatsapp,
+  certificates: [],
 };
+
+/** فقط عکس آپلودشده خود سایت یا https — این مقدار مستقیم در src می‌نشیند */
+export function parseCertificates(raw: string | undefined): Certificate[] {
+  try {
+    const list = JSON.parse(raw || '[]');
+    if (!Array.isArray(list)) return [];
+    return list
+      .map((c) => ({ title: String(c?.title ?? '').trim().slice(0, 120), code: String(c?.code ?? '').trim().slice(0, 60), image: String(c?.image ?? '').trim() }))
+      .filter((c) => c.title && /^(\/media\/[a-z0-9]+\.[a-z0-9]+|https:\/\/\S+)$/i.test(c.image))
+      .slice(0, 24);
+  } catch {
+    return [];
+  }
+}
 
 /** ارقام فارسی/عربی → لاتین؛ \D به تنهایی ارقام فارسی را هم حذف می‌کند */
 function toLatin(v: string) {
@@ -96,5 +115,6 @@ export function mergeSiteSettings(raw: Record<string, string>): SiteSettings {
     phoneHref: phoneHref(phone),
     mobileHref: phoneHref(mobile),
     whatsappUrl: whatsappFromMobile(mobile) ?? defaultSiteSettings.whatsappUrl,
+    certificates: parseCertificates(raw.certificates),
   };
 }

@@ -5,7 +5,7 @@ import { m as motion } from 'framer-motion';
 import Link from 'next/link';
 import { MapPin, Calendar, Building2, ArrowRight } from 'lucide-react';
 import type { Project } from '@/shared/types';
-import { formatPersianNumber } from '@/shared/lib/utils';
+import { faDigits } from '@/shared/lib/utils';
 
 type Props = {
   project: Project;
@@ -49,7 +49,7 @@ export function ProjectDetailView({ project }: Props) {
               )}
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-4 h-4" />
-                سال {formatPersianNumber(project.year)}
+                سال {faDigits(project.year)}
               </span>
               {project.client && (
                 <span className="flex items-center gap-1.5">
