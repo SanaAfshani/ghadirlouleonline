@@ -4,42 +4,34 @@ import { latinDigits } from '@/shared/lib/utils';
 import { ORDER_STEPS } from '@/shared/lib/order-status';
 
 /**
- * پیامک‌های سفارش با الگوی اعتبارسنجی کاوه‌نگار (verify/lookup): از خط خدماتی می‌رود و به شماره‌هایی که پیامک تبلیغاتی
- * را بسته‌اند هم می‌رسد. متن هر الگو یک بار در پنل کاوه‌نگار ثبت و تأیید می‌شود؛ اینجا فقط نام الگو و مقدارها ارسال می‌شود.
+ * پیامک‌های سفارش با «خط خدماتی اشتراکی» ملی پیامک (ارسال با الگو): از خط خدماتی می‌رود و به شماره‌هایی که پیامک
+ * تبلیغاتی را بسته‌اند هم می‌رسد. متن هر الگو یک بار در پنل ملی پیامک ثبت و تأیید می‌شود و یک کد (bodyId) می‌گیرد؛
+ * اینجا فقط کد الگو و مقدار متغیرها ({0}، {1}، ...) ارسال می‌شود.
  *
  * تنظیمات (متغیرهای محیطی سرور):
- *   KAVENEGAR_API_KEY   کلید API پنل — بدون آن هیچ پیامکی ارسال نمی‌شود و فقط لاگ می‌شود
- *   SMS_ADMIN_MOBILE    موبایل(های) مدیر برای خبر درخواست جدید، با کاما — پیش‌فرض: موبایل تنظیمات سایت
+ *   MELIPAYAMAK_USERNAME   نام کاربری پنل ملی پیامک
+ *   MELIPAYAMAK_PASSWORD   کلید وب‌سرویس (توسعه دهندگان ← وب سرویس & API) — بدون این دو هیچ پیامکی ارسال نمی‌شود
+ *   SMS_ADMIN_MOBILE       موبایل(های) مدیر برای خبر درخواست جدید، با کاما — پیش‌فرض: موبایل تنظیمات سایت
  *
  * خطای ارسال هیچ‌وقت ثبت سفارش را خراب نمی‌کند؛ فقط لاگ می‌شود.
  */
 
-/** نام الگوها در پنل کاوه‌نگار — انگلیسی، بدون فاصله و _ */
+/** کد الگوها (bodyId) بعد از تأیید در پنل ملی پیامک — ۰ یعنی هنوز ثبت نشده و ارسال نمی‌شود */
 export const SMS_TEMPLATES = {
-  /** به مدیر: درخواست پیش‌فاکتور جدید — %token شماره، %token2 موبایل مشتری، %token10 نام مشتری */
-  adminNewQuote: 'ghadirNewQuote',
-  /** به مشتری: درخواست ثبت شد — %token شماره، %token10 نام */
-  quoteReceived: 'ghadirQuoteReceived',
-  /** به مشتری: پیش‌فاکتور تأیید و صادر شد — %token شماره، %token2 کد لینک کوتاه (/q/s/...)، %token10 نام */
-  quoteIssued: 'ghadirQuoteIssued',
-  /** به مشتری: مرحله سفارش عوض شد — %token شماره، %token10 مرحله */
-  orderStatus: 'ghadirOrderStatus',
+  /** به مدیر: درخواست پیش‌فاکتور جدید — {0} شماره، {1} نام مشتری، {2} موبایل مشتری */
+  adminNewQuote: 0,
+  /** به مشتری: درخواست ثبت شد — {0} نام، {1} شماره */
+  quoteReceived: 0,
+  /** به مشتری: پیش‌فاکتور تأیید و صادر شد — {0} نام، {1} شماره، {2} کد لینک کوتاه (/q/s/...) */
+  quoteIssued: 0,
+  /** به مشتری: مرحله سفارش عوض شد — {0} شماره، {1} مرحله */
+  orderStatus: 0,
 } as const;
 
-type Tokens = { token: string; token2?: string; token3?: string; token10?: string; token20?: string };
+const API = 'https://rest.payamak-panel.com/api/SendSMS/BaseServiceNumber';
 
-const API = 'https://api.kavenegar.com/v1';
-
-/** token/token2/token3 فاصله نمی‌پذیرند؛ token10 تا ۵ و token20 تا ۸ فاصله. _ هم خطای ۴۳۱ می‌دهد */
-function clean(value: string, maxSpaces: number) {
-  let spaces = 0;
-  return latinDigits(value)
-    .replace(/_/g, '-')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .replace(/ /g, () => (spaces++ < maxSpaces ? ' ' : '‌'))
-    .slice(0, 100);
-}
+/** متغیرها با «;» از هم جدا می‌شوند — «;» و خط جدید داخل مقدار نباید باشد */
+const clean = (value: string) => latinDigits(value).replace(/[;\r\n]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 100);
 
 function normalizeMobile(raw: string) {
   const digits = latinDigits(raw).replace(/\D/g, '');
@@ -49,26 +41,23 @@ function normalizeMobile(raw: string) {
   return null;
 }
 
-async function lookup(receptor: string, template: string, tokens: Tokens) {
-  const apiKey = process.env.KAVENEGAR_API_KEY;
-  const mobile = normalizeMobile(receptor);
-  if (!apiKey) return console.warn(`[sms] KAVENEGAR_API_KEY not set — skipped ${template}`);
-  if (!mobile) return console.warn(`[sms] invalid mobile — skipped ${template}`);
+async function send(to: string, bodyId: number, args: string[]) {
+  const username = process.env.MELIPAYAMAK_USERNAME;
+  const password = process.env.MELIPAYAMAK_PASSWORD;
+  const mobile = normalizeMobile(to);
+  if (!username || !password) return console.warn(`[sms] MELIPAYAMAK_USERNAME/PASSWORD not set — skipped body ${bodyId}`);
+  if (!bodyId) return console.warn('[sms] template not registered yet — skipped');
+  if (!mobile) return console.warn(`[sms] invalid mobile — skipped body ${bodyId}`);
 
-  const params = new URLSearchParams({ receptor: mobile, template, token: clean(tokens.token, 0) });
-  if (tokens.token2) params.set('token2', clean(tokens.token2, 0));
-  if (tokens.token3) params.set('token3', clean(tokens.token3, 0));
-  if (tokens.token10) params.set('token10', clean(tokens.token10, 5));
-  if (tokens.token20) params.set('token20', clean(tokens.token20, 8));
-
-  const res = await fetch(`${API}/${encodeURIComponent(apiKey)}/verify/lookup.json`, {
+  const res = await fetch(API, {
     method: 'POST',
-    body: params,
+    body: new URLSearchParams({ username, password, to: mobile, bodyId: String(bodyId), text: args.map(clean).join(';') }),
     signal: AbortSignal.timeout(10_000),
   });
   const data = await res.json().catch(() => null);
-  const status = data?.return?.status ?? res.status;
-  if (status !== 200) throw new Error(`kavenegar ${template}: ${status} ${data?.return?.message ?? ''}`);
+  // موفق: Value شناسه پیامک است (بیش از ۱۵ رقم)؛ در غیر این صورت کد خطا (مثلاً ‎-10 یعنی لینک در متغیرها)
+  const value = String(data?.Value ?? '');
+  if (!/^\d{15,}$/.test(value)) throw new Error(`melipayamak body ${bodyId}: ${res.status} ${value} ${data?.StrRetStatus ?? ''}`);
 }
 
 /** ارسال بدون شکستن جریان اصلی — در after() صدا زده می‌شود */
@@ -95,23 +84,23 @@ export function notifyQuoteRequested(q: QuoteInfo) {
     const admins = await adminMobiles();
     await Promise.all([
       ...admins.map((m) =>
-        safe(() => lookup(m, SMS_TEMPLATES.adminNewQuote, { token: q.number, token2: q.customerPhone, token10: q.customerName })),
+        safe(() => send(m, SMS_TEMPLATES.adminNewQuote, [q.number, q.customerName, q.customerPhone])),
       ),
-      safe(() => lookup(q.customerPhone, SMS_TEMPLATES.quoteReceived, { token: q.number, token10: q.customerName })),
+      safe(() => send(q.customerPhone, SMS_TEMPLATES.quoteReceived, [q.customerName, q.number])),
     ]);
   });
 }
 
 /** پیش‌فاکتور تأیید و صادر شد: لینک مشاهده به مشتری */
 export function notifyQuoteIssued(q: QuoteInfo) {
-  // توکن لینک «_» دارد که کاوه‌نگار نمی‌پذیرد — hex آن به /q/s/<hex> می‌رود و به /q/<token> برمی‌گردد
+  // لینک کامل در متغیر رد می‌شود (خطای ‎-10)؛ دامنه در متن الگوست و فقط کد hex توکن به /q/s/<hex> می‌رود
   const code = Buffer.from(q.token, 'base64url').toString('hex');
-  return safe(() => lookup(q.customerPhone, SMS_TEMPLATES.quoteIssued, { token: q.number, token2: code, token10: q.customerName }));
+  return safe(() => send(q.customerPhone, SMS_TEMPLATES.quoteIssued, [q.customerName, q.number, code]));
 }
 
 /** مرحله جدید سفارش (آماده‌سازی، بارگیری، ارسال، تحویل) */
 export function notifyOrderStatus(q: QuoteInfo, status: string) {
   const step = ORDER_STEPS.find((s) => s.key === status);
   if (!step) return Promise.resolve();
-  return safe(() => lookup(q.customerPhone, SMS_TEMPLATES.orderStatus, { token: q.number, token10: step.label }));
+  return safe(() => send(q.customerPhone, SMS_TEMPLATES.orderStatus, [q.number, step.label]));
 }

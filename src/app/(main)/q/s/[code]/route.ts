@@ -4,7 +4,7 @@ type Props = { params: Promise<{ code: string }> };
 
 /**
  * لینک کوتاه پیامک پیش‌فاکتور: /q/s/<hex> → /q/<token>.
- * توکن base64url است و ممکن است «_» داشته باشد که کاوه‌نگار در مقدار الگو نمی‌پذیرد؛ در پیامک همان توکن به صورت hex می‌رود.
+ * پنل پیامک لینک کامل را در متغیر الگو نمی‌پذیرد؛ دامنه در متن الگوست و توکن به صورت hex (فقط حرف و عدد) می‌رود.
  */
 export async function GET(request: NextRequest, { params }: Props) {
   const { code } = await params;
