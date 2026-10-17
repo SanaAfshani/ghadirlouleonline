@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { cn, faDigits, latinDigits } from '@/shared/lib/utils';
 import { GRADES, compareItems, itemLabel, type SortDir, type SortKey } from '@/shared/lib/price-item';
+import { Select } from '@/shared/ui/Select';
 import { useConsult } from '@/features/consult/ConsultProvider';
 import { useQuoteCart } from '@/features/quotes/QuoteCartProvider';
 import type { PriceBoard } from '@/shared/lib/price-board-types';
@@ -236,19 +237,19 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
           )}
           {/* موبایل سرستون ندارد — مرتب‌سازی با منو */}
           {(has.size || has.grade) && (
-            <select
-              value={`${sort.key}:${sort.dir}`}
-              onChange={(e) => {
-                const [key, dir] = e.target.value.split(':') as [SortKey, SortDir];
-                setSort({ key, dir });
-              }}
-              aria-label="مرتب‌سازی"
-              className="@3xl:hidden h-11 rounded-xl bg-[var(--muted)] border border-[var(--border)] px-3 text-sm min-w-0 flex-1 sm:flex-none"
-            >
-              {SORT_OPTIONS.filter((o) => (has.size || !o.value.startsWith('size')) && (has.grade || !o.value.startsWith('grade'))).map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+            <div className="@3xl:hidden w-full sm:w-56">
+              <Select
+                value={`${sort.key}:${sort.dir}`}
+                onChange={(v) => {
+                  const [key, dir] = v.split(':') as [SortKey, SortDir];
+                  setSort({ key, dir });
+                }}
+                options={SORT_OPTIONS.filter((o) => (has.size || !o.value.startsWith('size')) && (has.grade || !o.value.startsWith('grade')))}
+                icon={ArrowDownWideNarrow}
+                aria-label="مرتب‌سازی"
+                className="w-full h-11 rounded-xl bg-[var(--muted)] border border-[var(--border)] px-3 text-sm"
+              />
+            </div>
           )}
           {toolbar && (
             <div className="ms-auto flex items-center gap-3">

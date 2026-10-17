@@ -13,6 +13,7 @@ import { SeoPanel } from '@/features/admin/seo/SeoPanel';
 import { FaqEditor } from '@/features/admin/seo/FaqEditor';
 import type { SeoFields } from '@/features/admin/seo/seo';
 import type { FaqItem } from '@/shared/types';
+import { Select } from '@/shared/ui/Select';
 
 type Spec = { key: string; value: string };
 
@@ -184,12 +185,15 @@ export default function NewProductPage() {
                     <Loader2 className="w-4 h-4 animate-spin" /> بارگذاری...
                   </div>
                 ) : (
-                  <select required value={form.categoryId}
-                    onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
-                    className={inputCls}>
-                    <option value="">انتخاب دسته‌بندی...</option>
-                    {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
+                  <Select
+                    required
+                    value={form.categoryId}
+                    onChange={(categoryId) => setForm({ ...form, categoryId })}
+                    options={categories.map((c) => ({ value: c.id, label: c.name }))}
+                    placeholder="انتخاب دسته‌بندی..."
+                    aria-label="دسته‌بندی"
+                    className={inputCls}
+                  />
                 )}
               </div>
 

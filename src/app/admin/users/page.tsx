@@ -6,6 +6,7 @@ import { Plus, Search, Pencil, Trash2, Shield, User, Loader2, X } from 'lucide-r
 import toast from 'react-hot-toast';
 import { formatDate } from '@/shared/lib/utils';
 import { useConfirm } from '@/shared/ui/ConfirmDialog';
+import { Select } from '@/shared/ui/Select';
 
 type UserRow = {
   id: string;
@@ -281,15 +282,17 @@ export default function AdminUsersPage() {
                 className={inputCls}
                 dir="ltr"
               />
-              <select
+              <Select
                 value={form.role}
-                onChange={(e) => setForm({ ...form, role: e.target.value as UserRow['role'] })}
+                onChange={(role) => setForm({ ...form, role: role as UserRow['role'] })}
+                options={[
+                  { value: 'ADMIN', label: 'مدیر', hint: 'دسترسی کامل' },
+                  { value: 'EDITOR', label: 'ویرایشگر', hint: 'ویرایش محتوا و قیمت' },
+                  { value: 'VIEWER', label: 'بازدیدکننده', hint: 'فقط مشاهده' },
+                ]}
+                aria-label="نقش کاربر"
                 className={inputCls}
-              >
-                <option value="ADMIN">مدیر</option>
-                <option value="EDITOR">ویرایشگر</option>
-                <option value="VIEWER">بازدیدکننده</option>
-              </select>
+              />
               <button
                 type="submit"
                 disabled={saving}
