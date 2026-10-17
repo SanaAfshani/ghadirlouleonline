@@ -21,7 +21,8 @@ import { ProductCard } from '@/features/products/ProductCard';
 import { CategoryThumb } from '@/widgets/header/Header';
 import { siteConfig } from '@/shared/config/site';
 import { IconTile } from '@/shared/ui/IconTile';
-import { SpecCards, specMeta } from '@/features/products/SpecCards';
+import { SpecCards, specMeta, withDerivedSpecs } from '@/features/products/SpecCards';
+import { subjectFor } from '@/features/products/SpecIllustration';
 import { CertificateStrip } from '@/features/certificates/Certificates';
 import { cn, faDigits } from '@/shared/lib/utils';
 
@@ -180,6 +181,8 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
   const { board } = useLiveBoard(initialBoard);
   const line = board.lines.find((l) => l.productId === product.id);
   const summary = summarizeLine(line?.items ?? []);
+  const subject = subjectFor(product.category.slug, product.slug);
+  const cardSpecs = withDerivedSpecs(specs, line?.items ?? [], subject).slice(0, 4);
   const marketOpen = board.market.open;
   const legacyPrice = product.price ? formatProductPrice(product.price) : null;
 
@@ -254,7 +257,7 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
               <p className="mt-3 text-[15px] leading-8 text-[var(--muted-foreground)]">{faDigits(product.shortDescription)}</p>
             )}
 
-            <SpecCards specs={specs.slice(0, 4)} />
+            <SpecCards specs={cardSpecs} subject={subject} />
 
             {/* استانداردهای همین محصول (از مشخصات فنی) + گواهی‌های واقعی ثبت‌شده در پنل */}
             <div className="mt-4 rounded-3xl border border-[var(--border)] bg-[var(--card)] p-4 empty:hidden">
