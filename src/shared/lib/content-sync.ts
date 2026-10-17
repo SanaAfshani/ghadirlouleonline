@@ -1,0 +1,143 @@
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import sharp from 'sharp';
+import { prisma } from '@/shared/lib/prisma';
+
+/**
+ * انتقال یک‌باره محتوای مهر ۱۴۰۵ به دیتابیس هر محیط (سرور اصلی دیتابیس جدای خودش را دارد و این تغییرات فقط روی
+ * دیتابیس توسعه انجام شده بود): عکس‌های واقعی کارخانه در گالری و دسته کاروگیت، عکس سپتیک، عکس‌های توضیحات کاروگیت،
+ * پروژه اجراشده و ایمیل جدید.
+ *
+ * ایمن برای اجرای چندباره: هر مرحله اول بررسی می‌کند که قبلاً انجام شده یا نه؛ چیزی حذف نمی‌شود (عکس‌های قبلی گالری
+ * سر جایشان می‌مانند و عکس‌های جدید جلو می‌آیند). بعد از موفقیت کامل، کلید content_sync_2026_10 در تنظیمات ثبت می‌شود.
+ * عکس‌ها از content/sync-2026-10 (بیرون از public تا نسخه بی‌واترمارک قابل دانلود نباشد).
+ */
+
+const SYNC_KEY = 'content_sync_2026_10';
+const DIR = path.join(process.cwd(), 'content', 'sync-2026-10');
+
+/** شناسه ثابت برای هر عکس تا اجرای دوباره عکس تکراری نسازد (باید با الگوی /media/[a-z0-9]{20,40} بخواند) */
+const mediaId = (name: string) => `csync1${name}`.padEnd(25, '0');
+const url = (name: string) => `/media/${mediaId(name)}.webp`;
+
+const FILES = ['yard15', 'yard3', 'yard10', 'yard5', 'yard30', 'truck24', 'inst4', 'inst3', 'inst1', 'pickup2', 'septic5'];
+const CORRUGATED_GALLERY = ['yard15', 'yard3', 'yard10', 'yard5', 'yard30', 'inst4', 'inst3', 'inst1', 'pickup2'];
+const PROJECT_IMAGES = ['inst4', 'inst3', 'inst1', 'pickup2', 'truck24'];
+const OLD_EMAIL = 'ghadirlouleonline@gmail.com';
+const NEW_EMAIL = 'info@ghadirlouleonline.ir';
+
+const prepend = (raw: string, add: string[]) => {
+  let list: string[] = [];
+  try {
+    list = JSON.parse(raw || '[]');
+  } catch {}
+  if (list.includes(add[0])) return null; // قبلاً انجام شده
+  return JSON.stringify([...add, ...list.filter((u) => !add.includes(u))]);
+};
+
+async function syncMedia() {
+  const existing = new Set((await prisma.media.findMany({ where: { id: { in: FILES.map(mediaId) } }, select: { id: true } })).map((m) => m.id));
+  for (const name of FILES) {
+    if (existing.has(mediaId(name))) continue;
+    const data = await readFile(path.join(DIR, `${name}.webp`));
+    const { width, height } = await sharp(data).metadata();
+    await prisma.media.create({
+      data: { id: mediaId(name), data: new Uint8Array(data), mime: 'image/webp', size: data.length, width, height, originalName: `site-photo-${name}.webp` },
+    });
+  }
+}
+
+/** عکس‌های استوک توضیحات کاروگیت → عکس واقعی؛ عکس بارگیری زیر جدول ظرفیت حمل؛ عکس ترانشه بالای «فاضلاب شهری» */
+export function syncDescription(html: string) {
+  if (html.includes('csync1')) return null;
+  let out = html;
+  const swap = (alt: string, name: string, newAlt: string, portrait = false) => {
+    const re = new RegExp(`<img src="[^"]*" alt="${alt}"[^>]*>`);
+    out = out.replace(re, `<img src="${url(name)}" alt="${newAlt}"${portrait ? ' class="img-portrait"' : ''}>`);
+  };
+  swap('لوله کاروگیت چیست', 'yard15', 'لوله کاروگیت چیست — لوله دوجداره پلی اتیلن با جداره داخلی زرد در انبار کارخانه قدیر لوله پاسارگاد');
+  swap('کاربرد لوله کاروگیت', 'yard3', 'کاربرد لوله کاروگیت در شبکه فاضلاب و زهکشی — انبار لوله کاروگیت کارخانه در گرمسار');
+  swap('لوله کاروگیت فاضلابی', 'inst4', 'اجرای لوله کاروگیت فاضلابی در شبکه فاضلاب شهری', true);
+
+  const cap = out.indexOf('جدول ظرفیت حمل');
+  const tableEnd = cap >= 0 ? out.indexOf('</table>', cap) : -1;
+  if (tableEnd >= 0) {
+    const fig = `\n<figure><img src="${url('truck24')}" alt="بارگیری لوله کاروگیت روی کامیون برای ارسال به محل پروژه" class="img-portrait"><figcaption>بارگیری لوله کاروگیت از انبار کارخانه برای ارسال به پروژه</figcaption></figure>\n`;
+    out = out.slice(0, tableEnd + 8) + fig + out.slice(tableEnd + 8);
+  }
+  const sewer = out.indexOf('<h3>فاضلاب شهری</h3>');
+  if (sewer >= 0) {
+    const fig = `<figure><img src="${url('inst1')}" alt="اجرای لوله کاروگیت زهکشی در ترانشه" class="img-portrait"><figcaption>اجرای لوله کاروگیت در ترانشه زهکشی</figcaption></figure>\n`;
+    out = out.slice(0, sewer) + fig + out.slice(sewer);
+  }
+  return out === html ? null : out;
+}
+
+const PROJECT_CONTENT =
+  '<p>تصاویر واقعی اجرای لوله کاروگیت دوجداره تولید قدیر لوله پاسارگاد در پروژه‌های شبکه فاضلاب و زهکشی: حفاری و آماده‌سازی ترانشه، چیدمان لوله‌ها در مسیر و اتصال شاخه‌ها با کوپلر و واشر آب‌بند.</p>' +
+  '<h2>مراحل در تصاویر</h2><ul><li>حفر ترانشه و آماده‌سازی بستر لوله</li><li>چیدمان لوله کاروگیت در مسیر شبکه</li><li>اتصال شاخه‌ها با کوپلر و واشر آب‌بند</li><li>بارگیری از انبار کارخانه و ارسال به محل پروژه</li></ul>' +
+  '<p>برای انتخاب سایز و کلاس مقاومتی مناسب پروژه خود (SN4 سبک یا SN8 سنگین) با کارشناس فروش مشورت کنید.</p>';
+
+export async function syncContent() {
+  if (await prisma.siteSettings.findUnique({ where: { key: SYNC_KEY }, select: { key: true } })) return 'already done';
+  const markDone = () => prisma.siteSettings.create({ data: { key: SYNC_KEY, value: new Date().toISOString(), type: 'text' } });
+
+  // دیتابیس توسعه همین تغییرات را دستی گرفته (آپلودهای site-photo-*.jpg) — اجرای دوباره عکس و شکل تکراری می‌ساخت
+  if (await prisma.media.findFirst({ where: { originalName: { startsWith: 'site-photo-', endsWith: '.jpg' } }, select: { id: true } })) {
+    await markDone();
+    return 'applied manually before — skipped';
+  }
+
+  const done: string[] = [];
+
+  await syncMedia();
+
+  const corrugated = await prisma.product.findFirst({ where: { slug: 'corrugated-pipe' }, select: { id: true, images: true, description: true } });
+  if (corrugated) {
+    const images = prepend(corrugated.images, CORRUGATED_GALLERY.map(url));
+    const description = corrugated.description ? syncDescription(corrugated.description) : null;
+    if (images || description) {
+      await prisma.product.update({ where: { id: corrugated.id }, data: { ...(images && { images }), ...(description && { description }) } });
+      done.push('corrugated');
+    }
+  }
+
+  const category = await prisma.category.findFirst({ where: { slug: 'corrugated-pipes' }, select: { id: true, image: true } });
+  if (category && !category.image?.includes('csync1')) {
+    await prisma.category.update({ where: { id: category.id }, data: { image: url('yard30') } });
+    done.push('category');
+  }
+
+  const septic = await prisma.product.findFirst({ where: { slug: 'septic-tank-polyethylene' }, select: { id: true, images: true } });
+  const septicImages = septic && prepend(septic.images, [url('septic5')]);
+  if (septic && septicImages) {
+    await prisma.product.update({ where: { id: septic.id }, data: { images: septicImages } });
+    done.push('septic');
+  }
+
+  if (!(await prisma.project.findUnique({ where: { slug: 'corrugated-pipe-sewer-installation' }, select: { id: true } }))) {
+    await prisma.project.create({
+      data: {
+        title: 'اجرای شبکه فاضلاب با لوله کاروگیت',
+        slug: 'corrugated-pipe-sewer-installation',
+        description: 'تصاویر واقعی اجرای لوله کاروگیت دوجداره قدیر لوله پاسارگاد در ترانشه شبکه فاضلاب و زهکشی.',
+        content: PROJECT_CONTENT,
+        images: JSON.stringify(PROJECT_IMAGES.map(url)),
+        year: 1405,
+        published: true,
+        featured: true,
+      },
+    });
+    done.push('project');
+  }
+
+  // فقط اگر هنوز ایمیل قدیمی است — اگر ادمین ایمیل دیگری گذاشته دست نمی‌خورد
+  const email = await prisma.siteSettings.findUnique({ where: { key: 'contact_email' } });
+  if (!email || email.value === OLD_EMAIL) {
+    await prisma.siteSettings.upsert({ where: { key: 'contact_email' }, update: { value: NEW_EMAIL }, create: { key: 'contact_email', value: NEW_EMAIL, type: 'text' } });
+    done.push('email');
+  }
+
+  await markDone();
+  return done.join(', ') || 'nothing to change';
+}
