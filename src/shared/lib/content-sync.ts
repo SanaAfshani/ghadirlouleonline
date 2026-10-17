@@ -16,8 +16,11 @@ import { prisma } from '@/shared/lib/prisma';
 const SYNC_KEY = 'content_sync_2026_10';
 const DIR = path.join(process.cwd(), 'content', 'sync-2026-10');
 
-/** شناسه ثابت برای هر عکس تا اجرای دوباره عکس تکراری نسازد (باید با الگوی /media/[a-z0-9]{20,40} بخواند) */
-const mediaId = (name: string) => `csync1${name}`.padEnd(25, '0');
+/**
+ * شناسه ثابت برای هر عکس تا اجرای دوباره عکس تکراری نسازد (باید با الگوی /media/[a-z0-9]{20,40} بخواند).
+ * «z» بعد از نام لازم است: بدون آن yard3 و yard30 بعد از پر شدن با صفر یک شناسه می‌شدند.
+ */
+const mediaId = (name: string) => `csync2${name}z`.padEnd(25, '0');
 const url = (name: string) => `/media/${mediaId(name)}.webp`;
 
 const FILES = ['yard15', 'yard3', 'yard10', 'yard5', 'yard30', 'truck24', 'inst4', 'inst3', 'inst1', 'pickup2', 'septic5'];
@@ -49,7 +52,7 @@ async function syncMedia() {
 
 /** عکس‌های استوک توضیحات کاروگیت → عکس واقعی؛ عکس بارگیری زیر جدول ظرفیت حمل؛ عکس ترانشه بالای «فاضلاب شهری» */
 export function syncDescription(html: string) {
-  if (html.includes('csync1')) return null;
+  if (html.includes('csync2')) return null;
   let out = html;
   const swap = (alt: string, name: string, newAlt: string, portrait = false) => {
     const re = new RegExp(`<img src="[^"]*" alt="${alt}"[^>]*>`);
@@ -103,7 +106,7 @@ export async function syncContent() {
   }
 
   const category = await prisma.category.findFirst({ where: { slug: 'corrugated-pipes' }, select: { id: true, image: true } });
-  if (category && !category.image?.includes('csync1')) {
+  if (category && !category.image?.includes('csync2')) {
     await prisma.category.update({ where: { id: category.id }, data: { image: url('yard30') } });
     done.push('category');
   }
