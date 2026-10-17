@@ -2,11 +2,12 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, m as motion } from 'framer-motion';
-import { CheckCircle2, FileSpreadsheet, Loader2, Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
+import { CheckCircle2, FileSpreadsheet, Loader2, MessageCircle, Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { cn, faDigits, formatPersianNumber, latinDigits } from '@/shared/lib/utils';
 import { DEFAULT_VAT_RATE } from '@/shared/lib/quote-constants';
 import { IconTile } from '@/shared/ui/IconTile';
+import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
 
 export type CartLine = {
   priceItemId: string;
@@ -119,6 +120,13 @@ function QuoteCartPanel({
   const [error, setError] = useState('');
   const [doneHref, setDoneHref] = useState('');
   const [doneNumber, setDoneNumber] = useState('');
+  const { whatsappUrl } = useSiteSettings();
+  // بدون پنل پیامک: مشتری با یک کلیک درخواست را در واتس‌اپ فروش می‌فرستد تا فروش همان لحظه خبردار شود
+  const whatsappDone = doneHref && whatsappUrl
+    ? `${whatsappUrl}?text=${encodeURIComponent(
+        `سلام، درخواست پیش‌فاکتور ${doneNumber} را ثبت کردم.\nنام: ${name}\nموبایل: ${phone}\n${typeof window !== 'undefined' ? new URL(doneHref, window.location.origin).href : doneHref}`,
+      )}`
+    : '';
 
   useEffect(() => {
     if (!open) return;
@@ -221,6 +229,17 @@ function QuoteCartPanel({
                     الان می‌توانید پیش‌فاکتور را ببینید. پس از تأیید کارشناس، روی همان لینک فاکتور نهایی نمایش داده می‌شود.
                   </p>
                   <div className="mt-6 flex flex-col gap-2">
+                    {whatsappDone && (
+                      <a
+                        href={whatsappDone}
+                        target="_blank"
+                        rel="noopener"
+                        className="h-11 px-6 rounded-xl bg-emerald-600 text-white font-bold text-sm flex items-center justify-center gap-2"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        ارسال به واتس‌اپ فروش برای پیگیری سریع‌تر
+                      </a>
+                    )}
                     {doneHref && (
                       <a
                         href={doneHref}

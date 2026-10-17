@@ -11,6 +11,7 @@ import { useConfirm } from '@/shared/ui/ConfirmDialog';
 import { siteConfig } from '@/shared/config/site';
 import { ORDER_STEPS, type OrderLogEntry } from '@/shared/lib/order-status';
 import { IconTile } from '@/shared/ui/IconTile';
+import { whatsappFromMobile } from '@/shared/lib/site-settings';
 
 type Item = {
   id?: string;
@@ -249,6 +250,22 @@ function OrderTrackingPanel({ quote, onChange }: { quote: Quote; onChange: (q: Q
   };
 
   const at = (key: string) => quote.orderLog.find((e) => e.status === key)?.at;
+  // بدون پنل پیامک: مرحله فعلی با یک کلیک از واتس‌اپ خود فروش برای مشتری می‌رود
+  const step = ORDER_STEPS.find((s) => s.key === quote.orderStatus);
+  const customerWa = whatsappFromMobile(quote.customerPhone);
+  const stepWaHref = step && customerWa
+    ? `${customerWa}?text=${encodeURIComponent(
+        [
+          `سلام ${quote.customerName} عزیز،`,
+          `سفارش ${quote.number}: ${step.label}`,
+          step.desc,
+          ...(quote.trackingNote ? [quote.trackingNote] : []),
+          `پیگیری سفارش: ${siteConfig.url}/track?n=${quote.number}`,
+          '',
+          siteConfig.name,
+        ].join('\n'),
+      )}`
+    : '';
   return (
     <div className="p-5 border-b border-[var(--border)] bg-emerald-500/[0.04]">
       <div className="flex items-center gap-2.5 mb-3">
@@ -294,7 +311,18 @@ function OrderTrackingPanel({ quote, onChange }: { quote: Quote; onChange: (q: Q
           ذخیره توضیح
         </button>
       </div>
-      <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">با کلیک روی هر مرحله، همان مرحله و زمانش برای مشتری ثبت می‌شود. کلیک دوباره، مرحله را برمی‌دارد.</p>
+      {stepWaHref && (
+        <a
+          href={stepWaHref}
+          target="_blank"
+          rel="noopener"
+          className="mt-3 h-10 px-4 rounded-xl bg-emerald-600 text-white text-xs font-bold inline-flex items-center gap-2"
+        >
+          <MessageCircle className="w-4 h-4" />
+          ارسال «{step?.label}» به مشتری در واتس‌اپ
+        </a>
+      )}
+      <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">با کلیک روی هر مرحله، همان مرحله و زمانش برای مشتری ثبت می‌شود. کلیک دوباره، مرحله را برمی‌دارد. بعد با دکمه سبز، همان مرحله را در واتس‌اپ برای مشتری بفرستید.</p>
     </div>
   );
 }
