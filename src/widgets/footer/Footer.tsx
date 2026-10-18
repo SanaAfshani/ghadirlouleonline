@@ -152,7 +152,7 @@ export function Footer({ categories }: { categories: NavCategory[] }) {
         )}
 
         <div className="mt-10 lg:mt-16 py-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
-          <p>© <span className="num">{year}</span> {siteName} — فروش آنلاین {siteConfig.legalName}. تمامی حقوق محفوظ است.</p>
+          <p>© <span className="num">{year}</span> {siteName} — نماینده انحصاری {siteConfig.legalName}. تمامی حقوق محفوظ است.</p>
           <nav aria-label="قوانین" className="flex items-center gap-4">
             <Link href="/terms" className="hover:text-white transition-colors">قوانین و شرایط خرید</Link>
             <Link href="/privacy" className="hover:text-white transition-colors">حریم خصوصی</Link>

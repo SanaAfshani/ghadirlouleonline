@@ -51,7 +51,8 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
       <div className="container-main grid grid-cols-1 lg:grid-cols-[1fr_470px] items-center gap-8 lg:gap-14 pt-8 pb-16 sm:pt-12 sm:pb-20 lg:pt-20 lg:pb-28">
         <div className="min-w-0 text-legible">
           <p className="eyebrow">
-            فروش مستقیم از کارخانه {siteConfig.legalName}
+            <ShieldCheck className="w-4 h-4" aria-hidden />
+            نماینده انحصاری {siteConfig.legalName}
           </p>
           <h1
             className="mt-3 text-[1.85rem] leading-[1.4] sm:text-[2.6rem] lg:text-[3.1rem] lg:leading-[1.3] font-black tracking-tight text-white"

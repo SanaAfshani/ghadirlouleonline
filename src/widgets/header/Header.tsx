@@ -49,7 +49,7 @@ function Logo({ compact = false }: { compact?: boolean }) {
       <Image src="/images/logo.png" alt="" width={44} height={44} className={cn('object-contain', compact ? 'w-9 h-9' : 'w-11 h-11')} priority />
       <span className="leading-tight">
         <span className={cn('block font-black text-[var(--foreground)]', compact ? 'text-[15px]' : 'text-lg')}>{siteName}</span>
-        {!compact && <span className="block text-[11px] text-[var(--muted-foreground)]">فروشگاه تخصصی لوله و اتصالات</span>}
+        {!compact && <span className="block text-[11px] text-[var(--muted-foreground)]">نماینده انحصاری {siteConfig.legalName}</span>}
       </span>
     </Link>
   );
