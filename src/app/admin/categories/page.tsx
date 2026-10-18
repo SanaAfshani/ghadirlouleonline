@@ -1,14 +1,78 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
+import Image from 'next/image';
 import { m as motion } from 'framer-motion';
-import { Plus, Search, Trash2, Layers, Loader2 } from 'lucide-react';
+import { Plus, Search, Trash2, Layers, Loader2, Pencil } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { slugify } from '@/shared/lib/utils';
 import type { Category } from '@/shared/types';
 import { useConfirm } from '@/shared/ui/ConfirmDialog';
+import { ImageUploader } from '@/shared/ui/ImageUploader';
 
 type CategoryRow = Category & { _count?: { products: number } };
+
+const fieldCls = 'w-full bg-[var(--muted)] border border-[var(--border)] rounded-xl px-4 text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--accent)]';
+
+/** ویرایش دسته: عکس (همان آپلودر محصولات، یک عکس)، نام و توضیح — قبلاً این صفحه اصلاً فرم عکس نداشت */
+function CategoryEditor({ cat, onSaved, onCancel }: { cat: CategoryRow; onSaved: (c: CategoryRow) => void; onCancel: () => void }) {
+  const [name, setName] = useState(cat.name);
+  const [description, setDescription] = useState(cat.description ?? '');
+  const [image, setImage] = useState(cat.image ?? '');
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    if (!name.trim()) return toast.error('نام دسته را وارد کنید');
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/categories/${cat.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim(), description, image }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        toast.error(json.error || 'ذخیره ناموفق بود');
+        return;
+      }
+      onSaved({ ...cat, ...json.data });
+      toast.success('دسته‌بندی ذخیره شد');
+    } catch {
+      toast.error('خطا در ارتباط با سرور');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="grid gap-5 md:grid-cols-[16rem_1fr] p-5 bg-[var(--muted)]/40">
+      <div>
+        <p className="text-sm font-medium text-[var(--foreground)] mb-1.5">عکس دسته‌بندی</p>
+        <ImageUploader images={image ? [image] : []} onChange={(imgs) => setImage(imgs[0] ?? '')} max={1} />
+        <p className="mt-2 text-xs text-[var(--muted-foreground)] leading-6">در منوی محصولات، صفحه دسته‌ها و کارت دسته نمایش داده می‌شود. عکس افقی با کیفیت بهتر است.</p>
+      </div>
+      <div className="grid gap-3 content-start">
+        <label className="block">
+          <span className="block text-sm font-medium text-[var(--foreground)] mb-1.5">نام</span>
+          <input value={name} onChange={(e) => setName(e.target.value)} className={`${fieldCls} h-11`} />
+        </label>
+        <label className="block">
+          <span className="block text-sm font-medium text-[var(--foreground)] mb-1.5">توضیح کوتاه</span>
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className={`${fieldCls} py-2.5 leading-7`} />
+        </label>
+        <div className="flex gap-2">
+          <button type="button" onClick={save} disabled={saving} className="h-11 px-6 rounded-xl bg-[var(--accent)] text-[var(--accent-foreground)] font-semibold text-sm disabled:opacity-50 flex items-center gap-2">
+            {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+            ذخیره
+          </button>
+          <button type="button" onClick={onCancel} className="h-11 px-4 rounded-xl bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] text-sm">
+            انصراف
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminCategoriesPage() {
   const confirm = useConfirm();
@@ -21,6 +85,7 @@ export default function AdminCategoriesPage() {
   const [saving, setSaving] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const loadCategories = useCallback(async () => {
     setLoading(true);
@@ -224,8 +289,8 @@ export default function AdminCategoriesPage() {
               </thead>
               <tbody>
                 {filtered.map((cat, i) => (
+                  <Fragment key={cat.id}>
                   <motion.tr
-                    key={cat.id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: i * 0.05 }}
@@ -233,9 +298,15 @@ export default function AdminCategoriesPage() {
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center">
-                          <Layers className="w-4 h-4 text-[var(--accent-text)]" />
-                        </div>
+                        {cat.image ? (
+                          <span className="relative w-11 h-11 rounded-xl overflow-hidden bg-[var(--muted)] shrink-0">
+                            <Image src={cat.image} alt="" fill sizes="44px" className="object-cover" />
+                          </span>
+                        ) : (
+                          <div className="w-11 h-11 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center shrink-0" title="بدون عکس">
+                            <Layers className="w-4 h-4 text-[var(--accent-text)]" />
+                          </div>
+                        )}
                         <span className="text-[var(--foreground)] font-medium">{cat.name}</span>
                       </div>
                     </td>
@@ -260,6 +331,16 @@ export default function AdminCategoriesPage() {
                       </button>
                     </td>
                     <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setEditingId(editingId === cat.id ? null : cat.id)}
+                        aria-expanded={editingId === cat.id}
+                        className="h-8 px-3 rounded-lg bg-[var(--muted)] flex items-center gap-1.5 text-xs font-medium text-[var(--foreground)] hover:bg-[var(--accent)]/15 transition-colors"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                        ویرایش و عکس
+                      </button>
                       <button
                         type="button"
                         disabled={deletingId === cat.id}
@@ -272,8 +353,24 @@ export default function AdminCategoriesPage() {
                           <Trash2 className="w-4 h-4" />
                         )}
                       </button>
+                      </div>
                     </td>
                   </motion.tr>
+                  {editingId === cat.id && (
+                    <tr className="border-b border-[var(--border)]">
+                      <td colSpan={5} className="p-0">
+                        <CategoryEditor
+                          cat={cat}
+                          onCancel={() => setEditingId(null)}
+                          onSaved={(updated) => {
+                            setCategories((prev) => prev.map((c) => (c.id === updated.id ? { ...c, ...updated } : c)));
+                            setEditingId(null);
+                          }}
+                        />
+                      </td>
+                    </tr>
+                  )}
+                  </Fragment>
                 ))}
               </tbody>
             </table>
