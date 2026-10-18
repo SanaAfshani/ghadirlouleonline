@@ -15,7 +15,7 @@ export async function register() {
   }
 
   // انتقال یک‌باره محتوا (shared/lib/content-sync) — در پس‌زمینه تا بالا آمدن سرور منتظر آپلود عکس‌ها نماند
-  const { syncContent, syncPriceTitles, syncSepticMainPhoto, syncVatOff, syncVatOffIssued } = await import('@/shared/lib/content-sync');
+  const { syncContent, syncPriceTitles, syncSepticMainPhoto, syncVatOff, syncVatOffIssued, syncCertificates, syncExclusiveText } = await import('@/shared/lib/content-sync');
   syncContent()
     .then((result) => console.log('[content-sync]', result))
     .catch((error) => console.error('[content-sync] failed, will retry on next start:', error));
@@ -25,10 +25,24 @@ export async function register() {
   syncSepticMainPhoto()
     .then((result) => console.log('[septic-photo]', result))
     .catch((error) => console.error('[septic-photo] failed, will retry on next start:', error));
+  syncCertificates()
+    .then((result) => console.log('[certificates]', result))
+    .catch((error) => console.error('[certificates] failed, will retry on next start:', error));
+  syncExclusiveText()
+    .then((result) => console.log('[exclusive-text]', result))
+    .catch((error) => console.error('[exclusive-text] failed, will retry on next start:', error));
   // پشت سر هم: هر دو روی ردیف‌های Quote کار می‌کنند
   syncVatOff()
     .then((result) => console.log('[vat-off]', result))
     .then(() => syncVatOffIssued())
     .then((result) => console.log('[vat-off-issued]', result))
     .catch((error) => console.error('[vat-off] failed, will retry on next start:', error));
+
+  // عکس‌های واترمارک‌دار در پس‌زمینه آماده شوند (shared/lib/media-cache) — بعد از کارهای بالا، تا با آن‌ها رقابت نکند
+  setTimeout(() => {
+    import('@/shared/lib/media-cache')
+      .then(({ warmMediaCache }) => warmMediaCache())
+      .then((result) => console.log('[media-cache]', result))
+      .catch((error) => console.error('[media-cache] warm failed:', error));
+  }, 30_000);
 }

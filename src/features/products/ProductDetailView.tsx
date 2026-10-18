@@ -134,7 +134,21 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
       {/* دسکتاپ: تصویر اصلی + بندانگشتی */}
       <div className="hidden lg:block">
         <button type="button" onClick={() => setZoom(active)} aria-label="بزرگ‌نمایی تصویر" className="relative block w-full aspect-[4/3] rounded-3xl overflow-hidden bg-[var(--muted)] border border-[var(--border)] cursor-zoom-in">
-          <Image src={images[active]} alt={name} fill sizes="(max-width: 1024px) 100vw, 50vw" quality={90} className="object-cover" priority />
+          {/* همه عکس‌ها روی هم و از اول بارگذاری می‌شوند؛ کلیک روی بندانگشتی فقط عکس آماده را نشان می‌دهد —
+              قبلاً با هر کلیک آدرس عکس عوض می‌شد و تا ساخت نسخه جدید روی سرور منتظر می‌ماند */}
+          {images.map((src, i) => (
+            <Image
+              key={src}
+              src={src}
+              alt={i === active ? name : ''}
+              aria-hidden={i !== active}
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              quality={90}
+              priority={i === 0}
+              className={cn('object-cover transition-opacity duration-200', i === active ? 'opacity-100' : 'opacity-0')}
+            />
+          ))}
         </button>
         {images.length > 1 && (
           // نوار افقی بندانگشتی — با عکس‌های زیاد چند ردیف نمی‌شود
@@ -172,12 +186,6 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
 
   const images = product.images.length ? product.images : product.category.image ? [product.category.image] : [];
   const specs = Object.entries(product.specifications ?? {});
-  // «ISIRI 9116 / EN 13476» → دو نشان جدا
-  const standards = specs
-    .filter(([k]) => /استاندارد/.test(k))
-    .flatMap(([, v]) => v.split(/[\/،,]/))
-    .map((v) => v.trim())
-    .filter(Boolean);
   const { board } = useLiveBoard(initialBoard);
   const line = board.lines.find((l) => l.productId === product.id);
   const summary = summarizeLine(line?.items ?? []);
@@ -259,9 +267,9 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
 
             <SpecCards specs={cardSpecs} subject={subject} />
 
-            {/* استانداردهای همین محصول (از مشخصات فنی) + گواهی‌های واقعی ثبت‌شده در پنل */}
+            {/* فقط عکس گواهی‌های واقعی — نام استانداردها همین حالا در جدول مشخصات فنی هست و تکرارش شلوغ می‌کرد */}
             <div className="mt-4 rounded-3xl border border-[var(--border)] bg-[var(--card)] p-4 empty:hidden">
-              <CertificateStrip certificates={certificates} standards={standards} />
+              <CertificateStrip certificates={certificates} />
             </div>
 
             {/* کارشناس فروش — موبایل (در دسکتاپ سایدبار همین کار را می‌کند) */}
