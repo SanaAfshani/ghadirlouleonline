@@ -11,7 +11,10 @@ import type { OrderLogEntry } from '@/shared/lib/order-status';
 import { OrderTimeline } from './OrderTimeline';
 
 const subscribeNoop = () => () => {};
-const clientNow = () => Date.now();
+// getSnapshot باید تا تغییر واقعی همان مقدار را برگرداند. Date.now خام هر میلی‌ثانیه عوض می‌شد: روی گوشی کند React بین
+// دو خواندن مقدار تازه می‌دید، پشت سر هم دوباره رندر می‌کرد و با «Maximum update depth» صفحه خطای ۵۰۰ نشان می‌داد.
+// گرد به دقیقه — برای «منقضی شده» کافی است و در طول یک رندر ثابت می‌ماند.
+const clientNow = () => Math.floor(Date.now() / 60_000) * 60_000;
 const serverNow = () => 0;
 
 export type PublicQuote = {
