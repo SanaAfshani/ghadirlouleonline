@@ -243,3 +243,34 @@ export async function syncVatOff() {
   ]);
   return `${notes.length} price notes, ${quotes} pending quotes without VAT`;
 }
+
+const VAT_OFF_ISSUED_KEY = 'vat_off_issued_2026_10';
+const VAT_ISSUED_BACKUP_ID = 'vatissuedbackup202610z000';
+
+/**
+ * به درخواست مدیر، ارزش افزوده از پیش‌فاکتورها/فاکتورهای صادرشده هم برداشته می‌شود: نرخ و مبلغ مالیات صفر، جمع کل = جمع کالا،
+ * و متن «+ 10% ارزش افزوده» از یادداشت ردیف‌های داخل پیش‌فاکتور (کپی یادداشت جدول قیمت). یک بار؛ مقادیر قبلی در Media پشتیبان.
+ */
+export async function syncVatOffIssued() {
+  if (await prisma.siteSettings.findUnique({ where: { key: VAT_OFF_ISSUED_KEY }, select: { key: true } })) return 'already done';
+
+  const quotes = await prisma.quote.findMany({ where: { vatRate: { gt: 0 } }, select: { id: true, number: true, vatRate: true, vatAmount: true, total: true } });
+  const items = await prisma.quoteItem.findMany({ where: { note: { contains: 'ارزش افزوده' } }, select: { id: true, note: true } });
+  const notes = items.map((i) => ({ id: i.id, before: i.note, note: i.note.replace(VAT_NOTE, '').trim() })).filter((i) => i.note !== i.before);
+  const backup = Buffer.from(JSON.stringify({ quotes, notes: notes.map(({ id, before }) => ({ id, note: before })) }));
+
+  const [, updatedQuotes] = await prisma.$transaction([
+    prisma.media.upsert({
+      where: { id: VAT_ISSUED_BACKUP_ID },
+      update: {},
+      create: { id: VAT_ISSUED_BACKUP_ID, data: new Uint8Array(backup), mime: 'application/json', size: backup.length, originalName: 'quotes-vat-backup.json' },
+    }),
+    prisma.$executeRaw`UPDATE "Quote" SET "vatRate" = 0, "vatAmount" = 0, total = subtotal WHERE "vatRate" > 0`,
+    prisma.$executeRaw`
+      UPDATE "QuoteItem" i SET note = c.note
+      FROM jsonb_to_recordset(${JSON.stringify(notes)}::jsonb) AS c(id text, note text)
+      WHERE i.id = c.id`,
+    prisma.siteSettings.create({ data: { key: VAT_OFF_ISSUED_KEY, value: new Date().toISOString(), type: 'text' } }),
+  ]);
+  return `${updatedQuotes} quotes and ${notes.length} quote rows without VAT`;
+}
