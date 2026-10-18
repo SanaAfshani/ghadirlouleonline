@@ -45,3 +45,24 @@ await sharp({ create: { width: W, height: H, channels: 4, background: { r: 0, g:
   .png()
   .toFile('public/images/watermark.png');
 console.log('watermark', W, 'x', H);
+
+// نشان اسناد (گواهینامه، اینفوگرافیک روی زمینه سفید): بدون زمینه تیره، لوگو + متن تیره — سرور آن را مورب و تکرارشونده
+// و کم‌رنگ روی کل سند می‌چیند (watermark.ts). خروجی: public/images/watermark-doc.png
+const docText = await sharp({
+  text: {
+    text: '<span foreground="#0f172a">قدیر لوله آنلاین</span>',
+    font: 'Vazirmatn Bold 54',
+    fontfile: 'public/fonts/Vazirmatn-Bold.ttf',
+    rgba: true,
+    dpi: 72,
+  },
+}).png().toBuffer({ resolveWithObject: true });
+const DW = PAD + docText.info.width + GAP + LOGO + PAD;
+await sharp({ create: { width: DW, height: H, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+  .composite([
+    { input: docText.data, left: PAD, top: Math.round((H - docText.info.height) / 2) },
+    { input: logo, left: PAD + docText.info.width + GAP, top: logoTop },
+  ])
+  .png()
+  .toFile('public/images/watermark-doc.png');
+console.log('watermark-doc', DW, 'x', H);

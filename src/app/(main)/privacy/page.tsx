@@ -20,7 +20,7 @@ export default function PrivacyPage() {
       <div className="container-main section-padding-sm max-w-3xl">
         <article className="article-content">
           <p>
-            {siteConfig.name} فروشگاه آنلاین کارخانه {siteConfig.legalName} است. این صفحه توضیح می‌دهد هنگام استفاده از سایت چه
+            {siteConfig.name} تنها نماینده انحصاری فروش {siteConfig.legalName} است. این صفحه توضیح می‌دهد هنگام استفاده از سایت چه
             اطلاعاتی از شما دریافت می‌شود و با آن چه می‌کنیم.
           </p>
 

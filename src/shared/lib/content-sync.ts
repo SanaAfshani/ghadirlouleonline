@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 import { prisma } from '@/shared/lib/prisma';
+import { siteConfig } from '@/shared/config/site';
 import { SPLIT_SKIP, splitTitle } from '@/shared/lib/price-title-split';
 
 /**
@@ -273,4 +274,65 @@ export async function syncVatOffIssued() {
     prisma.siteSettings.create({ data: { key: VAT_OFF_ISSUED_KEY, value: new Date().toISOString(), type: 'text' } }),
   ]);
   return `${updatedQuotes} quotes and ${notes.length} quote rows without VAT`;
+}
+
+const CERTIFICATES_KEY = 'certificates_2026_10';
+const CERT_DIR = path.join(process.cwd(), 'content', 'certs');
+/** گواهینامه‌های قدیر لوله پاسارگاد (عکس‌ها تمیز شده: بدون نوار گوشی/مرورگر، ISO صاف شده). شناسه ثابت تا اجرای دوباره تکراری نسازد */
+const CERTIFICATES = [
+  { file: 'iso-9001', id: 'certiso9001z2026100000000', title: 'گواهینامه ISO 9001:2015 سیستم مدیریت کیفیت قدیر لوله پاسارگاد', code: 'ISO 9001:2015 · QMS2038021125' },
+  { file: 'isiri-9116-renewal', id: 'certisiri9116renewz000000', title: 'پروانه علامت استاندارد اجباری لوله‌های پلی اتیلن، پلی پروپیلن و PVC-U با دیواره ساختمند (تمدید ۱۴۰۱)', code: 'ISIRI 9116-3' },
+  { file: 'isiri-9116-license', id: 'certisiri9116licz00000000', title: 'پروانه علامت استاندارد اجباری لوله پلی اتیلن دیواره ساختمند (کاروگیت)', code: 'ISIRI 9116-3' },
+  { file: 'qc-test-report', id: 'certqctestreportz00000000', title: 'گواهی کنترل کیفیت و گزارش آزمون لوله کاروگیت ۳۱۵ SN8', code: 'ISIRI 9116-3 · DIN 16961-2' },
+];
+
+/** گواهینامه‌ها در Media و تنظیمات certificates — یک بار؛ گواهی‌هایی که ادمین قبلاً ثبت کرده سر جایشان می‌مانند */
+export async function syncCertificates() {
+  if (await prisma.siteSettings.findUnique({ where: { key: CERTIFICATES_KEY }, select: { key: true } })) return 'already done';
+
+  const existingMedia = new Set((await prisma.media.findMany({ where: { id: { in: CERTIFICATES.map((c) => c.id) } }, select: { id: true } })).map((m) => m.id));
+  for (const c of CERTIFICATES) {
+    if (existingMedia.has(c.id)) continue;
+    const data = await readFile(path.join(CERT_DIR, `${c.file}.webp`));
+    const { width, height } = await sharp(data).metadata();
+    await prisma.media.create({ data: { id: c.id, data: new Uint8Array(data), mime: 'image/webp', size: data.length, width, height, originalName: `certificate-${c.file}.webp` } });
+  }
+
+  const setting = await prisma.siteSettings.findUnique({ where: { key: 'certificates' } });
+  let list: { title: string; code: string; image: string }[] = [];
+  try {
+    const parsed = JSON.parse(setting?.value || '[]');
+    if (Array.isArray(parsed)) list = parsed;
+  } catch {}
+  const ours = CERTIFICATES.map((c) => ({ title: c.title, code: c.code, image: `/media/${c.id}.webp` })).filter((c) => !list.some((l) => l.image === c.image));
+  const value = JSON.stringify([...ours, ...list]);
+
+  await prisma.$transaction([
+    prisma.siteSettings.upsert({ where: { key: 'certificates' }, update: { value }, create: { key: 'certificates', value, type: 'json' } }),
+    prisma.siteSettings.create({ data: { key: CERTIFICATES_KEY, value: new Date().toISOString(), type: 'text' } }),
+  ]);
+  return `${ours.length} certificates added`;
+}
+
+const EXCLUSIVE_TEXT_KEY = 'exclusive_text_2026_10';
+
+/**
+ * متن سئوی صفحه اول (home_seo_content) روی سرور هنوز «فروشگاه آنلاین کارخانه / خرید مستقیم از کارخانه» بود —
+ * فقط همان دو عبارت قدیمی به «تنها نماینده انحصاری» تبدیل می‌شود؛ اگر ادمین متن را عوض کرده باشد دست نمی‌خورد. یک بار.
+ */
+export async function syncExclusiveText() {
+  if (await prisma.siteSettings.findUnique({ where: { key: EXCLUSIVE_TEXT_KEY }, select: { key: true } })) return 'already done';
+  const row = await prisma.siteSettings.findUnique({ where: { key: 'home_seo_content' } });
+  let result = 'nothing to change';
+  if (row) {
+    const next = row.value
+      .replace(`<h3>خرید مستقیم از کارخانه ${siteConfig.legalName}</h3>`, `<h3>${siteConfig.exclusiveTitle}</h3>`)
+      .replace(`${siteConfig.name} فروشگاه آنلاین کارخانه ${siteConfig.legalName}،`, `<strong>${siteConfig.name}</strong> تنها نماینده انحصاری فروش ${siteConfig.legalName}،`);
+    if (next !== row.value) {
+      await prisma.siteSettings.update({ where: { key: 'home_seo_content' }, data: { value: next } });
+      result = 'home SEO text updated';
+    }
+  }
+  await prisma.siteSettings.create({ data: { key: EXCLUSIVE_TEXT_KEY, value: new Date().toISOString(), type: 'text' } });
+  return result;
 }

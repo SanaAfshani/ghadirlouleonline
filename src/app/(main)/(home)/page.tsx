@@ -22,9 +22,9 @@ import { siteConfig } from '@/shared/config/site';
 import { JsonLd } from '@/shared/ui/JsonLd';
 import { localBusinessSchema, organizationSchema, websiteSchema } from '@/shared/lib/seo';
 
-const HOME_TITLE = 'خرید لوله کاروگیت با قیمت روز از کارخانه | قدیر لوله آنلاین';
+const HOME_TITLE = 'خرید لوله کاروگیت با قیمت روز | نماینده انحصاری قدیر لوله پاسارگاد';
 const HOME_DESCRIPTION =
-  'قیمت روز و مشخصات لوله کاروگیت (دوجداره پلی اتیلن) مستقیم از کارخانه قدیر لوله پاسارگاد. تامین پروژه‌ای، مشاوره فنی و ارسال از گرمسار به سراسر ایران.';
+  'قدیر لوله آنلاین، تنها نماینده انحصاری قدیر لوله پاسارگاد: قیمت روز لوله کاروگیت دوجداره با استاندارد ISIRI 9116 و ISO 9001، تامین پروژه‌ای و ارسال از کارخانه گرمسار به سراسر ایران.';
 
 export const metadata: Metadata = {
   // absolute: وگرنه قالب «%s | نام سایت» لایه روت نام سایت را دوباره اضافه می‌کند
@@ -61,7 +61,7 @@ export default async function HomePage() {
       <ServicesSection />
       <BrandsSection />
       <BlogPreview posts={posts} />
-      <FactorySection address={settings.address} factoryAddress={settings.factoryAddress} companyPhones={settings.companyPhones} mapUrl={settings.mapUrl} />
+      <FactorySection address={settings.address} factoryAddress={settings.factoryAddress} companyPhones={settings.companyPhones} mapUrl={settings.mapUrl} certificates={settings.certificates} />
       <SeoContent html={settings.homeSeoContent} />
     </>
   );

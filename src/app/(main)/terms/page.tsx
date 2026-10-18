@@ -20,7 +20,7 @@ export default function TermsPage() {
       <div className="container-main section-padding-sm max-w-3xl">
         <article className="article-content">
           <p>
-            {siteConfig.name} فروشگاه آنلاین کارخانه {siteConfig.legalName} است. استفاده از سایت و ثبت درخواست خرید به معنی
+            {siteConfig.name} تنها نماینده انحصاری فروش {siteConfig.legalName} است. استفاده از سایت و ثبت درخواست خرید به معنی
             پذیرش شرایط زیر است.
           </p>
 

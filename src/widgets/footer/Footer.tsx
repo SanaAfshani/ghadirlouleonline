@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Building2, ChevronDown, Clock, Factory, Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
+import { Building2, ChevronDown, Clock, Factory, Mail, MapPin, MessageCircle, Phone, ShieldCheck } from 'lucide-react';
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
 import { siteConfig } from '@/shared/config/site';
 import { phoneHref as toTel } from '@/shared/lib/site-settings';
@@ -61,7 +61,11 @@ export function Footer({ categories }: { categories: NavCategory[] }) {
               <Image src="/images/logo.png" alt="" width={52} height={52} className="w-12 h-12 object-contain" />
               <span className="text-xl font-black text-white">{siteName}</span>
             </Link>
-            <p className="mt-4 text-sm leading-7 text-slate-400 max-w-sm">{siteDescription}</p>
+            <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-black text-[var(--accent-text)]">
+              <ShieldCheck className="w-4 h-4 shrink-0" aria-hidden />
+              <strong>{siteConfig.exclusiveTitle}</strong>
+            </p>
+            <p className="mt-2 text-sm leading-7 text-slate-400 max-w-sm">{siteDescription}</p>
             <div className="mt-5 flex gap-2">
               <a href={whatsappUrl} target="_blank" rel="noopener" aria-label="واتس‌اپ" className="grid place-items-center w-11 h-11 rounded-2xl bg-white/5 border border-white/10 hover:bg-[#128C7E] hover:text-white transition-colors">
                 <MessageCircle className="w-5 h-5" />
@@ -144,15 +148,30 @@ export function Footer({ categories }: { categories: NavCategory[] }) {
           </Column>
         </div>
 
-        {/* گواهینامه‌ها — فقط وقتی عکس واقعی در پنل ثبت شده باشد */}
-        {certificates.length > 0 && (
-          <div className="mt-10 lg:mt-14 pt-6 border-t border-white/10">
-            <CertificateStrip certificates={certificates} tone="dark" />
+        {/* گواهینامه‌ها (فقط وقتی عکس واقعی در پنل ثبت شده) + نمادهای اعتماد */}
+        <div className="mt-10 lg:mt-14 pt-6 border-t border-white/10 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
+          {certificates.length > 0 ? <CertificateStrip certificates={certificates} tone="dark" /> : <span />}
+          <div>
+            <p className="mb-3 font-black text-sm text-white">نمادهای اعتماد</p>
+            <ul className="flex flex-wrap gap-2.5">
+              {siteConfig.trustBadges.map((b) => {
+                const img = <Image src={b.image} alt={b.name} width={82} height={100} className="h-[5.5rem] w-auto object-contain" />;
+                return (
+                  <li key={b.name} title={b.name} className="rounded-2xl bg-white p-2 ring-1 ring-white/10">
+                    {b.href ? (
+                      <a href={b.href} target="_blank" rel="noopener" referrerPolicy="origin" aria-label={`استعلام ${b.name}`}>{img}</a>
+                    ) : (
+                      img
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
           </div>
-        )}
+        </div>
 
         <div className="mt-10 lg:mt-16 py-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
-          <p>© <span className="num">{year}</span> {siteName} — نماینده انحصاری {siteConfig.legalName}. تمامی حقوق محفوظ است.</p>
+          <p>© <span className="num">{year}</span> {siteName} — <strong className="text-slate-200">{siteConfig.exclusiveTitle}</strong>. تمامی حقوق محفوظ است.</p>
           <nav aria-label="قوانین" className="flex items-center gap-4">
             <Link href="/terms" className="hover:text-white transition-colors">قوانین و شرایط خرید</Link>
             <Link href="/privacy" className="hover:text-white transition-colors">حریم خصوصی</Link>

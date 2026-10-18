@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, Factory, Headphones, Search, ShieldCheck, Truck } from 'lucide-react';
+import { ChevronDown, ChevronLeft, Factory, Headphones, Search, ShieldCheck, Truck } from 'lucide-react';
 import { siteConfig } from '@/shared/config/site';
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
 import { useConsult } from '@/features/consult/ConsultProvider';
@@ -50,12 +50,27 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
 
       <div className="container-main grid grid-cols-1 lg:grid-cols-[1fr_470px] items-center gap-8 lg:gap-14 pt-8 pb-16 sm:pt-12 sm:pb-20 lg:pt-20 lg:pb-28">
         <div className="min-w-0 text-legible">
-          <p className="eyebrow">
-            <ShieldCheck className="w-4 h-4" aria-hidden />
-            نماینده انحصاری {siteConfig.legalName}
-          </p>
+          {/* جایگاه اصلی برند — اولین چیزی که دیده می‌شود؛ به صفحه گواهینامه‌ها می‌رود */}
+          <Link
+            href="/certificates"
+            className="group inline-flex items-center gap-3 rounded-2xl border border-[var(--accent)]/60 bg-[rgba(14,18,23,0.6)] backdrop-blur-md p-1.5 pe-4 shadow-[0_12px_32px_-12px_rgba(245,158,11,0.55)] transition-colors hover:border-[var(--accent)]"
+          >
+            <span className="relative grid place-items-center w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-[var(--accent)] text-[var(--accent-foreground)] shrink-0">
+              <ShieldCheck className="w-6 h-6" aria-hidden />
+              <span aria-hidden className="absolute -inset-1 rounded-[0.9rem] border border-[var(--accent)]/50 animate-pulse" />
+            </span>
+            <strong className="leading-tight text-right">
+              <span className="block text-[11px] sm:text-xs font-bold text-[var(--accent-text)]">تنها نماینده انحصاری</span>
+              <span className="block mt-0.5 text-base sm:text-lg font-black text-white">{siteConfig.legalName}</span>
+            </strong>
+            <span className="hidden sm:flex items-center gap-1.5 ms-1 ps-3 border-s border-white/15 text-[11px] font-bold text-slate-200">
+              <span className="h-6 px-2 rounded-md bg-white/10 grid place-items-center">ISO 9001</span>
+              <span className="h-6 px-2 rounded-md bg-white/10 grid place-items-center">ISIRI 9116</span>
+              <ChevronLeft className="w-4 h-4 text-[var(--accent-text)] transition-transform group-hover:-translate-x-0.5" aria-hidden />
+            </span>
+          </Link>
           <h1
-            className="mt-3 text-[1.85rem] leading-[1.4] sm:text-[2.6rem] lg:text-[3.1rem] lg:leading-[1.3] font-black tracking-tight text-white"
+            className="mt-5 text-[1.85rem] leading-[1.4] sm:text-[2.6rem] lg:text-[3.1rem] lg:leading-[1.3] font-black tracking-tight text-white"
           >
             {heroTitle}
           </h1>

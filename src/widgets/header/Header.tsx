@@ -124,7 +124,7 @@ export function Header({ categories }: { categories: NavCategory[] }) {
         <div className="hidden lg:block h-[38px] bg-[var(--ink)] text-[12px] text-slate-300">
           <div className="container-main h-full flex items-center justify-between">
             <div className="flex items-center gap-5">
-              <span className="flex items-center gap-1.5"><Factory className="w-3.5 h-3.5 text-[var(--accent-text)]" />فروش مستقیم از کارخانه {siteConfig.legalName}</span>
+              <strong className="flex items-center gap-1.5 font-black text-white"><Factory className="w-3.5 h-3.5 text-[var(--accent-text)]" />{siteConfig.exclusiveTitle}</strong>
               <span className="flex items-center gap-1.5"><Truck className="w-3.5 h-3.5 text-[var(--accent-text)]" />ارسال از انبار به سراسر کشور</span>
               <span className="hidden xl:flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-[var(--accent-text)]" />{siteConfig.workingHours}</span>
             </div>

@@ -27,12 +27,13 @@ export type ContactLocation = {
 const iconMap: Record<ContactInfoItem['icon'], LucideIcon> = { phone: Phone, mail: Mail, map: MapPin, clock: Clock };
 const iconTone: Record<ContactInfoItem['icon'], IconTone> = { phone: 'emerald', mail: 'sky', map: 'rose', clock: 'violet' };
 
-type Props = { contactInfo: ContactInfoItem[]; locations: ContactLocation[]; whatsappUrl?: string };
+/** intro: بخشی که بلافاصله بعد از سربرگ می‌آید (معرفی کارخانه، سمت سرور برای سئو) */
+type Props = { contactInfo: ContactInfoItem[]; locations: ContactLocation[]; whatsappUrl?: string; intro?: React.ReactNode };
 
 const fieldCls =
   'w-full h-12 rounded-2xl bg-[var(--muted)] border border-[var(--border)] px-4 text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--foreground)]/40 focus:bg-[var(--background)] transition-colors';
 
-export function ContactPageClient({ contactInfo, locations, whatsappUrl }: Props) {
+export function ContactPageClient({ contactInfo, locations, whatsappUrl, intro }: Props) {
   const { phone, phoneHref } = useSiteSettings();
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
   const [loading, setLoading] = useState(false);
@@ -77,6 +78,8 @@ export function ContactPageClient({ contactInfo, locations, whatsappUrl }: Props
           </a>
         )}
       </div>
+
+      {intro}
 
       <section className="section-padding">
         <div className="container-main grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-8 lg:gap-12 items-start">

@@ -4,12 +4,14 @@ import { getSiteSettingsMap } from '@/shared/lib/data';
 import { mergeSiteSettings, phoneHref } from '@/shared/lib/site-settings';
 import { siteConfig } from '@/shared/config/site';
 import { JsonLd } from '@/shared/ui/JsonLd';
-import { breadcrumbSchema, localBusinessSchema } from '@/shared/lib/seo';
+import { breadcrumbSchema, faqPageSchema, localBusinessSchema } from '@/shared/lib/seo';
+import { FACTORY_FAQS, FactoryAbout, factorySchema } from '@/features/contact/FactoryAbout';
+import { FaqAccordion } from '@/shared/ui/FaqAccordion';
 
 export const metadata: Metadata = {
-  title: 'تماس با ما | آدرس کارخانه و دفتر مرکزی',
+  title: `تماس با ما | ${siteConfig.exclusiveTitle}`,
   description:
-    `راه‌های ارتباط با ${siteConfig.legalName}: تلفن دفتر مرکزی ${siteConfig.companyPhones[0]}، آدرس دفتر تهران (شادآباد) و کارخانه و انبار شهرک صنعتی گرمسار. استعلام قیمت لوله و مسیریابی روی نقشه.`,
+    `تماس با ${siteConfig.name}، ${siteConfig.exclusiveTitle}: تلفن ${siteConfig.companyPhones[0]}، دفتر تهران (شادآباد) و کارخانه گرمسار. معرفی کارخانه از ۱۳۹۱، استاندارد ISIRI 9116-3 و ابعاد لوله کاروگیت.`,
   alternates: { canonical: `${siteConfig.url}/contact` },
 };
 
@@ -49,7 +51,13 @@ export default async function ContactPage() {
       {/* تکرار LocalBusiness در صفحه تماس — گوگل این صفحه را منبع اصلی اطلاعات تماس می‌داند */}
       <JsonLd data={localBusinessSchema(settings)} />
       <JsonLd data={breadcrumbSchema([{ name: 'تماس با ما', path: '/contact' }])} />
-      <ContactPageClient contactInfo={contactInfo} locations={locations} whatsappUrl={settings.whatsappUrl} />
+      <JsonLd data={factorySchema} />
+      <JsonLd data={faqPageSchema(FACTORY_FAQS)} />
+      {/* اول معرفی کارخانه، بعد راه‌های تماس و نقشه، آخر سوالات متداول */}
+      <ContactPageClient contactInfo={contactInfo} locations={locations} whatsappUrl={settings.whatsappUrl} intro={<FactoryAbout />} />
+      <div className="container-main pb-12 [&>section]:mt-0">
+        <FaqAccordion faqs={FACTORY_FAQS} />
+      </div>
     </>
   );
 }

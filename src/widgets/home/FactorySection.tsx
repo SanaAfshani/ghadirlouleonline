@@ -1,9 +1,11 @@
 import Image from 'next/image';
-import { Building2, Factory, MapPin, Navigation, Phone } from 'lucide-react';
+import { Building2, Factory, MapPin, Navigation, Phone, ShieldCheck } from 'lucide-react';
 import { siteConfig } from '@/shared/config/site';
 import { phoneHref, type SiteSettings } from '@/shared/lib/site-settings';
 import { faDigits } from '@/shared/lib/utils';
 import { IconTile } from '@/shared/ui/IconTile';
+import { CertificateStrip } from '@/features/certificates/Certificates';
+import { LtrCodes } from '@/shared/ui/LtrCodes';
 
 const STEPS = [
   { title: 'ثبت سفارش یا استعلام', desc: 'آنلاین از جدول قیمت یا تماس با دفتر فروش' },
@@ -11,10 +13,10 @@ const STEPS = [
   { title: 'ارسال به محل پروژه', desc: 'حمل به سراسر کشور پس از هماهنگی' },
 ];
 
-type Props = Pick<SiteSettings, 'address' | 'factoryAddress' | 'companyPhones' | 'mapUrl'>;
+type Props = Pick<SiteSettings, 'address' | 'factoryAddress' | 'companyPhones' | 'mapUrl' | 'certificates'>;
 
-/** این سایت فروش آنلاین کارخانه است — مسیر کالا از انبار تا مشتری و آدرس‌های واقعی (سئوی محلی) */
-export function FactorySection({ address, factoryAddress, companyPhones, mapUrl }: Props) {
+/** تنها نماینده انحصاری کارخانه — مسیر کالا از انبار تا مشتری، گواهینامه‌های کارخانه و آدرس‌های واقعی (سئوی محلی) */
+export function FactorySection({ address, factoryAddress, companyPhones, mapUrl, certificates }: Props) {
   return (
     <section className="relative bg-[var(--ink)] text-white overflow-hidden" aria-labelledby="factory-title">
       <div className="absolute inset-0 bp-grid" aria-hidden />
@@ -46,11 +48,11 @@ export function FactorySection({ address, factoryAddress, companyPhones, mapUrl 
         <div>
           <p className="eyebrow">کارخانه و انبار</p>
           <h2 id="factory-title" className="mt-2 text-[1.35rem] sm:text-2xl lg:text-3xl font-black text-white leading-snug">
-            فروش مستقیم از کارخانه {siteConfig.legalName}
+            {siteConfig.exclusiveTitle}
           </h2>
           <p className="mt-3 text-sm sm:text-[15px] leading-8 text-slate-300 max-w-xl">
-            {siteConfig.name} فروشگاه آنلاین کارخانه {siteConfig.legalName}، تولیدکننده لوله دوجداره پلی اتیلن است. سفارش‌ها مستقیم از انبار
-            کارخانه بارگیری و بدون واسطه به سراسر کشور ارسال می‌شوند.
+            <strong className="text-white">{siteConfig.name}</strong> تنها نماینده انحصاری فروش {siteConfig.legalName}، تولیدکننده لوله دوجداره پلی اتیلن
+            (کاروگیت) است. سفارش‌ها مستقیم از انبار کارخانه در گرمسار بارگیری و بدون واسطه به سراسر کشور ارسال می‌شوند.
           </p>
 
           <ol className="mt-8 grid grid-cols-1 sm:grid-cols-3 border border-white/10 rounded-2xl overflow-hidden">
@@ -89,6 +91,24 @@ export function FactorySection({ address, factoryAddress, companyPhones, mapUrl 
         </div>
 
         <div className="grid gap-3">
+          {/* جایگاه انحصاری + گواهینامه‌های کارخانه — اعتماد مشتری و سئو */}
+          <article className="rounded-2xl border-2 border-[var(--accent)]/60 bg-[var(--accent)]/[0.08] p-5">
+            <div className="flex items-start gap-3.5">
+              <IconTile icon={ShieldCheck} />
+              <div className="min-w-0">
+                <h3 className="font-black text-white leading-7">{siteConfig.exclusiveTitle}</h3>
+                <p className="mt-1 text-sm leading-7 text-slate-300">
+                  <LtrCodes text={`محصولات ${siteConfig.legalName} با گواهینامه ISO 9001 و پروانه استاندارد ملی ISIRI 9116-3 فقط از طریق ${siteConfig.name} عرضه می‌شود.`} />
+                </p>
+              </div>
+            </div>
+            {certificates.length > 0 && (
+              <div className="mt-4">
+                <CertificateStrip certificates={certificates} tone="dark" title="گواهینامه‌ها و مجوزها" />
+              </div>
+            )}
+          </article>
+
           <article className="corner-marks rounded-2xl border border-white/10 bg-white/[0.04] p-5">
             <div className="flex items-start gap-3.5">
               <IconTile icon={Factory} />

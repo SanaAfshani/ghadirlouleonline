@@ -8,6 +8,9 @@ import { BadgeCheck, ChevronLeft, X } from 'lucide-react';
 import type { Certificate } from '@/shared/lib/site-settings';
 import { cn, faDigits } from '@/shared/lib/utils';
 
+/** کد استاندارد لاتین (ISO 9001، ISIRI 9116-3) با ارقام لاتین می‌ماند — همین شکل جستجو می‌شود؛ فقط کد تمام‌فارسی ارقام فارسی می‌گیرد */
+const codeText = (code: string) => (/[A-Za-z]/.test(code) ? code : faDigits(code));
+
 /** نمایش بزرگ عکس گواهی */
 function CertificateViewer({ cert, onClose }: { cert: Certificate | null; onClose: () => void }) {
   useEffect(() => {
@@ -31,7 +34,7 @@ function CertificateViewer({ cert, onClose }: { cert: Certificate | null; onClos
           </div>
           <p className="absolute bottom-6 inset-x-0 text-center text-white font-bold px-4">
             {cert.title}
-            {cert.code && <span className="block text-sm font-normal text-white/70 num">{faDigits(cert.code)}</span>}
+            {cert.code && <span dir="ltr" className="block text-sm font-normal text-white/70">{codeText(cert.code)}</span>}
           </p>
           <button onClick={onClose} aria-label="بستن" className="absolute top-4 left-4 grid place-items-center w-11 h-11 rounded-full bg-black/60 ring-1 ring-white/25 text-white"><X className="w-5 h-5" /></button>
         </motion.div>
@@ -58,7 +61,7 @@ export function CertificatesGrid({ certificates }: { certificates: Certificate[]
               <Image src={c.image} alt={c.title} fill sizes="(min-width: 1024px) 280px, 50vw" className="object-contain p-2 transition-transform duration-500 group-hover:scale-105" />
             </span>
             <span className="mt-3 flex items-start gap-1.5 font-black text-sm leading-6"><BadgeCheck className="w-4.5 h-4.5 mt-0.5 shrink-0 text-emerald-600" />{c.title}</span>
-            {c.code && <span className="block text-xs text-[var(--muted-foreground)] num">{faDigits(c.code)}</span>}
+            {c.code && <span dir="ltr" className="block text-xs text-[var(--muted-foreground)] text-right">{codeText(c.code)}</span>}
           </button>
         ))}
       </div>
@@ -97,7 +100,7 @@ export function CertificateStrip({ certificates, standards = [], tone = 'light',
         {standards.map((s) => (
           <span key={s} className={cn('h-9 px-3 rounded-xl text-xs font-black flex items-center gap-1.5 num border', dark ? 'border-white/15 bg-white/5 text-white' : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300')}>
             <BadgeCheck className="w-4 h-4" />
-            {faDigits(s)}
+            {codeText(s)}
           </span>
         ))}
         {certificates.slice(0, 6).map((c) => (
