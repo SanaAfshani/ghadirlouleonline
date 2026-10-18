@@ -7,6 +7,7 @@ import { addWatermark } from '@/shared/lib/watermark';
  * کش نسخه واترمارک‌دار عکس‌های آپلودی. قبلاً هر درخواست /media/<id> عکس را از دیتابیس می‌خواند و دوباره واترمارک
  * می‌کرد — روی سرور اصلی ۷ تا ۱۸ ثانیه برای هر عکس؛ گالری محصول با کلیک روی هر عکس همین‌قدر منتظر می‌ماند.
  * حالا هر عکس یک بار ساخته می‌شود: روی دیسک (.next/cache، تا دیپلوی بعدی) + حافظه برای عکس‌های پرتکرار.
+ * پیش‌ساخت همه عکس‌ها هنگام بالا آمدن سرور حذف شد: روی سرور کوچک CPU را چند دقیقه کامل می‌گرفت و صفحه‌ها بالا نمی‌آمدند.
  * محتوای هر id هرگز عوض نمی‌شود؛ با تغییر واترمارک فقط VERSION را عوض کنید.
  */
 const VERSION = 'wm2';
@@ -69,16 +70,4 @@ export async function getMedia(id: string): Promise<Entry | null> {
   })().finally(() => inflight.delete(id));
   inflight.set(id, task);
   return task;
-}
-
-/** بعد از بالا آمدن سرور، همه عکس‌ها یکی‌یکی در پس‌زمینه آماده می‌شوند تا اولین بازدیدکننده منتظر نماند */
-export async function warmMediaCache() {
-  const rows = await prisma.media.findMany({ where: { mime: { startsWith: 'image/' } }, select: { id: true }, orderBy: { createdAt: 'desc' } });
-  let built = 0;
-  for (const { id } of rows) {
-    if (memory.has(id) || (await fromDisk(id))) continue;
-    await getMedia(id);
-    built++;
-  }
-  return `${built} of ${rows.length} images prepared`;
 }

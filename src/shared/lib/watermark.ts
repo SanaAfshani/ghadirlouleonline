@@ -15,6 +15,9 @@ const MIN_SIDE = 240;
 /** شفافیت نشان تکرارشونده روی اسناد و تصاویر گرافیکی */
 const DOC_OPACITY = 0.11;
 
+// sharp به‌طور پیش‌فرض همه هسته‌ها را می‌گیرد؛ روی سرور کوچک واترمارک چند عکس هم‌زمان پاسخ صفحه‌ها را معطل می‌کرد
+sharp.concurrency(1);
+
 let badge: Promise<Buffer> | null = null;
 const loadBadge = () => (badge ??= readFile(path.join(process.cwd(), 'public', 'images', 'watermark.png')));
 let docBadge: Promise<Buffer> | null = null;

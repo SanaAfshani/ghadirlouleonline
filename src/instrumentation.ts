@@ -38,11 +38,4 @@ export async function register() {
     .then((result) => console.log('[vat-off-issued]', result))
     .catch((error) => console.error('[vat-off] failed, will retry on next start:', error));
 
-  // عکس‌های واترمارک‌دار در پس‌زمینه آماده شوند (shared/lib/media-cache) — بعد از کارهای بالا، تا با آن‌ها رقابت نکند
-  setTimeout(() => {
-    import('@/shared/lib/media-cache')
-      .then(({ warmMediaCache }) => warmMediaCache())
-      .then((result) => console.log('[media-cache]', result))
-      .catch((error) => console.error('[media-cache] warm failed:', error));
-  }, 30_000);
 }
