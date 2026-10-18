@@ -7,21 +7,28 @@ import { priceFromWeight, toWeight } from '@/shared/lib/price-admin';
  */
 export async function applyPricePerKg(productId: string, pricePerKg: number | null) {
   const items = await prisma.priceItem.findMany({ where: { productId }, select: { id: true, price: true, weight: true } });
-  const now = new Date();
   const changed = items.flatMap((i) => {
     const price = priceFromWeight(i.weight, pricePerKg);
-    return price === undefined || price === i.price ? [] : [{ id: i.id, price, previousPrice: i.price }];
+    return price === undefined || price === i.price ? [] : [{ id: i.id, price }];
   });
-  // هر ردیف یک رفت‌وبرگشت به دیتابیس است؛ سقف پیش‌فرض ۵ ثانیه برای چند ده ردیف کم است
-  await prisma.$transaction(async (tx) => {
-    await tx.product.update({ where: { id: productId }, data: { pricePerKg } });
-    for (const c of changed) {
-      await tx.priceItem.update({
-        where: { id: c.id },
-        data: { price: c.price, previousPrice: c.previousPrice, priceChangedAt: now, history: { create: { price: c.price, recordedAt: now } } },
-      });
-    }
-  }, { timeout: 30_000 });
+  // یک کوئری برای همه ردیف‌ها (مثل تغییر درصدی): قبلاً هر ردیف دو رفت‌وبرگشت در یک تراکنش بود و برای ۵۲ ردیف
+  // کاروگیت از سقف ۳۰ ثانیه می‌گذشت، کل تراکنش برمی‌گشت و ادمین «خطای سرور» می‌دید. زمان‌ها UTC (timestamp بدون منطقه).
+  await prisma.$transaction([
+    prisma.product.update({ where: { id: productId }, data: { pricePerKg } }),
+    prisma.$executeRaw`
+      WITH upd AS (
+        UPDATE "PriceItem" i
+        SET "previousPrice" = i.price,
+            price = c.price,
+            "priceChangedAt" = (now() AT TIME ZONE 'UTC'),
+            "updatedAt" = (now() AT TIME ZONE 'UTC')
+        FROM jsonb_to_recordset(${JSON.stringify(changed)}::jsonb) AS c(id text, price int)
+        WHERE i.id = c.id
+        RETURNING i.id, i.price
+      )
+      INSERT INTO "PriceHistory" (id, "priceItemId", price, "recordedAt")
+      SELECT 'c' || substr(md5(random()::text || upd.id), 1, 24), upd.id, upd.price, (now() AT TIME ZONE 'UTC') FROM upd`,
+  ]);
   // ردیف بی‌وزن با فرمول حساب نمی‌شود — ادمین باید بداند چرا «۰ ردیف به‌روز شد»
   return { updated: changed.length, missingWeight: items.filter((i) => toWeight(i.weight) == null).length };
 }
