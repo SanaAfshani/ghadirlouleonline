@@ -177,3 +177,34 @@ export async function syncPriceTitles() {
   ]);
   return `${changes.length} price rows split`;
 }
+
+const SEPTIC_PHOTO_KEY = 'septic_main_photo_2026_10';
+
+/**
+ * عکس بارگیری سپتیک روی وانت (کج، با آدم و درخت) عکس اصلی محصول شده بود — عکس اصلی باید خود مخزن روی زمینه سفید باشد.
+ * همان عکس به ته گالری می‌رود (روی سرور csync2septic5، در دیتابیس توسعه آپلود دستی site-photo-b2-5.jpg). یک بار؛ چیزی حذف نمی‌شود.
+ */
+export async function syncSepticMainPhoto() {
+  if (await prisma.siteSettings.findUnique({ where: { key: SEPTIC_PHOTO_KEY }, select: { key: true } })) return 'already done';
+  const pickup = await prisma.media.findMany({
+    where: { originalName: { in: ['site-photo-septic5.webp', 'site-photo-b2-5.jpg'] } },
+    select: { id: true },
+  });
+  const pickupUrls = new Set(pickup.map((m) => `/media/${m.id}.webp`));
+  const septic = await prisma.product.findFirst({ where: { slug: 'septic-tank-polyethylene' }, select: { id: true, images: true } });
+
+  let result = 'nothing to change';
+  if (septic) {
+    let images: string[] = [];
+    try {
+      images = JSON.parse(septic.images || '[]');
+    } catch {}
+    if (images.length > 1 && pickupUrls.has(images[0])) {
+      const reordered = [...images.filter((u) => !pickupUrls.has(u)), ...images.filter((u) => pickupUrls.has(u))];
+      await prisma.product.update({ where: { id: septic.id }, data: { images: JSON.stringify(reordered) } });
+      result = 'septic pickup photo moved to the end';
+    }
+  }
+  await prisma.siteSettings.create({ data: { key: SEPTIC_PHOTO_KEY, value: new Date().toISOString(), type: 'text' } });
+  return result;
+}

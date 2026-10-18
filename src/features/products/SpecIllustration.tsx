@@ -44,7 +44,8 @@ const PALETTES: Record<Subject, Palette> = {
   ductile: { hi: '#64748b', mid: '#1e3a5f', lo: '#0f172a', inner: '#d1d5db', innerLo: '#9ca3af' },
   well: { hi: '#93c5fd', mid: '#2563eb', lo: '#1e3a8a', inner: '#bfdbfe', innerLo: '#3b82f6' },
   manhole: { hi: '#fef08a', mid: '#facc15', lo: '#a16207', inner: '#fde047', innerLo: '#ca8a04' },
-  septic: { hi: '#7dd3fc', mid: '#0284c7', lo: '#0c4a6e', inner: '#bae6fd', innerLo: '#0369a1' },
+  // مخزن مشکی با درب سبز — مثل عکس اصلی محصول
+  septic: { hi: '#4b5563', mid: '#1f2937', lo: '#0b0f14', inner: '#374151', innerLo: '#111827' },
   'fitting-pe': { hi: '#4b5563', mid: '#1f2937', lo: '#0b0f14', inner: '#374151', innerLo: '#111827' },
   'fitting-corrugated': BLACK,
   'fitting-pvc': { hi: '#f1f5f9', mid: '#94a3b8', lo: '#475569', inner: '#e2e8f0', innerLo: '#94a3b8' },
@@ -61,7 +62,6 @@ const BEAD: Partial<Record<Subject, [string, string]>> = {
   ductile: ['#94a3b8', '#334155'],
   manhole: ['#fef08a', '#ca8a04'],
   drainage: ['#fde68a', '#d97706'],
-  septic: ['#bae6fd', '#0369a1'],
   well: ['#bfdbfe', '#2563eb'],
 };
 
@@ -180,7 +180,8 @@ export function SpecIllustration({ kind, subject = 'corrugated', className }: { 
             ))}
             <path d="M12 21 H52" stroke="#fff" strokeOpacity="0.3" strokeWidth="2" strokeLinecap="round" />
             <rect x="25" y="8" width="14" height="10" fill={url('bodyX')} />
-            <ellipse cx="32" cy="8" rx="7" ry="2.2" fill={p.hi} stroke={p.lo} strokeOpacity="0.5" strokeWidth="0.8" />
+            <ellipse cx="32" cy="8" rx="8" ry="2.6" fill="#16a34a" stroke="#14532d" strokeWidth="0.8" />
+            <ellipse cx="32" cy="7.4" rx="5.5" ry="1.4" fill="#4ade80" fillOpacity="0.7" />
           </g>
         );
       case 'fitting-pe':

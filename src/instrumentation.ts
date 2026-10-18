@@ -15,11 +15,14 @@ export async function register() {
   }
 
   // انتقال یک‌باره محتوا (shared/lib/content-sync) — در پس‌زمینه تا بالا آمدن سرور منتظر آپلود عکس‌ها نماند
-  const { syncContent, syncPriceTitles } = await import('@/shared/lib/content-sync');
+  const { syncContent, syncPriceTitles, syncSepticMainPhoto } = await import('@/shared/lib/content-sync');
   syncContent()
     .then((result) => console.log('[content-sync]', result))
     .catch((error) => console.error('[content-sync] failed, will retry on next start:', error));
   syncPriceTitles()
     .then((result) => console.log('[price-split]', result))
     .catch((error) => console.error('[price-split] failed, will retry on next start:', error));
+  syncSepticMainPhoto()
+    .then((result) => console.log('[septic-photo]', result))
+    .catch((error) => console.error('[septic-photo] failed, will retry on next start:', error));
 }
