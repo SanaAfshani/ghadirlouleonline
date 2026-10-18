@@ -6,7 +6,7 @@ import {
   Check, Copy, ExternalLink, FileSpreadsheet, Loader2, Mail, MessageCircle, Plus, Trash2, Truck, X,
 } from 'lucide-react';
 import { cn, faDigits, formatPersianNumber, latinDigits } from '@/shared/lib/utils';
-import { DEFAULT_VAT_RATE, statusLabel } from '@/shared/lib/quote-constants';
+import { DEFAULT_VAT_RATE, VAT_ENABLED, statusLabel } from '@/shared/lib/quote-constants';
 import { useConfirm } from '@/shared/ui/ConfirmDialog';
 import { siteConfig } from '@/shared/config/site';
 import { ORDER_STEPS, type OrderLogEntry } from '@/shared/lib/order-status';
@@ -389,18 +389,20 @@ function QuoteEditor({
         <Field label="شرکت"><input disabled={locked} value={quote.customerCompany} onChange={(e) => set({ customerCompany: e.target.value })} className={cn(inputCls, 'w-full')} /></Field>
         <Field label="پیام مشتری" className="sm:col-span-2"><textarea disabled={locked} value={quote.customerMessage} onChange={(e) => set({ customerMessage: e.target.value })} rows={2} className={cn(inputCls, 'w-full h-auto py-2')} /></Field>
         <Field label="یادداشت داخلی" className="sm:col-span-2"><textarea value={quote.adminNote} onChange={(e) => set({ adminNote: e.target.value })} rows={2} className={cn(inputCls, 'w-full h-auto py-2')} /></Field>
-        <Field label={`ارزش افزوده (٪)`}>
-          <input
-            disabled={locked}
-            value={faDigits(String(quote.vatRate))}
-            onChange={(e) => {
-              const vatRate = Number(latinDigits(e.target.value).replace(/[^\d.]/g, '')) || 0;
-              set({ vatRate, ...calcFrom(items, vatRate) });
-            }}
-            dir="ltr"
-            className={cn(inputCls, 'w-full text-left')}
-          />
-        </Field>
+        {VAT_ENABLED && (
+          <Field label={`ارزش افزوده (٪)`}>
+            <input
+              disabled={locked}
+              value={faDigits(String(quote.vatRate))}
+              onChange={(e) => {
+                const vatRate = Number(latinDigits(e.target.value).replace(/[^\d.]/g, '')) || 0;
+                set({ vatRate, ...calcFrom(items, vatRate) });
+              }}
+              dir="ltr"
+              className={cn(inputCls, 'w-full text-left')}
+            />
+          </Field>
+        )}
         <Field label="اعتبار تا (خالی = ۴۸ ساعت بعد از صدور)">
           <input
             disabled={locked}
@@ -457,10 +459,14 @@ function QuoteEditor({
       )}
 
       <div className="p-5 border-t border-[var(--border)] bg-[var(--muted)]/30 space-y-1 text-sm num">
-        <div className="flex justify-between"><span className="text-[var(--muted-foreground)]">جمع کالا</span><span>{money(totals.subtotal)} تومان</span></div>
-        <div className="flex justify-between"><span className="text-[var(--muted-foreground)]">ارزش افزوده {faDigits(String(quote.vatRate))}٪</span><span>{money(totals.vatAmount)} تومان</span></div>
+        {quote.vatRate > 0 && (
+          <>
+            <div className="flex justify-between"><span className="text-[var(--muted-foreground)]">جمع کالا</span><span>{money(totals.subtotal)} تومان</span></div>
+            <div className="flex justify-between"><span className="text-[var(--muted-foreground)]">ارزش افزوده {faDigits(String(quote.vatRate))}٪</span><span>{money(totals.vatAmount)} تومان</span></div>
+          </>
+        )}
         <div className="flex justify-between font-black text-base pt-1"><span>جمع کل</span><span>{money(totals.total)} تومان</span></div>
-        <p className="text-[11px] text-[var(--muted-foreground)] pt-2">نرخ پیش‌فرض ارزش افزوده {formatPersianNumber(DEFAULT_VAT_RATE)}٪ است. هزینه حمل در این پیش‌فاکتور لحاظ نشده.</p>
+        <p className="text-[11px] text-[var(--muted-foreground)] pt-2">{VAT_ENABLED && `نرخ پیش‌فرض ارزش افزوده ${formatPersianNumber(DEFAULT_VAT_RATE)}٪ است. `}هزینه حمل در این پیش‌فاکتور لحاظ نشده.</p>
       </div>
 
       <div className="p-4 border-t border-[var(--border)] flex flex-wrap gap-2">

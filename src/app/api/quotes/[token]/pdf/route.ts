@@ -132,8 +132,12 @@ export async function GET(_request: NextRequest, { params }: Props) {
         React.createElement(
           View,
           { style: [styles.section, { alignItems: 'flex-start' }] },
-          React.createElement(Text, null, `جمع کالا: ${money(quote.subtotal)} تومان`),
-          React.createElement(Text, null, `ارزش افزوده ${quote.vatRate}٪: ${money(quote.vatAmount)} تومان`),
+          ...(quote.vatRate > 0
+            ? [
+                React.createElement(Text, { key: 'sub' }, `جمع کالا: ${money(quote.subtotal)} تومان`),
+                React.createElement(Text, { key: 'vat' }, `ارزش افزوده ${quote.vatRate}٪: ${money(quote.vatAmount)} تومان`),
+              ]
+            : []),
           React.createElement(Text, { style: [styles.bold, { fontSize: 12, marginTop: 4 }] }, `جمع کل: ${money(quote.total)} تومان`),
         ),
         // فوتر کارخانه

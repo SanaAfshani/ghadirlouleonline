@@ -208,3 +208,38 @@ export async function syncSepticMainPhoto() {
   await prisma.siteSettings.create({ data: { key: SEPTIC_PHOTO_KEY, value: new Date().toISOString(), type: 'text' } });
   return result;
 }
+
+const VAT_OFF_KEY = 'vat_off_2026_10';
+const VAT_NOTES_BACKUP_ID = 'vatnotesbackup202610z0000';
+/** «فروش به صورت رسمی می‌باشد + 10% ارزش افزوده» (با یا بدون نیم‌فاصله و «—» قبلش) */
+const VAT_NOTE = /\s*—?\s*فروش به صورت رسمی می‌?\s?باشد\s*\+\s*10\s*%\s*ارزش افزوده/g;
+
+/**
+ * ارزش افزوده فعلاً خاموش است (quote-constants: VAT_ENABLED): متن «+ 10% ارزش افزوده» از یادداشت ردیف‌های قیمت
+ * حذف می‌شود و پیش‌فاکتورهای صادرنشده‌ای که با ۱۰٪ ثبت شده‌اند بدون مالیات می‌شوند. فاکتورهای صادرشده دست نمی‌خورند.
+ * یک بار؛ یادداشت‌های قبلی در Media پشتیبان می‌شوند؛ updatedAt ردیف‌ها عوض نمی‌شود.
+ */
+export async function syncVatOff() {
+  if (await prisma.siteSettings.findUnique({ where: { key: VAT_OFF_KEY }, select: { key: true } })) return 'already done';
+
+  const rows = await prisma.priceItem.findMany({ where: { note: { contains: 'ارزش افزوده' } }, select: { id: true, note: true } });
+  const notes = rows.map((r) => ({ id: r.id, before: r.note, note: r.note.replace(VAT_NOTE, '').trim() })).filter((r) => r.note !== r.before);
+  const backup = Buffer.from(JSON.stringify(notes.map(({ id, before }) => ({ id, note: before }))));
+
+  const [, , quotes] = await prisma.$transaction([
+    prisma.media.upsert({
+      where: { id: VAT_NOTES_BACKUP_ID },
+      update: {},
+      create: { id: VAT_NOTES_BACKUP_ID, data: new Uint8Array(backup), mime: 'application/json', size: backup.length, originalName: 'price-notes-vat-backup.json' },
+    }),
+    prisma.$executeRaw`
+      UPDATE "PriceItem" i SET note = c.note
+      FROM jsonb_to_recordset(${JSON.stringify(notes)}::jsonb) AS c(id text, note text)
+      WHERE i.id = c.id`,
+    prisma.$executeRaw`
+      UPDATE "Quote" SET "vatRate" = 0, "vatAmount" = 0, total = subtotal
+      WHERE status <> 'ISSUED' AND "vatRate" > 0`,
+    prisma.siteSettings.create({ data: { key: VAT_OFF_KEY, value: new Date().toISOString(), type: 'text' } }),
+  ]);
+  return `${notes.length} price notes, ${quotes} pending quotes without VAT`;
+}

@@ -324,15 +324,19 @@ function QuoteCartPanel({
 
                 <form onSubmit={submit} className="shrink-0 border-t border-[var(--border)] bg-[var(--card)]">
                   <div className="px-5 py-3 space-y-1.5 text-sm num border-b border-[var(--border)]">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-[var(--muted-foreground)]">جمع کالا</span>
-                      <span>{subtotal.toLocaleString('fa-IR')} تومان</span>
-                    </div>
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-[var(--muted-foreground)]">ارزش افزوده {faDigits(String(DEFAULT_VAT_RATE))}٪</span>
-                      <span>{vatAmount.toLocaleString('fa-IR')} تومان</span>
-                    </div>
-                    <div className="flex items-center justify-between gap-3 font-black pt-1">
+                    {DEFAULT_VAT_RATE > 0 && (
+                      <>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-[var(--muted-foreground)]">جمع کالا</span>
+                          <span>{subtotal.toLocaleString('fa-IR')} تومان</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-[var(--muted-foreground)]">ارزش افزوده {faDigits(String(DEFAULT_VAT_RATE))}٪</span>
+                          <span>{vatAmount.toLocaleString('fa-IR')} تومان</span>
+                        </div>
+                      </>
+                    )}
+                    <div className={cn('flex items-center justify-between gap-3 font-black', DEFAULT_VAT_RATE > 0 && 'pt-1')}>
                       <span>جمع کل</span>
                       <span>{total.toLocaleString('fa-IR')} تومان</span>
                     </div>

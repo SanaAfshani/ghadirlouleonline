@@ -11,6 +11,7 @@ import {
   type QuoteLineInput,
 } from '@/shared/lib/quotes';
 import { latinDigits } from '@/shared/lib/utils';
+import { VAT_ENABLED } from '@/shared/lib/quote-constants';
 import { notifyQuoteIssued } from '@/shared/lib/sms';
 
 type Props = { params: Promise<{ id: string }> };
@@ -75,7 +76,8 @@ export async function PATCH(request: NextRequest, { params }: Props) {
       return NextResponse.json({ success: false, error: 'پیش‌فاکتور صادرشده قابل ویرایش نیست' }, { status: 400 });
     }
 
-    const vatRate = body.vatRate !== undefined ? Number(body.vatRate) : current.vatRate;
+    // ارزش افزوده خاموش: هر ذخیره و صدور با نرخ صفر — پیش‌فاکتورهای قدیمیِ ۱۰٪ هم موقع صدور بدون مالیات می‌شوند
+    const vatRate = !VAT_ENABLED ? 0 : body.vatRate !== undefined ? Number(body.vatRate) : current.vatRate;
     if (!Number.isFinite(vatRate) || vatRate < 0 || vatRate > 100) {
       return NextResponse.json({ success: false, error: 'نرخ مالیات نامعتبر است' }, { status: 400 });
     }

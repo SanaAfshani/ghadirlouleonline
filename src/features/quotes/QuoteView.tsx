@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from 'react';
 import Image from 'next/image';
 import { CheckCircle2, Clock, Download, Factory, Mail, MapPin, MessageCircle, Phone, Printer } from 'lucide-react';
-import { faDigits } from '@/shared/lib/utils';
+import { cn, faDigits } from '@/shared/lib/utils';
 import type { SiteSettings } from '@/shared/lib/site-settings';
 import { siteConfig } from '@/shared/config/site';
 import type { OrderLogEntry } from '@/shared/lib/order-status';
@@ -230,15 +230,20 @@ export function QuoteView({ quote, settings }: { quote: PublicQuote; settings: S
 
         <section className="px-6 sm:px-8 py-5 border-t border-slate-200 dark:border-[var(--border)]">
           <div className="ms-auto max-w-xs space-y-1.5 text-sm num">
-            <div className="flex justify-between gap-8">
-              <span className="text-slate-500 dark:text-[var(--muted-foreground)]">جمع کالا</span>
-              <span>{money(quote.subtotal)}</span>
-            </div>
-            <div className="flex justify-between gap-8">
-              <span className="text-slate-500 dark:text-[var(--muted-foreground)]">ارزش افزوده {faDigits(String(quote.vatRate))}٪</span>
-              <span>{money(quote.vatAmount)}</span>
-            </div>
-            <div className="flex justify-between gap-8 font-black text-base pt-2 border-t border-slate-200 dark:border-[var(--border)]">
+            {/* بدون ارزش افزوده، جمع کالا همان جمع کل است — ردیف تکراری نمایش داده نمی‌شود */}
+            {quote.vatRate > 0 && (
+              <>
+                <div className="flex justify-between gap-8">
+                  <span className="text-slate-500 dark:text-[var(--muted-foreground)]">جمع کالا</span>
+                  <span>{money(quote.subtotal)}</span>
+                </div>
+                <div className="flex justify-between gap-8">
+                  <span className="text-slate-500 dark:text-[var(--muted-foreground)]">ارزش افزوده {faDigits(String(quote.vatRate))}٪</span>
+                  <span>{money(quote.vatAmount)}</span>
+                </div>
+              </>
+            )}
+            <div className={cn('flex justify-between gap-8 font-black text-base', quote.vatRate > 0 && 'pt-2 border-t border-slate-200 dark:border-[var(--border)]')}>
               <span>جمع کل</span>
               <span>{money(quote.total)} تومان</span>
             </div>
