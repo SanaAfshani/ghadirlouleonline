@@ -4,6 +4,7 @@ import { useSyncExternalStore } from 'react';
 import Image from 'next/image';
 import { CheckCircle2, Clock, Download, Factory, Mail, MapPin, MessageCircle, Phone, Printer } from 'lucide-react';
 import { cn, faDigits } from '@/shared/lib/utils';
+import { faDateLong } from '@/shared/lib/jalali';
 import type { SiteSettings } from '@/shared/lib/site-settings';
 import { siteConfig } from '@/shared/config/site';
 import type { OrderLogEntry } from '@/shared/lib/order-status';
@@ -43,8 +44,7 @@ export type PublicQuote = {
 };
 
 const money = (n: number) => n.toLocaleString('fa-IR');
-const faDateTime = (iso: string | null) =>
-  iso ? new Date(iso).toLocaleString('fa-IR', { timeZone: 'Asia/Tehran', dateStyle: 'medium', timeStyle: 'short' }) : '—';
+const faDateTime = (iso: string | null) => faDateLong(iso);
 
 export function QuoteView({ quote, settings }: { quote: PublicQuote; settings: SiteSettings }) {
   const now = useSyncExternalStore(subscribeNoop, clientNow, serverNow);

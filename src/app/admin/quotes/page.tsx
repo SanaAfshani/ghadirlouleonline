@@ -12,6 +12,8 @@ import { siteConfig } from '@/shared/config/site';
 import { ORDER_STEPS, type OrderLogEntry } from '@/shared/lib/order-status';
 import { IconTile } from '@/shared/ui/IconTile';
 import { whatsappFromMobile } from '@/shared/lib/site-settings';
+import { faDateLong } from '@/shared/lib/jalali';
+import { ValidUntilField } from '@/features/quotes/ValidUntilField';
 
 type Item = {
   id?: string;
@@ -216,6 +218,7 @@ export default function AdminQuotesPage() {
             onChange={(q) => setQuotes((all) => all!.map((x) => (x.id === q.id ? q : x)))}
             onSaveDraft={() => save({ items: selected.items, vatRate: selected.vatRate, adminNote: selected.adminNote, customerName: selected.customerName, customerPhone: selected.customerPhone, customerEmail: selected.customerEmail, customerCompany: selected.customerCompany, customerMessage: selected.customerMessage, validUntil: selected.validUntil })}
             onIssue={issue}
+            onSaveValidity={() => save({ action: 'validity', validUntil: selected.validUntil }, 'تاریخ اعتبار ذخیره شد')}
             onReject={reject}
             onDelete={remove}
             onCopyLink={copyLink}
@@ -328,7 +331,7 @@ function OrderTrackingPanel({ quote, onChange }: { quote: Quote; onChange: (q: Q
 }
 
 function QuoteEditor({
-  quote, busy, onChange, onSaveDraft, onIssue, onReject, onDelete, onCopyLink, waHref, mailHref,
+  quote, busy, onChange, onSaveDraft, onIssue, onSaveValidity, onReject, onDelete, onCopyLink, waHref, mailHref,
 }: {
   quote: Quote;
   busy: boolean;
@@ -338,6 +341,7 @@ function QuoteEditor({
   onReject: () => void;
   onDelete: () => void;
   onCopyLink: () => void;
+  onSaveValidity: () => void;
   waHref: string;
   mailHref: string;
 }) {
@@ -364,7 +368,7 @@ function QuoteEditor({
     <div className={cn(card, 'overflow-hidden')}>
       <div className="p-5 border-b border-[var(--border)] flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs text-[var(--muted-foreground)]">{statusLabel(quote.status)} · {new Date(quote.createdAt).toLocaleString('fa-IR')}</p>
+          <p className="text-xs text-[var(--muted-foreground)]">{statusLabel(quote.status)} · {faDateLong(quote.createdAt)}</p>
           <h2 className="text-xl font-black num mt-1">{quote.number}</h2>
           {quote.sourcePath && <p className="text-xs text-[var(--muted-foreground)] mt-1">از صفحه: {quote.sourcePath}</p>}
         </div>
@@ -403,14 +407,13 @@ function QuoteEditor({
             />
           </Field>
         )}
-        <Field label="اعتبار تا (خالی = ۴۸ ساعت بعد از صدور)">
-          <input
-            disabled={locked}
-            type="datetime-local"
-            value={quote.validUntil ? toLocalInput(quote.validUntil) : ''}
-            onChange={(e) => set({ validUntil: e.target.value ? new Date(e.target.value).toISOString() : null })}
-            className={cn(inputCls, 'w-full')}
-          />
+        <Field label={locked ? 'اعتبار تا — قابل اصلاح و تمدید' : 'اعتبار تا (خالی = ۴۸ ساعت بعد از صدور)'} className="sm:col-span-2">
+          <ValidUntilField value={quote.validUntil} allowEmpty={!locked} onChange={(validUntil) => set({ validUntil })} />
+          {locked && (
+            <button type="button" disabled={busy} onClick={onSaveValidity} className="mt-2 h-9 px-4 rounded-xl bg-[var(--foreground)] text-[var(--background)] text-xs font-bold disabled:opacity-40">
+              ذخیره تاریخ اعتبار
+            </button>
+          )}
         </Field>
       </div>
 
@@ -502,10 +505,4 @@ function calcFrom(items: Item[], vatRate: number) {
   const subtotal = items.reduce((s, i) => s + Math.round(i.unitPrice * i.quantity), 0);
   const vatAmount = Math.round(subtotal * (vatRate / 100));
   return { subtotal, vatAmount, total: subtotal + vatAmount };
-}
-
-function toLocalInput(iso: string) {
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }

@@ -8,6 +8,7 @@ import { getSiteSettingsMap } from '@/shared/lib/site-settings-store';
 import { mergeSiteSettings } from '@/shared/lib/site-settings';
 import { siteConfig } from '@/shared/config/site';
 import { serverErrorResponse } from '@/shared/lib/api-errors';
+import { faDateLong } from '@/shared/lib/jalali';
 
 type Props = { params: Promise<{ token: string }> };
 
@@ -49,10 +50,7 @@ function money(n: number) {
   return n.toLocaleString('fa-IR');
 }
 
-function faDate(iso: string | null) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleString('fa-IR', { timeZone: 'Asia/Tehran', dateStyle: 'medium', timeStyle: 'short' });
-}
+const faDate = (iso: string | null) => faDateLong(iso);
 
 export async function GET(_request: NextRequest, { params }: Props) {
   try {

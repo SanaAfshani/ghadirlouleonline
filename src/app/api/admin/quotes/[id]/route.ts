@@ -72,6 +72,16 @@ export async function PATCH(request: NextRequest, { params }: Props) {
       return NextResponse.json({ success: true, data: serializeQuote(quote) });
     }
 
+    // اصلاح/تمدید «اعتبار تا» — برای فاکتور صادرشده هم؛ فقط همین فیلد، ردیف‌ها و مبلغ دست نمی‌خورند
+    if (action === 'validity') {
+      const validUntil = body.validUntil ? new Date(body.validUntil) : null;
+      if (!validUntil || Number.isNaN(validUntil.getTime()) || validUntil.getTime() <= Date.now()) {
+        return NextResponse.json({ success: false, error: 'تاریخ «اعتبار تا» باید بعد از الان باشد' }, { status: 400 });
+      }
+      const quote = await prisma.quote.update({ where: { id }, data: { validUntil }, include: { items: { orderBy: { sortOrder: 'asc' } } } });
+      return NextResponse.json({ success: true, data: serializeQuote(quote) });
+    }
+
     if (current.status === 'ISSUED' && action !== 'reissue') {
       return NextResponse.json({ success: false, error: 'پیش‌فاکتور صادرشده قابل ویرایش نیست' }, { status: 400 });
     }
