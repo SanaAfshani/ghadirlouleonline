@@ -7,11 +7,13 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        // صفحات جستجو محتوای تکراری تولید می‌کنند و بودجه خزش را هدر می‌دهند
-        disallow: ['/admin/', '/api/', '/search?'],
+        // /admin بدون اسلش هم (صفحه ورود)؛ /api فقط داده تعاملی است و محتوای صفحه‌ها سمت سرور رندر می‌شود.
+        // /search و پیش‌فاکتور /q عمداً بسته نیستند: noindex دارند و گوگل فقط وقتی صفحه را بخزد noindex را می‌بیند —
+        // Disallow باعث می‌شد آدرسِ لینک‌شده بدون محتوا در نتایج بماند.
+        disallow: ['/admin', '/api/'],
       },
     ],
+    // Host فقط برای یاندکس بود و منسوخ است
     sitemap: `${siteConfig.url}/sitemap.xml`,
-    host: siteConfig.url,
   };
 }

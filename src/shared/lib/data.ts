@@ -191,6 +191,16 @@ export const getProjectBySlug = cache(async (slug: string) => {
  * فقط داده لازم سایت‌مپ با تاریخ آخرین تغییر واقعی هر آدرس.
  * lastmod همیشه «اکنون» برای گوگل بی‌معناست و نادیده گرفته می‌شود.
  */
+/** ستون images (JSON) → فهرست آدرس عکس برای سایت‌مپ تصاویر؛ نامعتبر = خالی */
+function parseImageList(raw: string | null): string[] {
+  try {
+    const list = JSON.parse(raw || '[]');
+    return Array.isArray(list) ? list.filter((u): u is string => typeof u === 'string' && u.length > 0).slice(0, 10) : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function getSitemapData() {
   const [products, projects, prices] = await Promise.all([
     prisma.product.findMany({
@@ -198,11 +208,12 @@ export async function getSitemapData() {
       select: {
         slug: true,
         updatedAt: true,
+        images: true,
         category: { select: { slug: true } },
         priceItems: { select: { updatedAt: true }, orderBy: { updatedAt: 'desc' }, take: 1 },
       },
     }),
-    prisma.project.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
+    prisma.project.findMany({ where: { published: true }, select: { slug: true, updatedAt: true, images: true } }),
     prisma.priceItem.aggregate({ _max: { updatedAt: true } }),
   ]);
 
@@ -214,9 +225,10 @@ export async function getSitemapData() {
         slug: p.slug,
         categorySlug: p.category.slug,
         lastModified: priced && priced > p.updatedAt ? priced : p.updatedAt,
+        images: parseImageList(p.images),
       };
     }),
-    projects,
+    projects: projects.map((p) => ({ slug: p.slug, updatedAt: p.updatedAt, images: parseImageList(p.images) })),
     pricesUpdatedAt: prices._max.updatedAt,
   };
 }

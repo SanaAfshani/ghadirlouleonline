@@ -9,6 +9,10 @@ export const dynamic = 'force-dynamic';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = siteConfig.url;
 
+  // سایت‌مپ تصاویر: عکس‌های هر صفحه برای جستجوی تصویری گوگل — آدرس مطلق
+  const abs = (u: string | null | undefined) => (u ? (u.startsWith('http') ? u : `${baseUrl}${u.startsWith('/') ? '' : '/'}${u}`) : null);
+  const imgs = (list: (string | null | undefined)[]) => list.map(abs).filter((u): u is string => !!u);
+
   const [categories, { products, projects, pricesUpdatedAt }, posts, settings] = await Promise.all([
     getPublishedCategories(),
     getSitemapData(),
@@ -21,7 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const latestPost = posts.reduce<Date | undefined>((a, p) => (!a || p.updatedAt > a ? p.updatedAt : a), undefined);
 
   const staticPages: MetadataRoute.Sitemap = [
-    { url: baseUrl, lastModified: pricesModified, changeFrequency: 'daily', priority: 1 },
+    { url: baseUrl, lastModified: pricesModified, changeFrequency: 'daily', priority: 1, images: imgs(['/images/site/hero-wm.webp', '/images/site/factory-aerial-wm.webp']) },
     { url: `${baseUrl}/products`, changeFrequency: 'daily', priority: 0.9 },
     { url: `${baseUrl}/prices`, lastModified: pricesModified, changeFrequency: 'daily', priority: 0.9 },
     { url: `${baseUrl}/categories`, changeFrequency: 'weekly', priority: 0.85 },
@@ -40,6 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: c.updatedAt,
     changeFrequency: 'weekly',
     priority: 0.8,
+    images: imgs([c.image]),
   }));
 
   const productPages: MetadataRoute.Sitemap = products.map((p) => ({
@@ -47,6 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: p.lastModified,
     changeFrequency: 'weekly',
     priority: 0.75,
+    images: imgs(p.images),
   }));
 
   const blogPages: MetadataRoute.Sitemap = posts.map((p) => ({
@@ -54,6 +60,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: p.updatedAt,
     changeFrequency: 'monthly',
     priority: 0.7,
+    images: imgs([p.coverImage]),
   }));
 
   const projectPages: MetadataRoute.Sitemap = projects.map((p) => ({
@@ -61,6 +68,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: p.updatedAt,
     changeFrequency: 'monthly',
     priority: 0.65,
+    images: imgs(p.images),
   }));
 
   // /search (noindex) در سایت‌مپ نیست؛ /projects فقط وقتی پروژه‌ای ثبت شده باشد
@@ -68,9 +76,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ? [{ url: `${baseUrl}/projects`, changeFrequency: 'monthly', priority: 0.6 }]
     : [];
 
-  // /certificates بدون گواهی ۴۰۴ است
-  const certificatesPage: MetadataRoute.Sitemap = parseCertificates(settings.certificates).length
-    ? [{ url: `${baseUrl}/certificates`, changeFrequency: 'yearly', priority: 0.5 }]
+  // /certificates بدون گواهی ۴۰۴ است؛ جایگاه «نماینده انحصاری» برای سئو مهم است — اولویت بالاتر از صفحات قوانین
+  const certificates = parseCertificates(settings.certificates);
+  const certificatesPage: MetadataRoute.Sitemap = certificates.length
+    ? [{ url: `${baseUrl}/certificates`, changeFrequency: 'monthly', priority: 0.75, images: imgs(certificates.map((c) => c.image)) }]
     : [];
 
   return [...staticPages, ...categoryPages, ...productPages, ...blogPages, ...projectsIndex, ...projectPages, ...certificatesPage];
