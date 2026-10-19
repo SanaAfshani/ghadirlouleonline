@@ -63,6 +63,8 @@ model Product {
   ogDescription    String?
   /** سوالات متداول اختصاصی محصول — آرایه JSON از {question, answer} */
   faqs             String   @default("[]")
+  /** کاتالوگ‌ها و مدارک فنی محصول — آرایه JSON از {title, url} */
+  catalogs         String   @default("[]")
   /** ردیف‌های تابلوی قیمت لحظه‌ای این محصول */
   priceItems       PriceItem[]
   /// قیمت روز هر کیلوگرم (تومان). وقتی پر است قیمت هر ردیفِ وزن‌دار = وزن × این عدد و دستی وارد نمی‌شود.

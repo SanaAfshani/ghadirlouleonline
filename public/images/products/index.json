@@ -1,0 +1,72 @@
+{
+  "polymer-valves": [
+    "/images/products/polymer-valves-1.webp",
+    "/images/products/polymer-valves-2.webp",
+    "/images/products/polymer-valves-3.webp",
+    "/images/products/polymer-valves-4.webp"
+  ],
+  "sprinkler-irrigation-equipment": [
+    "/images/products/sprinkler-irrigation-equipment-1.webp",
+    "/images/products/sprinkler-irrigation-equipment-2.webp",
+    "/images/products/sprinkler-irrigation-equipment-3.webp",
+    "/images/products/sprinkler-irrigation-equipment-4.webp"
+  ],
+  "sprinklers": [
+    "/images/products/sprinklers-1.webp",
+    "/images/products/sprinklers-2.webp",
+    "/images/products/sprinklers-3.webp",
+    "/images/products/sprinklers-4.webp"
+  ],
+  "layflat-hose": [
+    "/images/products/layflat-hose-1.webp",
+    "/images/products/layflat-hose-2.webp",
+    "/images/products/layflat-hose-3.webp"
+  ],
+  "drip-fittings": [
+    "/images/products/drip-fittings-1.webp",
+    "/images/products/drip-fittings-2.webp"
+  ],
+  "upvc-threaded-fittings": [
+    "/images/products/upvc-threaded-fittings-1.webp",
+    "/images/products/upvc-threaded-fittings-2.webp",
+    "/images/products/upvc-threaded-fittings-3.webp",
+    "/images/products/upvc-threaded-fittings-4.webp"
+  ],
+  "composite-manhole-covers": [
+    "/images/products/composite-manhole-covers-1.webp",
+    "/images/products/composite-manhole-covers-2.webp",
+    "/images/products/composite-manhole-covers-3.webp",
+    "/images/products/composite-manhole-covers-4.webp",
+    "/images/products/composite-manhole-covers-5.webp",
+    "/images/products/composite-manhole-covers-6.webp"
+  ],
+  "urban-furniture-composite": [
+    "/images/products/urban-furniture-composite-1.webp",
+    "/images/products/urban-furniture-composite-2.webp",
+    "/images/products/urban-furniture-composite-3.webp",
+    "/images/products/urban-furniture-composite-4.webp",
+    "/images/products/urban-furniture-composite-5.webp",
+    "/images/products/urban-furniture-composite-6.webp"
+  ],
+  "telecom-covers": [
+    "/images/products/telecom-covers-1.webp",
+    "/images/products/telecom-covers-2.webp",
+    "/images/products/telecom-covers-3.webp"
+  ],
+  "industrial-park-covers": [
+    "/images/products/industrial-park-covers-1.webp"
+  ],
+  "electrical-duct-boxes": [
+    "/images/products/electrical-duct-boxes-1.webp"
+  ],
+  "gas-covers-manholes": [
+    "/images/products/gas-covers-manholes-1.webp",
+    "/images/products/gas-covers-manholes-2.webp",
+    "/images/products/gas-covers-manholes-3.webp",
+    "/images/products/gas-covers-manholes-4.webp",
+    "/images/products/gas-covers-manholes-5.webp",
+    "/images/products/gas-covers-manholes-6.webp",
+    "/images/products/gas-covers-manholes-7.webp",
+    "/images/products/gas-covers-manholes-8.webp"
+  ]
+}

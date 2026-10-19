@@ -20,6 +20,8 @@ export interface Product {
   ogDescription?: string | null;
   /** سوالات متداول اختصاصی این محصول (در انتهای صفحه به صورت آکاردئون) */
   faqs: FaqItem[];
+  /** کاتالوگ‌ها و مدارک فنی محصول (PDF) */
+  catalogs: CatalogFile[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -43,6 +45,17 @@ export interface Category {
 export interface FaqItem {
   question: string;
   answer: string;
+}
+
+/**
+ * یک کاتالوگ/مدرک فنی محصول. دو حالت دارد:
+ *  - PDF: فقط `url` پر است
+ *  - تصویری: `pages` آدرس صفحه‌هاست (کاتالوگ‌هایی که فقط عکس هستند، نه PDF)
+ */
+export interface CatalogFile {
+  title: string;
+  url?: string;
+  pages?: string[];
 }
 
 export interface BlogPost {

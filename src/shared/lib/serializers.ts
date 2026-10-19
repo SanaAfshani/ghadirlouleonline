@@ -1,6 +1,7 @@
 import type { FaqItem, BlogPost, Category, Product, Project } from '@/shared/types';
 import { formatPersianNumber } from '@/shared/lib/utils';
 import { isComingSoon } from '@/shared/lib/catalog';
+import { parseCatalogs } from '@/shared/lib/catalog-files';
 
 export function parseJsonArray(value: string): string[] {
   try {
@@ -45,6 +46,7 @@ type DbProduct = {
   ogTitle?: string | null;
   ogDescription?: string | null;
   faqs?: string;
+  catalogs?: string;
   categoryId: string;
   category: { slug: string; name: string; image?: string | null };
   createdAt: Date;
@@ -60,6 +62,7 @@ export function serializeProduct(p: DbProduct): Product {
     images: parseJsonArray(p.images),
     specifications: parseJsonObject(p.specifications),
     faqs: parseFaqs(p.faqs),
+    catalogs: parseCatalogs(p.catalogs),
   } as Product;
 }
 

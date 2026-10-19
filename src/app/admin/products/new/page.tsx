@@ -11,8 +11,9 @@ import { ImageUploader } from '@/shared/ui/ImageUploader';
 import { HtmlContentEditor } from '@/features/admin/editor/HtmlContentEditor';
 import { SeoPanel } from '@/features/admin/seo/SeoPanel';
 import { FaqEditor } from '@/features/admin/seo/FaqEditor';
+import { CatalogEditor } from '@/features/admin/catalogs/CatalogEditor';
 import type { SeoFields } from '@/features/admin/seo/seo';
-import type { FaqItem } from '@/shared/types';
+import type { CatalogFile, FaqItem } from '@/shared/types';
 import { Select } from '@/shared/ui/Select';
 
 type Spec = { key: string; value: string };
@@ -36,6 +37,7 @@ interface FormState {
   ogTitle: string;
   ogDescription: string;
   faqs: FaqItem[];
+  catalogs: CatalogFile[];
 }
 
 export default function NewProductPage() {
@@ -61,6 +63,7 @@ export default function NewProductPage() {
     ogTitle: '',
     ogDescription: '',
     faqs: [],
+    catalogs: [],
   });
   const [slugTouched, setSlugTouched] = useState(false);
 
@@ -119,6 +122,7 @@ export default function NewProductPage() {
           ogTitle: form.ogTitle,
           ogDescription: form.ogDescription,
           faqs: form.faqs,
+          catalogs: form.catalogs,
         }),
       });
 
@@ -278,6 +282,11 @@ export default function NewProductPage() {
               value={form.faqs}
               onChange={(faqs) => setForm((f) => ({ ...f, faqs }))}
               entityLabel="محصول"
+            />
+
+            <CatalogEditor
+              value={form.catalogs}
+              onChange={(catalogs) => setForm((f) => ({ ...f, catalogs }))}
             />
           </div>
 

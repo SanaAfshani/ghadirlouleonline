@@ -3,6 +3,7 @@ import { requireAdmin, isAdmin } from '@/shared/lib/admin-auth';
 import { prisma } from '@/shared/lib/prisma';
 import { serializeProduct } from '@/shared/lib/serializers';
 import { serializeFaqs } from '@/shared/lib/page-faqs';
+import { serializeCatalogs } from '@/shared/lib/catalog-files';
 import { slugify } from '@/shared/lib/utils';
 import { recordRedirect } from '@/shared/lib/redirects';
 
@@ -67,6 +68,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
     if (body.ogTitle !== undefined) data.ogTitle = optionalText(body.ogTitle);
     if (body.ogDescription !== undefined) data.ogDescription = optionalText(body.ogDescription);
     if (body.faqs !== undefined) data.faqs = serializeFaqs(body.faqs);
+    if (body.catalogs !== undefined) data.catalogs = serializeCatalogs(body.catalogs);
 
     const before = await prisma.product.findUnique({
       where: { id },

@@ -16,6 +16,8 @@ const STATEMENTS = [
   `ALTER TABLE "Quote" ADD COLUMN IF NOT EXISTS "orderStatus" TEXT NOT NULL DEFAULT ''`,
   `ALTER TABLE "Quote" ADD COLUMN IF NOT EXISTS "orderLog" TEXT NOT NULL DEFAULT '[]'`,
   `ALTER TABLE "Quote" ADD COLUMN IF NOT EXISTS "trackingNote" TEXT NOT NULL DEFAULT ''`,
+  // 20261020000000_product_catalogs
+  `ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "catalogs" TEXT NOT NULL DEFAULT '[]'`,
 ];
 
 export async function ensureSchema() {

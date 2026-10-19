@@ -2,6 +2,7 @@ import { prisma } from '@/shared/lib/prisma';
 import { siteConfig } from '@/shared/config/site';
 import { formatPersianNumber, slugify, stripHtml } from '@/shared/lib/utils';
 import { recordRedirect } from '@/shared/lib/redirects';
+import { isComingSoon } from '@/shared/lib/catalog';
 
 export type AuditType = 'product' | 'category' | 'blog' | 'project';
 export type Issue = { code: string; level: 'error' | 'warn'; message: string };
@@ -9,6 +10,8 @@ export type AuditItem = {
   type: AuditType;
   id: string;
   name: string;
+  /** عنوانی که واقعاً در <title> صفحه می‌نشیند — مبنای تشخیص عنوان تکراری */
+  title: string;
   url: string;
   adminUrl: string;
   score: number;
@@ -68,17 +71,21 @@ export async function runAudit(): Promise<{ items: AuditItem[]; summary: Record<
     if (p._count.priceItems === 0) issues.push({ code: 'prices', level: 'warn', message: 'جدول قیمت ندارد' });
     if (p.faqs === '[]') issues.push({ code: 'faq', level: 'warn', message: 'سوال متداول ندارد' });
     items.push({
-      type: 'product', id: p.id, name: p.name, url: `/products/${p.category.slug}/${p.slug}`,
+      type: 'product', id: p.id, name: p.name, title, url: `/products/${p.category.slug}/${p.slug}`,
       adminUrl: `/admin/products/${p.id}/edit`, score: score(issues), issues,
     });
   }
 
   for (const c of categories) {
     const issues: Issue[] = [];
+    // همان عنوانی که صفحه دسته می‌سازد؛ عمداً با عنوان صفحه محصول هم‌پوشانی ندارد
+    const title = isComingSoon(c.slug)
+      ? `${c.name} | مشخصات و استعلام (به زودی)`
+      : `قیمت ${c.name} | جدول سایز و خرید عمده`;
     if (!isAscii(c.slug)) issues.push({ code: 'slug', level: 'error', message: 'آدرس صفحه انگلیسی نیست' });
     if (!c.description) issues.push({ code: 'desc-missing', level: 'warn', message: 'توضیحات دسته ندارد' });
     if (!c.image) issues.push({ code: 'image', level: 'warn', message: 'تصویر ندارد' });
-    items.push({ type: 'category', id: c.id, name: c.name, url: `/products/${c.slug}`, adminUrl: '/admin/categories', score: score(issues), issues });
+    items.push({ type: 'category', id: c.id, name: c.name, title, url: `/products/${c.slug}`, adminUrl: '/admin/categories', score: score(issues), issues });
   }
 
   for (const b of posts) {
@@ -96,7 +103,7 @@ export async function runAudit(): Promise<{ items: AuditItem[]; summary: Record<
     if (!b.pdfUrl && w < 100) issues.push({ code: 'thin', level: 'error', message: 'محتوا کمتر از ۱۰۰ کلمه است' });
     else if (!b.pdfUrl && w < 300) issues.push({ code: 'thin', level: 'warn', message: 'محتوا کمتر از ۳۰۰ کلمه است' });
     if (b.faqs === '[]') issues.push({ code: 'faq', level: 'warn', message: 'سوال متداول ندارد' });
-    items.push({ type: 'blog', id: b.id, name: b.title, url: `/blog/${b.slug}`, adminUrl: `/admin/blog/${b.slug}/edit`, score: score(issues), issues });
+    items.push({ type: 'blog', id: b.id, name: b.title, title, url: `/blog/${b.slug}`, adminUrl: `/admin/blog/${b.slug}/edit`, score: score(issues), issues });
   }
 
   for (const pr of projects) {
@@ -104,13 +111,15 @@ export async function runAudit(): Promise<{ items: AuditItem[]; summary: Record<
     if (!isAscii(pr.slug)) issues.push({ code: 'slug', level: 'error', message: 'آدرس صفحه انگلیسی نیست' });
     if (!pr.description) issues.push({ code: 'desc-missing', level: 'warn', message: 'توضیحات ندارد' });
     if (pr.images === '[]') issues.push({ code: 'image', level: 'warn', message: 'تصویر ندارد' });
-    items.push({ type: 'project', id: pr.id, name: pr.title, url: `/projects/${pr.slug}`, adminUrl: `/admin/projects/${pr.id}/edit`, score: score(issues), issues });
+    items.push({ type: 'project', id: pr.id, name: pr.title, title: pr.title, url: `/projects/${pr.slug}`, adminUrl: `/admin/projects/${pr.id}/edit`, score: score(issues), issues });
   }
 
-  // عنوان تکراری بین صفحات — گوگل یکی را نادیده می‌گیرد
+  // عنوان تکراری بین صفحات — گوگل یکی را نادیده می‌گیرد.
+  // مبنا عنوان واقعی <title> است نه نام موجودیت؛ قبلاً صفحه دسته و محصولِ هم‌نام تکراری شمرده
+  // می‌شدند در حالی که عنوانشان از ابتدا عمداً متفاوت ساخته می‌شود.
   const seen = new Map<string, AuditItem[]>();
   for (const it of items) {
-    const key = norm(it.name);
+    const key = norm(it.title);
     seen.set(key, [...(seen.get(key) ?? []), it]);
   }
   for (const group of seen.values()) {

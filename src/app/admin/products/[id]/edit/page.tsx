@@ -10,8 +10,9 @@ import { ImageUploader } from '@/shared/ui/ImageUploader';
 import { HtmlContentEditor } from '@/features/admin/editor/HtmlContentEditor';
 import { SeoPanel } from '@/features/admin/seo/SeoPanel';
 import { FaqEditor } from '@/features/admin/seo/FaqEditor';
+import { CatalogEditor } from '@/features/admin/catalogs/CatalogEditor';
 import type { SeoFields } from '@/features/admin/seo/seo';
-import type { FaqItem } from '@/shared/types';
+import type { CatalogFile, FaqItem } from '@/shared/types';
 import { Select } from '@/shared/ui/Select';
 
 type Spec = { key: string; value: string };
@@ -35,6 +36,7 @@ interface FormState {
   ogTitle: string;
   ogDescription: string;
   faqs: FaqItem[];
+  catalogs: CatalogFile[];
 }
 
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
@@ -54,6 +56,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     ogTitle: '',
     ogDescription: '',
     faqs: [],
+    catalogs: [],
   });
 
   const handleSeoChange = (patch: Partial<SeoFields>) =>
@@ -101,6 +104,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           ogTitle: product.ogTitle || '',
           ogDescription: product.ogDescription || '',
           faqs: Array.isArray(product.faqs) ? product.faqs : [],
+          catalogs: Array.isArray(product.catalogs) ? product.catalogs : [],
         });
       } catch {
         toast.error('خطا در ارتباط با سرور');
@@ -141,6 +145,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           ogTitle: form.ogTitle,
           ogDescription: form.ogDescription,
           faqs: form.faqs,
+          catalogs: form.catalogs,
         }),
       });
 
@@ -303,6 +308,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
               value={form.faqs}
               onChange={(faqs) => setForm((f) => ({ ...f, faqs }))}
               entityLabel="محصول"
+            />
+
+            <CatalogEditor
+              value={form.catalogs}
+              onChange={(catalogs) => setForm((f) => ({ ...f, catalogs }))}
             />
           </div>
 

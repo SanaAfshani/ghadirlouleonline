@@ -7,7 +7,8 @@ export type IllustrationKind =
 /** خود محصول که در هر کارت کشیده می‌شود — مثل منهول زرد کنار کولیس، نه یک لوله ثابت برای همه */
 export type Subject =
   | 'corrugated' | 'spiral' | 'drainage' | 'pe' | 'pvc' | 'pushfit' | 'concrete' | 'ductile' | 'well'
-  | 'manhole' | 'septic' | 'fitting-pe' | 'fitting-corrugated' | 'fitting-pvc' | 'coil' | 'drip-kit';
+  | 'manhole' | 'septic' | 'fitting-pe' | 'fitting-corrugated' | 'fitting-pvc' | 'coil' | 'drip-kit'
+  | 'valve' | 'sprinkler';
 
 /** دسته (و برای اسپیرال و اتصالات، خود محصول) → شکل محصول */
 export function subjectFor(categorySlug: string, productSlug: string): Subject {
@@ -26,6 +27,9 @@ export function subjectFor(categorySlug: string, productSlug: string): Subject {
     'septic-tanks': 'septic',
     'drip-irrigation-pipes': 'coil',
     'drip-irrigation-equipment': 'drip-kit',
+    'polymer-valves': 'valve',
+    'sprinkler-irrigation-equipment': 'sprinkler',
+    'layflat-hose': 'coil',
   };
   return byCategory[categorySlug] ?? 'corrugated';
 }
@@ -51,6 +55,10 @@ const PALETTES: Record<Subject, Palette> = {
   'fitting-pvc': { hi: '#f1f5f9', mid: '#94a3b8', lo: '#475569', inner: '#e2e8f0', innerLo: '#94a3b8' },
   coil: { hi: '#4b5563', mid: '#1f2937', lo: '#0b0f14', inner: '#374151', innerLo: '#111827' },
   'drip-kit': { hi: '#4b5563', mid: '#1f2937', lo: '#0b0f14', inner: '#374151', innerLo: '#111827' },
+  // بدنه مشکی پلیمری با دسته زرد — مثل شیر توپی واقعی
+  valve: { hi: '#4b5563', mid: '#1f2937', lo: '#0b0f14', inner: '#374151', innerLo: '#111827' },
+  // آبپاش نارنجی روی رایزر زرد
+  sprinkler: { hi: '#fdba74', mid: '#ea580c', lo: '#9a3412', inner: '#fed7aa', innerLo: '#f97316' },
 };
 
 /** رنگ گرانول مواد اولیه کنار هر محصول */
@@ -216,6 +224,43 @@ export function SpecIllustration({ kind, subject = 'corrugated', className }: { 
             <path d="M57 28 C62 28 63 20 63 12" stroke="#0b0f14" strokeWidth="3.4" fill="none" strokeLinecap="round" />
             {[[8, 36], [30, 45], [52, 36]].map(([cx, cy]) => (
               <rect key={cx} x={cx - 2.5} y={cy - 1.8} width="5" height="3.6" rx="1.2" fill="#7c3aed" />
+            ))}
+          </g>
+        );
+      case 'valve':
+        return (
+          <g>
+            {/* بدنه افقی با دو سر رزوه */}
+            <rect x="8" y="24" width="48" height="18" rx="3" fill={url('body')} />
+            <rect x="4" y="22" width="9" height="22" rx="2" fill={p.lo} />
+            <rect x="51" y="22" width="9" height="22" rx="2" fill={p.lo} />
+            <ellipse cx="6" cy="33" rx="2.2" ry="8" fill={url('inner')} />
+            <ellipse cx="58" cy="33" rx="2.2" ry="8" fill={url('inner')} />
+            <path d="M12 28 H52" stroke="#fff" strokeOpacity="0.2" strokeWidth="2.4" strokeLinecap="round" />
+            {/* گلویی و دسته اهرمی زرد */}
+            <rect x="28" y="16" width="8" height="9" rx="1.5" fill={p.lo} />
+            <rect x="18" y="8" width="34" height="7" rx="3.5" fill="#facc15" />
+            <rect x="18" y="8" width="34" height="2.6" rx="1.3" fill="#fde68a" fillOpacity="0.8" />
+            <circle cx="32" cy="11.5" r="2.2" fill="#a16207" />
+          </g>
+        );
+      case 'sprinkler':
+        return (
+          <g>
+            {/* رایزر زرد */}
+            <rect x="29" y="22" width="6" height="24" rx="1.5" fill="#facc15" />
+            <rect x="29" y="22" width="2" height="24" fill="#fef08a" fillOpacity="0.8" />
+            <ellipse cx="32" cy="46" rx="11" ry="3" fill={p.lo} fillOpacity="0.35" />
+            {/* بدنه آبپاش */}
+            <path d="M24 22 L32 10 L40 22 Z" fill={url('body')} />
+            <circle cx="32" cy="12" r="4.5" fill={p.lo} />
+            {/* بازوی ضربه‌ای و نازل */}
+            <path d="M40 14 H52" stroke={p.lo} strokeWidth="3" strokeLinecap="round" />
+            <rect x="50" y="10" width="6" height="8" rx="2" fill={p.mid} />
+            <path d="M24 16 L14 12" stroke={p.lo} strokeWidth="3" strokeLinecap="round" />
+            {/* قطرات پاشش */}
+            {[[48, 4], [55, 7], [11, 5], [6, 9]].map(([cx, cy]) => (
+              <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="1.8" fill={url('water')} />
             ))}
           </g>
         );

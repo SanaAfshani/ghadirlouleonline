@@ -4,6 +4,7 @@ import { prisma } from '@/shared/lib/prisma';
 import { serializeProduct, toProductListItem } from '@/shared/lib/serializers';
 import { slugify } from '@/shared/lib/utils';
 import { serializeFaqs } from '@/shared/lib/page-faqs';
+import { serializeCatalogs } from '@/shared/lib/catalog-files';
 import { getMarketNow } from '@/shared/lib/price-board';
 
 /** فیلد متنی اختیاری: رشته خالی را به null تبدیل می‌کند تا fallback سئو درست کار کند */
@@ -90,6 +91,7 @@ export async function POST(request: NextRequest) {
         ogTitle: optionalText(body.ogTitle),
         ogDescription: optionalText(body.ogDescription),
         faqs: serializeFaqs(body.faqs),
+        catalogs: serializeCatalogs(body.catalogs),
         categoryId: body.categoryId,
       },
       include: { category: true },

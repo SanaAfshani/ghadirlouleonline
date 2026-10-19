@@ -62,4 +62,7 @@ npm run db:seed      # seed داده‌های اولیه
 - [ ] آپلود PDF در پست‌های وبلاگ و نمایش در صفحه پست (پیاده‌سازی شده در `pdfUrl` روی BlogPost)
 - [x] قیمت روز هر کیلو (`pricePerKg` روی Product): قیمت هر متر = وزن ردیف × قیمت روز؛ از تابلوی قیمت ادمین تنظیم می‌شود (`src/shared/lib/price-per-kg.ts`)
 - [x] مشخصات جدای ردیف قیمت (`size`، `grade` سبک/نیمه‌سنگین/سنگین، `spec`، `dimensions` روی PriceItem): title فقط «مدل» است و نام کامل با `itemLabel` در `src/shared/lib/price-item.ts`؛ جدول سایت و تابلوی ادمین بر اساس کلاس/سایز/قیمت مرتب و تفکیک می‌شوند
+- [x] کاتالوگ محصول (`catalogs` روی Product — آرایه JSON از {title, url?, pages?}): آپلود کاتالوگ **PDF** یا **تصویری** (چند عکس = چند صفحه) در فرم ادمین (`src/features/admin/catalogs/CatalogEditor.tsx`) و نمایش در بخش «کاتالوگ و مدارک فنی» صفحه محصول با پیش‌نمایش تاشو و لایت‌باکس (`src/features/products/ProductCatalogs.tsx`)
+- [x] کاتالوگ دریچه و منهول کامپوزیتی با برند خودمان: `GET /api/catalogs/composite-covers/pdf` از روی همان محصولات دیتابیس رندر می‌شود، پس کاتالوگ و سایت هیچ‌وقت از هم عقب نمی‌افتند
+- [x] عکس محصول و دسته از صفحات کاتالوگ: `scripts/build-catalog-images.ts` (برش + واترمارک سایت + WebP) و `scripts/add-irrigation-products.ts` / `scripts/add-infra-products.ts` برای ثبت محصولات
 - [x] پیش‌فاکتور آنلاین: سبد مشتری از جدول قیمت → درخواست → تأیید ادمین → صفحه `/q/[token]` + PDF (`Quote` / `QuoteItem`)

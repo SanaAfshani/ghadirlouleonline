@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { AnimatePresence, m as motion } from 'framer-motion';
 import {
-  Check, ChevronLeft, ChevronRight, Clock, FileText, Headphones, ListChecks, MessageCircle, Phone, Table2, X,
+  BookOpen, Check, ChevronLeft, ChevronRight, Clock, Download, FileText, Headphones, ListChecks, MessageCircle, Phone, Table2, X,
 } from 'lucide-react';
 import type { Product } from '@/shared/types';
 import type { ProductListItem } from '@/shared/lib/serializers';
@@ -22,6 +22,7 @@ import { CategoryThumb } from '@/widgets/header/Header';
 import { siteConfig } from '@/shared/config/site';
 import { IconTile } from '@/shared/ui/IconTile';
 import { SpecCards, specMeta, withDerivedSpecs } from '@/features/products/SpecCards';
+import { ProductCatalogs } from '@/features/products/ProductCatalogs';
 import { subjectFor } from '@/features/products/SpecIllustration';
 import { CertificateStrip } from '@/features/certificates/Certificates';
 import { cn, faDigits } from '@/shared/lib/utils';
@@ -186,6 +187,7 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
 
   const images = product.images.length ? product.images : product.category.image ? [product.category.image] : [];
   const specs = Object.entries(product.specifications ?? {});
+  const catalogs = product.catalogs ?? [];
   const { board } = useLiveBoard(initialBoard);
   const line = board.lines.find((l) => l.productId === product.id);
   const summary = summarizeLine(line?.items ?? []);
@@ -198,6 +200,7 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
     ...(summary.count ? [{ id: 'price-table', label: 'جدول قیمت' }] : []),
     ...(product.description ? [{ id: 'overview', label: 'معرفی محصول' }] : []),
     ...(specs.length ? [{ id: 'specs', label: 'مشخصات فنی' }] : []),
+    ...(catalogs.length ? [{ id: 'catalog', label: 'کاتالوگ' }] : []),
     ...(product.faqs.length ? [{ id: 'faq', label: 'سوالات متداول' }] : []),
   ];
   const [current, setCurrent] = useState(sections[0]?.id);
@@ -336,6 +339,28 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
               )}
             </div>
 
+            {/* کاتالوگ — بالای صفحه قابل دیدن باشد، نه فقط در بخش پایینی */}
+            {catalogs.length > 0 && (
+              <div className="mt-3 flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-3">
+                <span className="w-10 h-10 rounded-xl bg-[var(--accent)]/12 grid place-items-center shrink-0">
+                  <BookOpen className="w-5 h-5 text-[var(--accent-text)]" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold leading-6">کاتالوگ و مدارک فنی</p>
+                  <p className="text-xs text-[var(--muted-foreground)] num">
+                    {faDigits(catalogs.length)} فایل — جدول سایز، ابعاد و کد فنی
+                  </p>
+                </div>
+                <button
+                  onClick={() => scrollTo('catalog')}
+                  className="h-10 px-4 rounded-xl border border-[var(--border)] text-sm font-bold flex items-center gap-1.5 shrink-0 hover:border-[var(--accent)] transition-colors"
+                >
+                  <Download className="w-4 h-4 text-[var(--accent-text)]" />
+                  دانلود
+                </button>
+              </div>
+            )}
+
             {/* دکمه‌ها — در موبایل نوار پایین همین کار را می‌کند */}
             <div className="hidden lg:flex gap-3 mt-5">
               <button onClick={() => open(product.name)} className="flex-1 h-13 rounded-2xl bg-[var(--accent)] text-[var(--accent-foreground)] font-black shadow-accent flex items-center justify-center gap-2 hover:-translate-y-0.5 transition-transform">
@@ -408,6 +433,16 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
                   );
                 })}
               </dl>
+            </section>
+          )}
+
+          {catalogs.length > 0 && (
+            <section id="catalog" aria-labelledby="catalog-title" className="scroll-mt-40">
+              <h2 id="catalog-title" className="text-xl sm:text-2xl font-black mb-2 flex items-center gap-3"><IconTile icon={BookOpen} tone="sky" size="sm" />کاتالوگ و مدارک فنی</h2>
+              <p className="mb-4 text-sm leading-7 text-[var(--muted-foreground)]">
+                کاتالوگ رسمی با جدول سایزها، ابعاد و کد فنی — برای مطالعه آفلاین دانلود کنید یا همین‌جا ببینید.
+              </p>
+              <ProductCatalogs catalogs={catalogs} productName={product.name} />
             </section>
           )}
 
