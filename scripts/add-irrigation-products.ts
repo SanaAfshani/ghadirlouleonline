@@ -8,8 +8,12 @@
 import 'dotenv/config';
 import { readFileSync } from 'fs';
 import { prisma } from '../src/shared/lib/prisma';
+import { catalogEntry } from '../src/shared/config/catalogs';
 
-/** نقشه عکس‌ها که scripts/build-product-images.mjs ساخته است */
+/** کاتالوگ برند خودمان؛ تعریفش در src/shared/config/catalogs.ts است */
+const CATALOG = catalogEntry('irrigation-valves');
+
+/** نقشه عکس‌ها که scripts/build-catalog-images.ts ساخته است */
 const IMAGES: Record<string, string[]> = JSON.parse(
   readFileSync('public/images/products/index.json', 'utf8'),
 );
@@ -535,7 +539,7 @@ async function main() {
     const category = await prisma.category.findUnique({ where: { slug: p.categorySlug } });
     if (!category && APPLY) throw new Error(`دسته ${p.categorySlug} پیدا نشد`);
 
-    const existing = await prisma.product.findUnique({ where: { slug: p.slug }, select: { images: true } });
+    const existing = await prisma.product.findUnique({ where: { slug: p.slug }, select: { images: true, catalogs: true } });
     const images = IMAGES[p.slug] ?? [];
     console.log(
       `${existing ? 'به‌روزرسانی' : 'افزودن'} محصول: ${p.name} → دسته ${p.categorySlug} (${images.length} عکس)`,
@@ -556,21 +560,22 @@ async function main() {
       inStock: true,
     };
 
-    // عکسی که ادمین بعداً اضافه کرده نباید با اجرای دوباره پاک شود؛ فقط وقتی محصول عکس ندارد پر می‌کنیم
+    // عکس و کاتالوگی که ادمین بعداً اضافه کرده نباید با اجرای دوباره پاک شود
     const hasImages = existing ? (JSON.parse(existing.images || '[]') as string[]).length > 0 : false;
+    const hasCatalogs = existing ? (JSON.parse(existing.catalogs || '[]') as unknown[]).length > 0 : false;
     const imageField = hasImages ? {} : { images: JSON.stringify(images) };
+    const catalogField = hasCatalogs ? {} : { catalogs: JSON.stringify([CATALOG]) };
 
     await prisma.product.upsert({
       where: { slug: p.slug },
-      // کاتالوگ از پنل ادمین آپلود می‌شود — اجرای دوباره نباید پاکش کند
-      create: { ...data, ...imageField, slug: p.slug, catalogs: '[]' },
-      update: { ...data, ...imageField },
+      create: { ...data, ...imageField, ...catalogField, slug: p.slug },
+      update: { ...data, ...imageField, ...catalogField },
     });
   }
 
   console.log(
     APPLY
-      ? '\nانجام شد. فایل کاتالوگ PDF را از پنل ادمین اضافه کنید.'
+      ? '\nانجام شد.'
       : '\nبرای اعمال: npx tsx scripts/add-irrigation-products.ts --apply',
   );
 }

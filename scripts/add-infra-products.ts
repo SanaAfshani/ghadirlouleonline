@@ -5,6 +5,7 @@
 import 'dotenv/config';
 import { readFileSync } from 'fs';
 import { prisma } from '../src/shared/lib/prisma';
+import { catalogEntry } from '../src/shared/config/catalogs';
 
 const APPLY = process.argv.includes('--apply');
 
@@ -12,11 +13,8 @@ const IMAGES: Record<string, string[]> = JSON.parse(
   readFileSync('public/images/products/index.json', 'utf8'),
 );
 
-/**
- * کاتالوگ برند خودمان — از روی همین محصولات رندر می‌شود، پس همیشه با سایت یکی است.
- * به‌جای فایل ثابت، آدرس همان مسیر ذخیره می‌شود تا با تغییر محصول، کاتالوگ هم به‌روز شود.
- */
-const CATALOG = { title: 'کاتالوگ دریچه و منهول کامپوزیتی', url: '/api/catalogs/composite-covers/pdf' };
+/** کاتالوگ برند خودمان؛ تعریفش در src/shared/config/catalogs.ts است */
+const CATALOG = catalogEntry('composite-covers');
 
 /** دسته جدیدی که این محصولات لازم دارند؛ بقیه در دسته موجود «منهول و دریچه» می‌نشینند */
 const CATEGORIES = [
