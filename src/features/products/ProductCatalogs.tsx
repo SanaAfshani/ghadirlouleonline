@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
-import { Download, ExternalLink, Eye, EyeOff, FileText, Images, X } from 'lucide-react';
+import { Download, ExternalLink, Eye, EyeOff, FileText, Images, Loader2, X } from 'lucide-react';
 import type { CatalogFile } from '@/shared/types';
 import { isImageCatalog } from '@/shared/lib/catalog-files';
 import { cn, faDigits } from '@/shared/lib/utils';
@@ -83,6 +83,8 @@ function PageLightbox({ pages, title, index, onIndex, onClose }: {
 export function ProductCatalogs({ catalogs, productName }: Props) {
   // هر لحظه فقط یک پیش‌نمایش باز است تا صفحه طولانی و گیج‌کننده نشود
   const [open, setOpen] = useState<number | null>(null);
+  // تا وقتی PDF نیامده، iframe یک کادر سفید خالی است و کاربر فکر می‌کند کار نکرده
+  const [loaded, setLoaded] = useState<number | null>(null);
   const [zoom, setZoom] = useState<{ catalog: number; page: number } | null>(null);
 
   return (
@@ -111,7 +113,7 @@ export function ProductCatalogs({ catalogs, productName }: Props) {
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <button
                   type="button"
-                  onClick={() => setOpen(expanded ? null : index)}
+                  onClick={() => { setOpen(expanded ? null : index); setLoaded(null); }}
                   aria-expanded={expanded}
                   className="flex-1 sm:flex-none h-11 px-4 rounded-2xl border border-[var(--border)] text-sm font-bold flex items-center justify-center gap-2 hover:border-[var(--accent)] transition-colors"
                 >
@@ -163,10 +165,19 @@ export function ProductCatalogs({ catalogs, productName }: Props) {
                   </div>
                 ) : (
                   <>
-                    <div className="rounded-2xl overflow-hidden border border-[var(--border)] bg-slate-950">
+                    <div className="relative rounded-2xl overflow-hidden border border-[var(--border)] bg-slate-950">
+                      {loaded !== index && (
+                        <div className="absolute inset-0 grid place-items-center gap-3 text-white/70">
+                          <div className="flex flex-col items-center gap-3">
+                            <Loader2 className="w-7 h-7 animate-spin" />
+                            <p className="text-sm">در حال آماده‌سازی کاتالوگ…</p>
+                          </div>
+                        </div>
+                      )}
                       <iframe
                         src={`${file.url}#view=FitH`}
                         title={`${file.title} — ${productName}`}
+                        onLoad={() => setLoaded(index)}
                         className="w-full border-0 block h-[70vh] min-h-[420px] md:h-[78vh]"
                       />
                     </div>

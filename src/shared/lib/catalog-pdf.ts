@@ -7,6 +7,9 @@ import { siteConfig } from '@/shared/config/site';
 import { parseJsonArray, parseJsonObject } from '@/shared/lib/serializers';
 import type { CatalogDef } from '@/shared/config/catalogs';
 
+/** عرض عکس داخل PDF — قاب نمایش ۱۶۸pt است، این اندازه برای چاپ هم کافی است */
+const PHOTO_W = 900;
+
 const ACCENT = '#d97706';
 const INK = '#0f172a';
 const MUTED = '#64748b';
@@ -143,8 +146,17 @@ export async function renderCatalogPdf(def: CatalogDef): Promise<Buffer | null> 
     const specs = Object.entries(parseJsonObject(p.specifications));
     const tables = tablesFromHtml(p.description ?? '');
     // @react-pdf فقط JPEG و PNG می‌خواند و عکس‌های سایت WebP هستند
+    // @react-pdf فقط JPEG و PNG می‌خواند و عکس‌های سایت WebP هستند.
+    // قبل از تبدیل کوچکش می‌کنیم: در صفحه با ارتفاع ۱۶۸pt نمایش داده می‌شود، پس عکس ۲۰۰۰px
+    // فقط حجم PDF و زمان رندر را بالا می‌برد. با PHOTO_W رندر از دقیقه به ثانیه رسید.
     const photo = images[0]
-      ? { data: await sharp(path.join(process.cwd(), 'public', images[0].replace(/^\//, ''))).png().toBuffer(), format: 'png' as const }
+      ? {
+          data: await sharp(path.join(process.cwd(), 'public', images[0].replace(/^\//, '')))
+            .resize({ width: PHOTO_W, withoutEnlargement: true })
+            .png({ compressionLevel: 9 })
+            .toBuffer(),
+          format: 'png' as const,
+        }
       : null;
 
     pages.push(
