@@ -17,34 +17,21 @@ const CAT_OUT = 'public/images/categories';
 const INDEX = path.join(OUT, 'index.json');
 
 /**
- * عکس برش‌خورده از صفحات PDF منبعِ پرجزئیات دارد و بزرگ ذخیره می‌شود.
- * نوار محصولات خیلی پهن و کم‌ارتفاع است (حدود ۵:۱) و در قاب ۴:۳ گالری از دو طرف بریده می‌شد،
- * پس وسط یک قاب ۴:۳ سفید می‌نشیند — مثل بقیه عکس‌های محصول.
- */
-/**
- * هر محصول در صفحه منبع فقط ۶۲۰ تا ۹۳۰ پیکسل عرض دارد. قاب ۱۶۰۰ یعنی حدود ۱.۸ برابر
- * بزرگ‌نمایی و همان نرمیِ عکس‌ها؛ با این قاب هیچ عکسی بزرگ‌نمایی نمی‌شود.
+ * هر محصول در صفحه کاتالوگ دریچه‌ها ۶۲۰ تا ۹۳۰ پیکسل عرض دارد؛ با این محدوده هیچ عکسی
+ * بزرگ‌نمایی نمی‌شود (بزرگ‌نمایی جزئیات اضافه نمی‌کند، فقط نرم می‌کند).
  */
 const INFRA_LIMITS = { minWidth: 760, maxWidth: 1400, maxUpscale: 1 };
-/** چقدر از قاب را خود محصول پر کند — حاشیه سفید زیاد، عکس را بی‌کیفیت جلوه می‌داد */
+/** چقدر از قاب را خود محصول پر کند — پرشدگی ناهمسان، عکس را نصفه و رهاشده نشان می‌داد */
 const FILL = 0.86;
-/** عکس لیست قیمت از یک JPEG کوچک درمی‌آید؛ قاب بزرگ‌تر فقط حجم اضافه می‌کرد، نه جزئیات */
-/**
- * منبع این گروه یک تصویر لیست قیمت است و هر محصول در آن فقط ۵۵ تا ۱۶۵ پیکسل عرض دارد،
- * پس برای رسیدن به اندازه قابل نمایش ناچار به بزرگ‌نمایی هستیم. سقف بزرگ‌نمایی برداشته
- * شد تا دست‌کم پرشدگی قاب بین همه یکسان بماند (قبلاً ۳۲٪ تا ۸۵٪ فرق می‌کرد و نصفه دیده می‌شد).
- */
-const VISPAR_LIMITS = { minWidth: 900, maxWidth: 900, maxUpscale: 99 };
+
 /**
  * کارت دسته با object-cover و نسبت ۴:۳ تا ۱۶:۱۰ نمایش داده می‌شود.
  * قاب را ۱۶:۱۰ می‌سازیم ولی خود محصول را داخل ناحیه امنِ ۴:۳ وسط نگه می‌داریم،
- * تا در هیچ‌کدام از دو نسبت بریده نشود (قبلاً محصول‌های لبه از وسط نصف می‌شدند).
+ * تا در هیچ‌کدام از دو نسبت بریده نشود.
  */
-// ناحیه امن دقیقاً هم‌اندازه قاب عکس محصول است تا عکس دسته هم بزرگ‌نمایی نشود
 const CATEGORY = { width: 1440, height: 900 };
 const CATEGORY_SAFE = { width: 1200, height: 900 };
 
-/** نوشتن عکس نهایی: واترمارک سایت + WebP با کیفیت بالا */
 /**
  * نوشتن عکس نهایی: واترمارک سایت + WebP، با هشِ محتوا در نام فایل.
  * هش لازم است چون با عوض شدن محتوای یک نام ثابت، هم بهینه‌ساز Next و هم مرورگر بازدیدکننده
@@ -74,99 +61,44 @@ const readIndex = async (): Promise<Record<string, string[]>> =>
 const writeIndex = async (patch: Record<string, string[]>) =>
   fs.writeFile(INDEX, JSON.stringify({ ...(await readIndex()), ...patch }, null, 2));
 
-// ───────────────────── الف) شیرآلات و آبیاری (صفحات لیست قیمت) ─────────────────────
+// ───────────────────── الف) شیرآلات و آبیاری (کاتالوگ رسمی سازنده) ─────────────────────
 
-const VISPAR_PAGES = [
-  '13.32.41.jpeg', '13.32.41 (1).jpeg',
-  '13.32.42.jpeg', '13.32.42 (1).jpeg', '13.32.42 (2).jpeg',
-  '13.32.43.jpeg', '13.32.43 (1).jpeg', '13.32.43 (2).jpeg',
-];
-const COLS = { R: { left: 462, width: 180 }, L: { left: 26, width: 182 } } as const;
-const isTeal = (r: number, g: number, b: number) => r < 95 && g > 125 && g < 195 && b > 165 && b < 220;
-
-/** عکس‌های انتخاب‌شده هر محصول: صفحه (۱ تا ۸)، ستون و ردیف نوار سرتیتر بلوک */
-const VISPAR_PICKS: Record<string, [number, 'R' | 'L', number][]> = {
-  'polymer-valves': [[1, 'R', 174], [2, 'R', 769], [2, 'L', 174], [1, 'L', 174]],
-  'sprinkler-irrigation-equipment': [[3, 'R', 179], [3, 'L', 179], [3, 'L', 373], [3, 'L', 897]],
-  sprinklers: [[4, 'R', 287], [4, 'R', 581], [4, 'R', 742], [4, 'L', 179]],
-  // قرقره‌های صفحه ۵ لوگوی سازنده دارند و استفاده نمی‌شوند
-  'layflat-hose': [[5, 'R', 205], [5, 'L', 429], [5, 'L', 835]],
-  'drip-fittings': [[6, 'R', 200], [6, 'L', 200]],
-  'upvc-threaded-fittings': [[7, 'L', 522], [7, 'L', 1016], [8, 'L', 884], [7, 'R', 168]],
+/**
+ * قبلاً این گروه از تصویرِ لیست قیمت بریده می‌شد و هر محصول آن‌جا فقط ۵۵ تا ۱۶۵ پیکسل بود،
+ * پس هرچه قاب را تنظیم می‌کردیم باز نرم و بی‌کیفیت می‌ماند.
+ * حالا از کاتالوگ رسمی سازنده (vispar.co/catalog) می‌آید: عکس استودیویی هر محصول به‌صورت
+ * شیء جدا با ماسک شفافیت، که scripts/extract-vispar-photos.ts بیرون می‌کشد.
+ *
+ * مقدارها نام فایل خروجی همان اسکریپت است (بدون پسوند).
+ */
+const VISPAR_PHOTOS: Record<string, string[]> = {
+  'polymer-valves': ['v-011-069', 'v-015-077', 'v-016-078', 'v-013-073'],
+  'sprinkler-irrigation-equipment': ['v-047-177', 'v-038-158', 'v-035-139', 'v-051-186'],
+  sprinklers: ['v-044-174', 'v-046-176', 'v-042-171', 'v-040-165'],
+  'layflat-hose': ['v-027-109', 'v-028-110', 'v-029-113', 'v-048-179'],
+  'drip-fittings': ['v-050-185', 'v-038-163', 'v-056-205', 'v-035-141'],
+  // اتصالات رزوه‌ای سفید در همین کاتالوگ آبیاری است؛ کاتالوگ UPVC خطِ صنعتیِ خاکستری است
+  'upvc-threaded-fittings': ['v-059-209', 'v-062-215', 'v-066-223', 'v-067-225'],
 };
 
-async function visparCutout(src: string, page: number, colName: 'R' | 'L', bar: number) {
-  const file = path.join(src, `WhatsApp Image 2026-10-18 at ${VISPAR_PAGES[page - 1]}`);
-  const col = COLS[colName];
-  const { data, info } = await sharp(file)
-    .extract({ left: col.left, top: 0, width: col.width, height: 1280 })
-    .raw().toBuffer({ resolveWithObject: true });
-  const ch = info.channels;
-
-  const teal: boolean[] = [], white: boolean[] = [];
-  for (let y = 0; y < info.height; y++) {
-    let t = 0, w = 0;
-    for (let x = 0; x < info.width; x++) {
-      const i = (y * info.width + x) * ch;
-      const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
-      if (isTeal(r, g, b)) t++;
-      if (r > 233 && g > 233 && b > 233) w++;
-    }
-    teal[y] = t / info.width > 0.4;
-    white[y] = w / info.width > 0.985;
-  }
-
-  // بالای نوار: فاصله سفید، بعد خود عکس، تا فاصله سفید بعدی
-  let y = bar - 3;
-  while (y > 0 && white[y]) y--;
-  const bottom = y;
-  let gap = 0;
-  while (y > 0 && gap < 9) { y--; gap = white[y] ? gap + 1 : 0; }
-  const top = Math.max(y + gap, 104);
-
-  let barEnd = bar;
-  while (barEnd < info.height && teal[barEnd]) barEnd++;
-  const height = Math.min(bottom + (barEnd - bar) + 4, 1280) - top;
-
-  const raw = await sharp(file)
-    .extract({ left: col.left, top, width: col.width, height })
-    .raw().toBuffer({ resolveWithObject: true });
-  const px = raw.data, rc = raw.info.channels;
-
-  // ۸ ردیف بالاتر از شروع نوار هم پاک می‌شود؛ لبه نوار ضدپله است و خط نازک فیروزه‌ای جا می‌گذارد.
-  // فقط رنگِ خود نوار پاک می‌شود تا اتصالات سفید و دسته‌های زرد محصول بریده نشوند.
-  for (let yy = Math.max(0, bar - top - 8); yy < raw.info.height; yy++) {
-    for (let xx = 0; xx < raw.info.width; xx++) {
-      const i = (yy * raw.info.width + xx) * rc;
-      const [r, g, b] = [px[i], px[i + 1], px[i + 2]];
-      if (b - r > 30 && g - r > 18) { px[i] = 255; px[i + 1] = 255; px[i + 2] = 255; }
-    }
-  }
-
-  return sharp(px, { raw: { width: raw.info.width, height: raw.info.height, channels: rc } })
-    .trim({ threshold: 12 }).png().toBuffer();
-}
+/**
+ * بیشتر عکس‌های کاتالوگ رسمی ۷۰۰ تا ۱۴۵۰ پیکسل‌اند و بزرگ‌نمایی نمی‌خواهند؛ چندتایی
+ * حدود ۲۸۰ پیکسل‌اند و تا ۲.۴ برابر بزرگ می‌شوند تا پرشدگی قاب بین همه یکسان بماند.
+ */
+const VISPAR_LIMITS = { minWidth: 900, maxWidth: 1400, maxUpscale: 2.4 };
 
 async function buildVispar(src: string) {
   const out: Record<string, string[]> = {};
-  for (const [slug, picks] of Object.entries(VISPAR_PICKS)) {
+  for (const [slug, photos] of Object.entries(VISPAR_PHOTOS)) {
     await clearOld(slug);
     const urls: string[] = [];
-    for (const [i, [page, col, bar]] of picks.entries()) {
-      const cut = await visparCutout(src, page, col, bar);
-      const { width = 1, height = 1 } = await sharp(cut).metadata();
-      const fit = Math.min((VISPAR_LIMITS.minWidth * FILL) / width, ((VISPAR_LIMITS.minWidth * 3) / 4 * FILL) / height);
-      const w = Math.max(1, Math.round(width * fit));
-      const h = Math.max(1, Math.round(height * fit));
-      const product = await sharp(cut).resize(w, h, { kernel: 'lanczos3' }).sharpen({ sigma: 1.1 }).toBuffer();
-      const canvas = { width: VISPAR_LIMITS.minWidth, height: Math.round((VISPAR_LIMITS.minWidth * 3) / 4) };
-      const framedBuf = await sharp({ create: { ...canvas, channels: 4, background: { r: 255, g: 255, b: 255, alpha: 1 } } })
-        .composite([{ input: product, left: Math.round((canvas.width - w) / 2), top: Math.round((canvas.height - h) / 2) }])
-        .png()
-        .toBuffer();
-      urls.push(await write(framedBuf, slug, i + 1));
+    for (const [i, photo] of photos.entries()) {
+      const file = path.join(src, `${photo}.png`);
+      if (!(await fs.stat(file).catch(() => null))) { console.warn(`${slug}: ${photo} نیست`); continue; }
+      const meta = await sharp(file).metadata();
+      const box = { left: 0, top: 0, width: meta.width ?? 1, height: meta.height ?? 1 };
+      urls.push(await write(await framed(file, box, VISPAR_LIMITS), slug, i + 1));
     }
-
     out[slug] = urls;
     console.log(`${slug}: ${urls.length} عکس`);
   }
