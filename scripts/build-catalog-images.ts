@@ -9,6 +9,7 @@
 import sharp from 'sharp';
 import fs from 'fs/promises';
 import path from 'path';
+import { createHash } from 'node:crypto';
 import { addWatermark } from '../src/shared/lib/watermark';
 
 const OUT = 'public/images/products';
@@ -20,16 +21,48 @@ const INDEX = path.join(OUT, 'index.json');
  * نوار محصولات خیلی پهن و کم‌ارتفاع است (حدود ۵:۱) و در قاب ۴:۳ گالری از دو طرف بریده می‌شد،
  * پس وسط یک قاب ۴:۳ سفید می‌نشیند — مثل بقیه عکس‌های محصول.
  */
-const INFRA_CANVAS = { width: 2000, height: 1500 };
+/**
+ * هر محصول در صفحه منبع فقط ۶۲۰ تا ۹۳۰ پیکسل عرض دارد. قاب ۱۶۰۰ یعنی حدود ۱.۸ برابر
+ * بزرگ‌نمایی و همان نرمیِ عکس‌ها؛ با این قاب هیچ عکسی بزرگ‌نمایی نمی‌شود.
+ */
+const INFRA_CANVAS = { width: 1200, height: 900 };
+/** چقدر از قاب را خود محصول پر کند — حاشیه سفید زیاد، عکس را بی‌کیفیت جلوه می‌داد */
+const FILL = 0.86;
 /** عکس لیست قیمت از یک JPEG کوچک درمی‌آید؛ قاب بزرگ‌تر فقط حجم اضافه می‌کرد، نه جزئیات */
-const VISPAR_CANVAS = { width: 1200, height: 900 };
-const CATEGORY = { width: 1200, height: 800 };
+// قاب کوچک‌تر یعنی محصول بدون بزرگ‌نمایی بیشتر، قاب را پر می‌کند — جزئیات همان است، سفیدیِ هدررفته کمتر
+const VISPAR_CANVAS = { width: 900, height: 675 };
+/**
+ * کارت دسته با object-cover و نسبت ۴:۳ تا ۱۶:۱۰ نمایش داده می‌شود.
+ * قاب را ۱۶:۱۰ می‌سازیم ولی خود محصول را داخل ناحیه امنِ ۴:۳ وسط نگه می‌داریم،
+ * تا در هیچ‌کدام از دو نسبت بریده نشود (قبلاً محصول‌های لبه از وسط نصف می‌شدند).
+ */
+// ناحیه امن دقیقاً هم‌اندازه قاب عکس محصول است تا عکس دسته هم بزرگ‌نمایی نشود
+const CATEGORY = { width: 1440, height: 900 };
+const CATEGORY_SAFE = { width: 1200, height: 900 };
 
 /** نوشتن عکس نهایی: واترمارک سایت + WebP با کیفیت بالا */
-async function write(buffer: Buffer, file: string) {
+/**
+ * نوشتن عکس نهایی: واترمارک سایت + WebP، با هشِ محتوا در نام فایل.
+ * هش لازم است چون با عوض شدن محتوای یک نام ثابت، هم بهینه‌ساز Next و هم مرورگر بازدیدکننده
+ * نسخه قدیمی را از کش می‌دادند؛ با تغییر نام، همه فوراً نسخه تازه را می‌گیرند.
+ * خروجی یکسان همان نام را می‌سازد، پس اجرای دوباره فایل تکراری درست نمی‌کند.
+ */
+async function write(buffer: Buffer, slug: string, index: number) {
   const webp = await sharp(buffer).webp({ quality: 92 }).toBuffer();
-  const marked = await addWatermark(webp, 'image/webp');
-  await fs.writeFile(file, marked ?? webp);
+  const body = (await addWatermark(webp, 'image/webp')) ?? webp;
+  const hash = createHash('sha1').update(body).digest('hex').slice(0, 8);
+  const name = `${slug}-${index}.${hash}.webp`;
+  await fs.writeFile(path.join(OUT, name), body);
+  return `/images/products/${name}`;
+}
+
+/** فایل‌های نسخه قبلی همین محصول را پاک می‌کند تا پوشه با هر اجرا باد نکند */
+async function clearOld(slug: string) {
+  const files = await fs.readdir(OUT).catch(() => [] as string[]);
+  await Promise.all(
+    files.filter((f) => new RegExp(`^${slug}-\\d+\\.[0-9a-f]{8}\\.webp$`).test(f))
+      .map((f) => fs.unlink(path.join(OUT, f))),
+  );
 }
 
 const readIndex = async (): Promise<Record<string, string[]>> =>
@@ -113,14 +146,15 @@ async function visparCutout(src: string, page: number, colName: 'R' | 'L', bar: 
 async function buildVispar(src: string) {
   const out: Record<string, string[]> = {};
   for (const [slug, picks] of Object.entries(VISPAR_PICKS)) {
+    await clearOld(slug);
     const urls: string[] = [];
     for (const [i, [page, col, bar]] of picks.entries()) {
       const cut = await visparCutout(src, page, col, bar);
       const { width = 1, height = 1 } = await sharp(cut).metadata();
       // بزرگ‌نمایی محدود: منبع ریز است و پر کردن کل قاب محصول را له می‌کند
       const scale = Math.min(
-        (VISPAR_CANVAS.width * 0.72) / width,
-        (VISPAR_CANVAS.height * 0.72) / height,
+        (VISPAR_CANVAS.width * FILL) / width,
+        (VISPAR_CANVAS.height * FILL) / height,
         5,
       );
       const w = Math.round(width * scale), h = Math.round(height * scale);
@@ -132,9 +166,7 @@ async function buildVispar(src: string) {
         .png()
         .toBuffer();
 
-      const name = `${slug}-${i + 1}.webp`;
-      await write(canvas, path.join(OUT, name));
-      urls.push(`/images/products/${name}`);
+      urls.push(await write(canvas, slug, i + 1));
     }
     out[slug] = urls;
     console.log(`${slug}: ${urls.length} عکس`);
@@ -143,6 +175,13 @@ async function buildVispar(src: string) {
 }
 
 // ───────────────────── ب) دریچه و منهول (صفحات کاتالوگ PDF) ─────────────────────
+
+/**
+ * عکسی که باید اول گالری بیاید (پیش‌فرض ۱).
+ * روی بعضی عکس‌ها نام سازنده داخل قالبِ خود محصول حک شده؛ جایی که روی عکس اول خواناست،
+ * عکس تمیزتری جلو انداخته می‌شود تا تصویر شاخصِ محصول و کارت‌ها آن را نشان ندهد.
+ */
+const LEAD: Record<string, number> = {};
 
 /** p-000 = صفحه ۱۰ فایل منبع؛ هر محصول خانواده‌ای کدام صفحه‌ها را می‌گیرد */
 const INFRA_FAMILIES: Record<string, string[]> = {
@@ -205,65 +244,177 @@ async function whiteBand(file: string) {
   };
 }
 
+/**
+ * شکستن نوار به محصول‌های جداگانه.
+ * قبلاً کل نوار یک عکس می‌شد: هر محصول کوچک وسط یک قاب سفید می‌افتاد (بی‌کیفیت به نظر می‌رسید)
+ * و در کارت ۴:۳ و عکس دسته، محصول‌های لبه از وسط بریده می‌شدند.
+ * محصول‌ها با فاصله سفید عمودی از هم جدا شده‌اند و برچسب هر کدام بالای خودش است.
+ */
+async function splitProducts(file: string, band: { left: number; top: number; width: number; height: number }) {
+  const page = await sharp(file).metadata();
+  // تشخیص روی خودِ نوار انجام می‌شود؛ بلندتر گرفتنش زمینه خاکستری صفحه را وارد می‌کرد و
+  // آن‌وقت همه ستون‌ها «محتوا» داشتند و محصول‌ها از هم جدا نمی‌شدند.
+  // حاشیه لازم برای سایه را pad در انتها اضافه می‌کند.
+  const box = band;
+  const PROBE = 1000;
+  const probe = await sharp(file).extract(box).resize({ width: PROBE }).raw().toBuffer({ resolveWithObject: true });
+  const { data, info } = probe;
+  const ch = info.channels;
+  const isWhite = (x: number, y: number) => {
+    const i = (y * info.width + x) * ch;
+    return data[i] > 235 && data[i + 1] > 235 && data[i + 2] > 235;
+  };
+
+  /** بازه‌های پیوسته‌ای که در آن‌ها محتوا هست */
+  const runs = (n: number, hasContent: (i: number) => boolean, minGap: number) => {
+    const out: [number, number][] = [];
+    let start: number | null = null, gap = 0;
+    for (let i = 0; i <= n; i++) {
+      if (i < n && hasContent(i)) {
+        if (start === null) start = i;
+        gap = 0;
+      } else if (start !== null) {
+        // فاصله کوتاه داخل یک محصول (مثل سایه) نباید آن را دو تکه کند
+        if (++gap > minGap || i === n) { out.push([start, i - gap]); start = null; gap = 0; }
+      }
+    }
+    return out;
+  };
+
+  const colHasContent = (x: number) => {
+    for (let y = 0; y < info.height; y++) if (!isWhite(x, y)) return true;
+    return false;
+  };
+  const columns = runs(info.width, colHasContent, Math.round(info.width * 0.005))
+    .filter(([a, b]) => b - a > info.width * 0.04);
+
+  const scale = box.width / info.width;
+  const boxes: { left: number; top: number; width: number; height: number }[] = [];
+
+  for (const [x0, x1] of columns) {
+    // داخل هر ستون، پایین‌ترین بلوک محتوا خودِ محصول است؛ بلوک‌های بالاتر برچسب‌اند
+    const rowHasContent = (y: number) => {
+      for (let x = x0; x <= x1; x++) if (!isWhite(x, y)) return true;
+      return false;
+    };
+    const rows = runs(info.height, rowHasContent, Math.round(info.height * 0.03));
+    if (!rows.length) continue;
+    const [y0, y1] = rows[rows.length - 1];
+    if (y1 - y0 < info.height * 0.12) continue;
+
+    // حاشیه دور محصول: بدون آن لبه و سایه زیر محصول دقیقاً روی مرز برش می‌افتاد و بریده دیده می‌شد
+    const pad = Math.round((x1 - x0) * scale * 0.06);
+    const left = Math.max(0, box.left + Math.round(x0 * scale) - pad);
+    const top = Math.max(0, box.top + Math.round(y0 * scale) - pad);
+    boxes.push({
+      left,
+      top,
+      // حاشیه نباید از لبه صفحه منبع بیرون بزند
+      width: Math.max(1, Math.min(Math.round((x1 - x0 + 1) * scale) + pad * 2, (page.width ?? left) - left)),
+      height: Math.max(1, Math.min(Math.round((y1 - y0 + 1) * scale) + pad * 2, (page.height ?? top) - top)),
+    });
+  }
+
+  // راست‌به‌چپ، هم‌ترتیب با برچسب‌های فارسی صفحه
+  return boxes.sort((a, b) => b.left - a.left);
+}
+
+/** محصول بریده‌شده وسط یک قاب ۴:۳، طوری که قاب را پر کند */
+async function framed(file: string, box: { left: number; top: number; width: number; height: number }, canvas: { width: number; height: number }) {
+  // trim لبه و سایه زیر محصول را می‌بُرید؛ خودِ جعبه تشخیص‌داده‌شده با کمی حاشیه برش می‌خورد
+  const cut = await sharp(file).extract(box).png().toBuffer();
+  const { width = 1, height = 1 } = await sharp(cut).metadata();
+  // سقف ۱: بزرگ‌نمایی جزئیاتی اضافه نمی‌کند، فقط عکس را نرم می‌کند
+  const fit = Math.min((canvas.width * FILL) / width, (canvas.height * FILL) / height, 1);
+  const w = Math.max(1, Math.round(width * fit));
+  const h = Math.max(1, Math.round(height * fit));
+  const product = await sharp(cut)
+    .resize(w, h, { kernel: 'lanczos3' })
+    .sharpen({ sigma: 0.6 })
+    .toBuffer();
+  return sharp({ create: { ...canvas, channels: 4, background: { r: 255, g: 255, b: 255, alpha: 1 } } })
+    .composite([{ input: product, left: Math.round((canvas.width - w) / 2), top: Math.round((canvas.height - h) / 2) }])
+    .png()
+    .toBuffer();
+}
+
 async function buildInfra(src: string) {
   const out: Record<string, string[]> = {};
   for (const [slug, pages] of Object.entries(INFRA_FAMILIES)) {
+    await clearOld(slug);
     const urls: string[] = [];
-    for (const [i, page] of pages.entries()) {
+    let n = 0;
+    for (const page of pages) {
       const file = path.join(src, `p-${page}.jpg`);
       const box = await whiteBand(file);
       if (!box || box.height < 200) { console.warn(`${slug}: نوار سفید صفحه ${page} پیدا نشد`); continue; }
-      const bandW = Math.round(INFRA_CANVAS.width * 0.96);
-      const band = await sharp(file)
-        .extract(box)
-        .resize({ width: bandW, withoutEnlargement: true, kernel: 'lanczos3' })
-        .sharpen({ sigma: 0.6 })
-        .png()
-        .toBuffer();
-      const meta = await sharp(band).metadata();
-      const canvas = await sharp({
-        create: { ...INFRA_CANVAS, channels: 4, background: { r: 255, g: 255, b: 255, alpha: 1 } },
-      })
-        .composite([{
-          input: band,
-          left: Math.round((INFRA_CANVAS.width - (meta.width ?? bandW)) / 2),
-          top: Math.round((INFRA_CANVAS.height - (meta.height ?? 0)) / 2),
-        }])
-        .png()
-        .toBuffer();
-      const name = `${slug}-${i + 1}.webp`;
-      await write(canvas, path.join(OUT, name));
-      urls.push(`/images/products/${name}`);
+
+      const products = await splitProducts(file, box);
+      if (!products.length) { console.warn(`${slug}: محصولی در صفحه ${page} جدا نشد`); continue; }
+
+      for (const product of products) {
+        urls.push(await write(await framed(file, product, INFRA_CANVAS), slug, ++n));
+      }
     }
+    const lead = LEAD[slug];
+    if (lead && urls[lead - 1]) urls.unshift(...urls.splice(lead - 1, 1));
+
     out[slug] = urls;
-    console.log(`${slug}: ${urls.length} عکس`);
+    console.log(`${slug}: ${urls.length} عکس${lead ? ` (عکس ${lead} اول آمد)` : ''}`);
   }
   return out;
 }
 
 // ───────────────────────────── ج) عکس دسته‌ها ─────────────────────────────
 
-/** دسته‌های تازه‌ساخته‌شده عکس ندارند و کارتشان جای خالی نشان می‌دهد */
-const CATEGORY_SOURCE: Record<string, string> = {
-  'polymer-valves': 'polymer-valves-1.webp',
-  'sprinkler-irrigation-equipment': 'sprinklers-1.webp',
-  'layflat-hose': 'layflat-hose-1.webp',
-  'urban-furniture': 'urban-furniture-composite-5.webp',
+/**
+ * دسته‌های تازه‌ساخته‌شده عکس ندارند و کارتشان جای خالی نشان می‌دهد.
+ * مقدار = [اسلاگ محصول، شماره عکس] و خود فایل از index.json خوانده می‌شود،
+ * چون نام فایل‌ها هش محتوا دارند و ثابت نیستند.
+ */
+const CATEGORY_SOURCE: Record<string, [string, number]> = {
+  'polymer-valves': ['polymer-valves', 1],
+  'sprinkler-irrigation-equipment': ['sprinklers', 1],
+  'layflat-hose': ['layflat-hose', 1],
+  'urban-furniture': ['urban-furniture-composite', 9],
 };
 
 async function buildCategories() {
   await fs.mkdir(CAT_OUT, { recursive: true });
-  for (const [slug, source] of Object.entries(CATEGORY_SOURCE)) {
-    const file = path.join(OUT, source);
-    if (!(await fs.stat(file).catch(() => null))) { console.warn(`${slug}: منبع ${source} نیست`); continue; }
-    // عکس محصول از قبل واترمارک دارد؛ دوباره نمی‌زنیم
-    const buf = await sharp(file)
-      // cover حاشیه سفیدِ قاب محصول را می‌برد تا خود محصول کارت دسته را پر کند
-      .resize({ ...CATEGORY, fit: 'cover' })
+  const index = await readIndex();
+
+  for (const [slug, [productSlug, nth]] of Object.entries(CATEGORY_SOURCE)) {
+    const url = (index[productSlug] ?? [])[nth - 1];
+    if (!url) { console.warn(`${slug}: عکس ${nth} محصول ${productSlug} در index.json نیست`); continue; }
+    const file = path.join(process.cwd(), 'public', url.replace(/^\//, ''));
+    if (!(await fs.stat(file).catch(() => null))) { console.warn(`${slug}: فایل ${url} نیست`); continue; }
+
+    // عکس محصول خودش یک قاب ۴:۳ است که محصول FILL آن را پر کرده و از قبل واترمارک دارد.
+    // trim این‌جا بی‌اثر است (واترمارک تا لبه‌ها می‌رسد)، پس مستقیم به اندازه ناحیه امن ۴:۳
+    // می‌رسانیمش — نتیجه: در برش ۴:۳ کارت، محصول همان FILL را پر می‌کند.
+    const inner = await sharp(file)
+      .resize(CATEGORY_SAFE.width, CATEGORY_SAFE.height, { fit: 'fill', kernel: 'lanczos3' })
+      .toBuffer();
+    const meta = await sharp(inner).metadata();
+    const buf = await sharp({
+      create: { ...CATEGORY, channels: 4, background: { r: 255, g: 255, b: 255, alpha: 1 } },
+    })
+      .composite([{
+        input: inner,
+        left: Math.round((CATEGORY.width - (meta.width ?? 0)) / 2),
+        top: Math.round((CATEGORY.height - (meta.height ?? 0)) / 2),
+      }])
       .webp({ quality: 92 })
       .toBuffer();
-    await fs.writeFile(path.join(CAT_OUT, `${slug}.webp`), buf);
-    console.log(`دسته ${slug}: /images/categories/${slug}.webp`);
+
+    const hash = createHash('sha1').update(buf).digest('hex').slice(0, 8);
+    // نسخه قبلی همین دسته پاک شود تا پوشه باد نکند
+    for (const f of await fs.readdir(CAT_OUT).catch(() => [] as string[])) {
+      if (new RegExp(`^${slug}\\.[0-9a-f]{8}\\.webp$`).test(f)) await fs.unlink(path.join(CAT_OUT, f));
+    }
+    const name = `${slug}.${hash}.webp`;
+    await fs.writeFile(path.join(CAT_OUT, name), buf);
+    console.log(`دسته ${slug}: /images/categories/${name}`);
   }
 }
 

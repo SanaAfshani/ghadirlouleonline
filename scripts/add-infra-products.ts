@@ -8,6 +8,8 @@ import { prisma } from '../src/shared/lib/prisma';
 import { catalogEntry } from '../src/shared/config/catalogs';
 
 const APPLY = process.argv.includes('--apply');
+/** عکس‌های ساخته‌شده را دوباره بنویس — وقتی build-catalog-images خروجی تازه داده */
+const REFRESH_IMAGES = process.argv.includes('--refresh-images');
 
 const IMAGES: Record<string, string[]> = JSON.parse(
   readFileSync('public/images/products/index.json', 'utf8'),
@@ -558,7 +560,7 @@ async function main() {
       inStock: true,
     };
     // عکس و کاتالوگی که ادمین بعداً اضافه کرده نباید با اجرای دوباره پاک شود
-    const hasImages = existing ? (JSON.parse(existing.images || '[]') as string[]).length > 0 : false;
+    const hasImages = !REFRESH_IMAGES && existing ? (JSON.parse(existing.images || '[]') as string[]).length > 0 : false;
     const hasCatalogs = existing ? (JSON.parse(existing.catalogs || '[]') as unknown[]).length > 0 : false;
     const imageField = hasImages ? {} : { images: JSON.stringify(images) };
     const catalogField = hasCatalogs ? {} : { catalogs: JSON.stringify([CATALOG]) };

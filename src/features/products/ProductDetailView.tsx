@@ -188,6 +188,7 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
   const images = product.images.length ? product.images : product.category.image ? [product.category.image] : [];
   const specs = Object.entries(product.specifications ?? {});
   const catalogs = product.catalogs ?? [];
+  const showCertificates = siteConfig.certificateCategorySlugs.includes(product.category.slug);
   const { board } = useLiveBoard(initialBoard);
   const line = board.lines.find((l) => l.productId === product.id);
   const summary = summarizeLine(line?.items ?? []);
@@ -270,10 +271,13 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
 
             <SpecCards specs={cardSpecs} subject={subject} />
 
-            {/* فقط عکس گواهی‌های واقعی — نام استانداردها همین حالا در جدول مشخصات فنی هست و تکرارش شلوغ می‌کرد */}
-            <div className="mt-4 rounded-3xl border border-[var(--border)] bg-[var(--card)] p-4 empty:hidden">
-              <CertificateStrip certificates={certificates} />
-            </div>
+            {/* فقط عکس گواهی‌های واقعی — نام استانداردها همین حالا در جدول مشخصات فنی هست و تکرارش شلوغ می‌کرد.
+                فقط روی دسته‌هایی که این پروانه‌ها واقعاً برایشان صادر شده (کاروگیت و دیواره ساختمند) */}
+            {showCertificates && (
+              <div className="mt-4 rounded-3xl border border-[var(--border)] bg-[var(--card)] p-4 empty:hidden">
+                <CertificateStrip certificates={certificates} />
+              </div>
+            )}
 
             {/* کارشناس فروش — موبایل (در دسکتاپ سایدبار همین کار را می‌کند) */}
             <div className="lg:hidden mt-4 flex items-center gap-3 rounded-3xl border border-[var(--border)] bg-[var(--card)] p-3">

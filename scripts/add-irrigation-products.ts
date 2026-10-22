@@ -19,6 +19,8 @@ const IMAGES: Record<string, string[]> = JSON.parse(
 );
 
 const APPLY = process.argv.includes('--apply');
+/** عکس‌های ساخته‌شده را دوباره بنویس — وقتی build-catalog-images خروجی تازه داده */
+const REFRESH_IMAGES = process.argv.includes('--refresh-images');
 
 /** دسته‌های جدیدی که این محصولات لازم دارند — دسته‌های موجود دست نمی‌خورند */
 const CATEGORIES = [
@@ -561,7 +563,7 @@ async function main() {
     };
 
     // عکس و کاتالوگی که ادمین بعداً اضافه کرده نباید با اجرای دوباره پاک شود
-    const hasImages = existing ? (JSON.parse(existing.images || '[]') as string[]).length > 0 : false;
+    const hasImages = !REFRESH_IMAGES && existing ? (JSON.parse(existing.images || '[]') as string[]).length > 0 : false;
     const hasCatalogs = existing ? (JSON.parse(existing.catalogs || '[]') as unknown[]).length > 0 : false;
     const imageField = hasImages ? {} : { images: JSON.stringify(images) };
     const catalogField = hasCatalogs ? {} : { catalogs: JSON.stringify([CATALOG]) };

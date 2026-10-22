@@ -8,10 +8,25 @@ export type IllustrationKind =
 export type Subject =
   | 'corrugated' | 'spiral' | 'drainage' | 'pe' | 'pvc' | 'pushfit' | 'concrete' | 'ductile' | 'well'
   | 'manhole' | 'septic' | 'fitting-pe' | 'fitting-corrugated' | 'fitting-pvc' | 'coil' | 'drip-kit'
-  | 'valve' | 'sprinkler';
+  | 'valve' | 'sprinkler' | 'cover' | 'gas-cover' | 'slab' | 'box';
 
-/** دسته (و برای اسپیرال و اتصالات، خود محصول) → شکل محصول */
+/**
+ * نگاشت سطح محصول. چند محصول متفاوت در یک دسته می‌نشینند (مثلاً پنج نوع دریچه در «منهول و دریچه»)
+ * و اگر فقط از روی دسته تصمیم بگیریم، همه یک آیکون می‌گیرند که محصولشان نیست.
+ */
+const BY_PRODUCT: Record<string, Subject> = {
+  'composite-manhole-covers': 'cover',
+  'telecom-covers': 'cover',
+  'industrial-park-covers': 'cover',
+  'gas-covers-manholes': 'gas-cover',
+  'urban-furniture-composite': 'slab',
+  'electrical-duct-boxes': 'box',
+};
+
+/** محصول → شکل؛ اگر محصول نگاشت اختصاصی نداشت، از روی دسته تصمیم گرفته می‌شود */
 export function subjectFor(categorySlug: string, productSlug: string): Subject {
+  const byProduct = BY_PRODUCT[productSlug];
+  if (byProduct) return byProduct;
   if (/spiral|aspiral/.test(productSlug)) return 'spiral';
   if (categorySlug === 'fittings') return /corrugat|karogit/.test(productSlug) ? 'fitting-corrugated' : /pvc/.test(productSlug) ? 'fitting-pvc' : 'fitting-pe';
   const byCategory: Record<string, Subject> = {
@@ -59,6 +74,12 @@ const PALETTES: Record<Subject, Palette> = {
   valve: { hi: '#4b5563', mid: '#1f2937', lo: '#0b0f14', inner: '#374151', innerLo: '#111827' },
   // آبپاش نارنجی روی رایزر زرد
   sprinkler: { hi: '#fdba74', mid: '#ea580c', lo: '#9a3412', inner: '#fed7aa', innerLo: '#f97316' },
+  // کامپوزیت پایه سیمانی — خاکستری بتنی، نه زرد پلی اتیلن
+  cover: { hi: '#e7e5e4', mid: '#a8a29e', lo: '#57534e', inner: '#d6d3d1', innerLo: '#78716c' },
+  slab: { hi: '#e7e5e4', mid: '#a8a29e', lo: '#57534e', inner: '#d6d3d1', innerLo: '#78716c' },
+  box: { hi: '#e7e5e4', mid: '#a8a29e', lo: '#57534e', inner: '#d6d3d1', innerLo: '#78716c' },
+  // دریچه گاز با رنگ نارنجی استاندارد شبکه گازرسانی
+  'gas-cover': { hi: '#fdba74', mid: '#f59e0b', lo: '#b45309', inner: '#fed7aa', innerLo: '#d97706' },
 };
 
 /** رنگ گرانول مواد اولیه کنار هر محصول */
@@ -225,6 +246,55 @@ export function SpecIllustration({ kind, subject = 'corrugated', className }: { 
             {[[8, 36], [30, 45], [52, 36]].map(([cx, cy]) => (
               <rect key={cx} x={cx - 2.5} y={cy - 1.8} width="5" height="3.6" rx="1.2" fill="#7c3aed" />
             ))}
+          </g>
+        );
+      case 'cover':
+      case 'gas-cover':
+        return (
+          <g>
+            {/* طوقه: حلقه‌ای که داخل بتن کف‌سازی می‌نشیند */}
+            <ellipse cx="32" cy="34" rx="28" ry="10" fill={p.lo} />
+            <ellipse cx="32" cy="32" rx="28" ry="10" fill={url('body')} />
+            <ellipse cx="32" cy="32" rx="21" ry="7" fill={p.lo} fillOpacity="0.5" />
+            {/* درب روی طوقه */}
+            <ellipse cx="32" cy="25" rx="23" ry="9" fill={p.lo} />
+            <ellipse cx="32" cy="23" rx="23" ry="9" fill={url('bodyX')} />
+            {/* حلقه‌های هم‌مرکز روی درب */}
+            {[16, 10].map((rx) => (
+              <ellipse key={rx} cx="32" cy="23" rx={rx} ry={rx * 0.39} fill="none" stroke={p.lo} strokeOpacity="0.45" strokeWidth="1.3" />
+            ))}
+            <ellipse cx="32" cy="23" rx="4.5" ry="1.9" fill={p.lo} fillOpacity="0.55" />
+            {/* دو جای دست برای برداشتن درب */}
+            {[[18, 24], [46, 24]].map(([cx, cy]) => (
+              <ellipse key={cx} cx={cx} cy={cy} rx="2" ry="1" fill={p.lo} fillOpacity="0.75" />
+            ))}
+          </g>
+        );
+      case 'slab':
+        return (
+          <g>
+            {/* دال بتنی در پرسپکتیو */}
+            <path d="M6 30 L32 18 L58 30 L32 42 Z" fill={url('body')} />
+            <path d="M6 30 L32 18 L58 30 L32 42 Z" fill="none" stroke={p.lo} strokeOpacity="0.5" strokeWidth="1" />
+            <path d="M6 30 V35 L32 47 V42 Z" fill={p.lo} />
+            <path d="M58 30 V35 L32 47 V42 Z" fill={p.mid} />
+            {/* سوراخ‌های آبرو */}
+            {[[-9, -3], [0, -5], [9, -3], [-9, 2], [0, 0], [9, 2]].map(([dx, dy], i) => (
+              <ellipse key={i} cx={32 + dx} cy={30 + dy} rx="3.6" ry="1.5" fill={p.lo} fillOpacity="0.8" />
+            ))}
+          </g>
+        );
+      case 'box':
+        return (
+          <g>
+            {/* بدنه باکس */}
+            <path d="M10 26 L32 16 L54 26 V38 L32 48 L10 38 Z" fill={url('body')} />
+            <path d="M10 26 L32 36 L54 26" fill="none" stroke={p.lo} strokeOpacity="0.5" strokeWidth="1.2" />
+            <path d="M32 36 V48" stroke={p.lo} strokeOpacity="0.45" strokeWidth="1.2" />
+            <path d="M10 26 L32 16 L54 26 L32 36 Z" fill={p.lo} fillOpacity="0.25" />
+            {/* درب جدا، کمی بالاتر */}
+            <path d="M14 18 L32 9 L50 18 L32 27 Z" fill={url('bodyX')} stroke={p.lo} strokeOpacity="0.5" strokeWidth="1" />
+            <ellipse cx="32" cy="18" rx="6" ry="2.4" fill={p.lo} fillOpacity="0.5" />
           </g>
         );
       case 'valve':
