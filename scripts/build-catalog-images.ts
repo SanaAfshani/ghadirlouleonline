@@ -25,12 +25,16 @@ const INDEX = path.join(OUT, 'index.json');
  * هر محصول در صفحه منبع فقط ۶۲۰ تا ۹۳۰ پیکسل عرض دارد. قاب ۱۶۰۰ یعنی حدود ۱.۸ برابر
  * بزرگ‌نمایی و همان نرمیِ عکس‌ها؛ با این قاب هیچ عکسی بزرگ‌نمایی نمی‌شود.
  */
-const INFRA_CANVAS = { width: 1200, height: 900 };
+const INFRA_LIMITS = { minWidth: 760, maxWidth: 1400, maxUpscale: 1 };
 /** چقدر از قاب را خود محصول پر کند — حاشیه سفید زیاد، عکس را بی‌کیفیت جلوه می‌داد */
 const FILL = 0.86;
 /** عکس لیست قیمت از یک JPEG کوچک درمی‌آید؛ قاب بزرگ‌تر فقط حجم اضافه می‌کرد، نه جزئیات */
-// قاب کوچک‌تر یعنی محصول بدون بزرگ‌نمایی بیشتر، قاب را پر می‌کند — جزئیات همان است، سفیدیِ هدررفته کمتر
-const VISPAR_CANVAS = { width: 900, height: 675 };
+/**
+ * منبع این گروه یک تصویر لیست قیمت است و هر محصول در آن فقط ۵۵ تا ۱۶۵ پیکسل عرض دارد،
+ * پس برای رسیدن به اندازه قابل نمایش ناچار به بزرگ‌نمایی هستیم. سقف بزرگ‌نمایی برداشته
+ * شد تا دست‌کم پرشدگی قاب بین همه یکسان بماند (قبلاً ۳۲٪ تا ۸۵٪ فرق می‌کرد و نصفه دیده می‌شد).
+ */
+const VISPAR_LIMITS = { minWidth: 900, maxWidth: 900, maxUpscale: 99 };
 /**
  * کارت دسته با object-cover و نسبت ۴:۳ تا ۱۶:۱۰ نمایش داده می‌شود.
  * قاب را ۱۶:۱۰ می‌سازیم ولی خود محصول را داخل ناحیه امنِ ۴:۳ وسط نگه می‌داریم،
@@ -151,23 +155,18 @@ async function buildVispar(src: string) {
     for (const [i, [page, col, bar]] of picks.entries()) {
       const cut = await visparCutout(src, page, col, bar);
       const { width = 1, height = 1 } = await sharp(cut).metadata();
-      // بزرگ‌نمایی محدود: منبع ریز است و پر کردن کل قاب محصول را له می‌کند
-      const scale = Math.min(
-        (VISPAR_CANVAS.width * FILL) / width,
-        (VISPAR_CANVAS.height * FILL) / height,
-        5,
-      );
-      const w = Math.round(width * scale), h = Math.round(height * scale);
+      const fit = Math.min((VISPAR_LIMITS.minWidth * FILL) / width, ((VISPAR_LIMITS.minWidth * 3) / 4 * FILL) / height);
+      const w = Math.max(1, Math.round(width * fit));
+      const h = Math.max(1, Math.round(height * fit));
       const product = await sharp(cut).resize(w, h, { kernel: 'lanczos3' }).sharpen({ sigma: 1.1 }).toBuffer();
-      const canvas = await sharp({
-        create: { ...VISPAR_CANVAS, channels: 4, background: { r: 255, g: 255, b: 255, alpha: 1 } },
-      })
-        .composite([{ input: product, left: Math.round((VISPAR_CANVAS.width - w) / 2), top: Math.round((VISPAR_CANVAS.height - h) / 2) }])
+      const canvas = { width: VISPAR_LIMITS.minWidth, height: Math.round((VISPAR_LIMITS.minWidth * 3) / 4) };
+      const framedBuf = await sharp({ create: { ...canvas, channels: 4, background: { r: 255, g: 255, b: 255, alpha: 1 } } })
+        .composite([{ input: product, left: Math.round((canvas.width - w) / 2), top: Math.round((canvas.height - h) / 2) }])
         .png()
         .toBuffer();
-
-      urls.push(await write(canvas, slug, i + 1));
+      urls.push(await write(framedBuf, slug, i + 1));
     }
+
     out[slug] = urls;
     console.log(`${slug}: ${urls.length} عکس`);
   }
@@ -320,18 +319,39 @@ async function splitProducts(file: string, band: { left: number; top: number; wi
 }
 
 /** محصول بریده‌شده وسط یک قاب ۴:۳، طوری که قاب را پر کند */
-async function framed(file: string, box: { left: number; top: number; width: number; height: number }, canvas: { width: number; height: number }) {
+/**
+ * محصول وسط یک قاب ۴:۳، طوری که همیشه همان کسر از قاب را پر کند.
+ *
+ * قاب ثابت کار نمی‌کرد: اندازه منبعِ محصول‌ها خیلی فرق دارد، پس سقف بزرگ‌نمایی برای
+ * ریزها زودتر فعال می‌شد و پرشدگی بین ۳۲٪ تا ۸۵٪ در نوسان بود — همان چیزی که
+ * «نصفه» دیده می‌شد. حالا اندازه قاب از خود محصول حساب می‌شود تا پرشدگی یکسان بماند.
+ */
+async function framed(
+  file: string,
+  box: { left: number; top: number; width: number; height: number },
+  limits: { minWidth: number; maxWidth: number; maxUpscale: number },
+) {
   // trim لبه و سایه زیر محصول را می‌بُرید؛ خودِ جعبه تشخیص‌داده‌شده با کمی حاشیه برش می‌خورد
   const cut = await sharp(file).extract(box).png().toBuffer();
   const { width = 1, height = 1 } = await sharp(cut).metadata();
-  // سقف ۱: بزرگ‌نمایی جزئیاتی اضافه نمی‌کند، فقط عکس را نرم می‌کند
-  const fit = Math.min((canvas.width * FILL) / width, (canvas.height * FILL) / height, 1);
+
+  // بزرگ‌نمایی فقط تا جایی که قاب به کف اندازه برسد؛ بیشتر از آن جزئیات اضافه نمی‌کند
+  const needed = Math.max(width / FILL, (height / FILL) * (4 / 3));
+  const canvasWidth = Math.round(Math.min(limits.maxWidth, Math.max(limits.minWidth, needed)));
+  const canvas = { width: canvasWidth, height: Math.round((canvasWidth * 3) / 4) };
+
+  const fit = Math.min(
+    (canvas.width * FILL) / width,
+    (canvas.height * FILL) / height,
+    limits.maxUpscale,
+  );
   const w = Math.max(1, Math.round(width * fit));
   const h = Math.max(1, Math.round(height * fit));
   const product = await sharp(cut)
     .resize(w, h, { kernel: 'lanczos3' })
     .sharpen({ sigma: 0.6 })
     .toBuffer();
+
   return sharp({ create: { ...canvas, channels: 4, background: { r: 255, g: 255, b: 255, alpha: 1 } } })
     .composite([{ input: product, left: Math.round((canvas.width - w) / 2), top: Math.round((canvas.height - h) / 2) }])
     .png()
@@ -353,7 +373,7 @@ async function buildInfra(src: string) {
       if (!products.length) { console.warn(`${slug}: محصولی در صفحه ${page} جدا نشد`); continue; }
 
       for (const product of products) {
-        urls.push(await write(await framed(file, product, INFRA_CANVAS), slug, ++n));
+        urls.push(await write(await framed(file, product, INFRA_LIMITS), slug, ++n));
       }
     }
     const lead = LEAD[slug];
