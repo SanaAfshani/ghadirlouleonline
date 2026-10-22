@@ -15,7 +15,7 @@ export async function register() {
   }
 
   // انتقال یک‌باره محتوا (shared/lib/content-sync) — در پس‌زمینه تا بالا آمدن سرور منتظر آپلود عکس‌ها نماند
-  const { syncContent, syncPriceTitles, syncSepticMainPhoto, syncVatOff, syncVatOffIssued, syncCertificates, syncExclusiveText } = await import('@/shared/lib/content-sync');
+  const { syncContent, syncPriceTitles, syncSepticMainPhoto, syncVatOff, syncVatOffIssued, syncCertificates, syncExclusiveText, syncGeneratedImages } = await import('@/shared/lib/content-sync');
   syncContent()
     .then((result) => console.log('[content-sync]', result))
     .catch((error) => console.error('[content-sync] failed, will retry on next start:', error));
@@ -31,6 +31,10 @@ export async function register() {
   syncExclusiveText()
     .then((result) => console.log('[exclusive-text]', result))
     .catch((error) => console.error('[exclusive-text] failed, will retry on next start:', error));
+  // هر بار اجرا می‌شود: نام عکس‌های تولیدشده هش محتوا دارد و با هر ساخت تازه عوض می‌شود
+  syncGeneratedImages()
+    .then((result) => console.log('[generated-images]', result))
+    .catch((error) => console.error('[generated-images] failed, will retry on next start:', error));
   // پشت سر هم: هر دو روی ردیف‌های Quote کار می‌کنند
   syncVatOff()
     .then((result) => console.log('[vat-off]', result))

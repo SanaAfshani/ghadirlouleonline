@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   title: 'پیگیری سفارش',
   description: `پیگیری وضعیت سفارش و پیش‌فاکتور ${siteConfig.name} با شماره پیش‌فاکتور: آماده‌سازی، بارگیری، ارسال و تحویل.`,
   alternates: { canonical: `${siteConfig.url}/track` },
+  /**
+   * ابزار است، نه صفحه محتوا: بدون شماره پیش‌فاکتور چیزی برای ایندکس ندارد و گوگل هم
+   * «Crawled - currently not indexed» گزارشش می‌کرد. لینک‌ها دنبال می‌شوند ولی ایندکس نه.
+   */
+  robots: { index: false, follow: true },
 };
 
 type Props = { searchParams: Promise<{ n?: string }> };

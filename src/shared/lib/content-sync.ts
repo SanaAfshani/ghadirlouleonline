@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 import { prisma } from '@/shared/lib/prisma';
@@ -335,4 +335,78 @@ export async function syncExclusiveText() {
   }
   await prisma.siteSettings.create({ data: { key: EXCLUSIVE_TEXT_KEY, value: new Date().toISOString(), type: 'text' } });
   return result;
+}
+
+/**
+ * همگام‌سازی آدرس عکس‌های تولیدشده با فایل‌های واقعی روی دیسک.
+ *
+ * نام این فایل‌ها هشِ محتوا دارد (scripts/build-catalog-images.ts) تا با عوض شدن عکس،
+ * کش مرورگر و بهینه‌ساز Next نسخه قدیمی را ندهند. اما آدرسِ ذخیره‌شده در دیتابیس با
+ * دیپلوی به‌روز نمی‌شود؛ بدون این همگام‌سازی، بعد از هر دیپلوی عکس‌ها ۴۰۴ می‌شدند.
+ *
+ * هر بار بالا آمدن سرور اجرا می‌شود (برخلاف بقیه sync‌ها یک‌باره نیست) چون با هر
+ * ساخت تازه عکس‌ها، هش هم عوض می‌شود. فقط آدرس‌های /images/products/ را عوض می‌کند،
+ * پس عکسی که ادمین آپلود کرده (/media/...) دست نمی‌خورد.
+ */
+export async function syncGeneratedImages() {
+  let index: Record<string, string[]>;
+  try {
+    const file = path.join(process.cwd(), 'public', 'images', 'products', 'index.json');
+    index = JSON.parse(await readFile(file, 'utf8')) as Record<string, string[]>;
+  } catch {
+    return 'no index.json';
+  }
+
+  const slugs = Object.keys(index);
+  if (!slugs.length) return 'index empty';
+
+  const products = await prisma.product.findMany({
+    where: { slug: { in: slugs } },
+    select: { id: true, slug: true, images: true },
+  });
+
+  let changed = 0;
+  for (const product of products) {
+    const wanted = index[product.slug] ?? [];
+    if (!wanted.length) continue;
+
+    let current: string[] = [];
+    try {
+      current = JSON.parse(product.images || '[]') as string[];
+    } catch {}
+
+    // عکس آپلودی ادمین جای عکس تولیدشده را گرفته — دست نمی‌زنیم
+    const generatedOnly = current.length === 0 || current.every((u) => u.startsWith('/images/products/'));
+    if (!generatedOnly) continue;
+    if (current.length === wanted.length && current.every((u, i) => u === wanted[i])) continue;
+
+    await prisma.product.update({ where: { id: product.id }, data: { images: JSON.stringify(wanted) } });
+    changed++;
+  }
+
+  // عکس دسته‌ها هم همین‌طور: نامشان هش دارد و با دیپلوی عوض می‌شود
+  const catDir = path.join(process.cwd(), 'public', 'images', 'categories');
+  const files = await readdir(catDir).catch(() => [] as string[]);
+  const bySlug = new Map<string, string>();
+  for (const f of files) {
+    const m = /^(.+)\.[0-9a-f]{8}\.webp$/.exec(f);
+    if (m) bySlug.set(m[1], `/images/categories/${f}`);
+  }
+  let cats = 0;
+  if (bySlug.size) {
+    const rows = await prisma.category.findMany({
+      where: { slug: { in: [...bySlug.keys()] } },
+      select: { id: true, slug: true, image: true },
+    });
+    for (const row of rows) {
+      const wanted = bySlug.get(row.slug)!;
+      // فقط وقتی عکس فعلی هم از همین خانواده است (یا نیست) — عکس دستی ادمین نماند زیر دست
+      if (row.image === wanted) continue;
+      if (row.image && !row.image.startsWith('/images/categories/')) continue;
+      await prisma.category.update({ where: { id: row.id }, data: { image: wanted } });
+      cats++;
+    }
+  }
+
+  return `products: ${changed}, categories: ${cats}`;
 }
