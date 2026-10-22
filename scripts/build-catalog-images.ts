@@ -320,6 +320,46 @@ async function splitProducts(file: string, band: { left: number; top: number; wi
 
 /** محصول بریده‌شده وسط یک قاب ۴:۳، طوری که قاب را پر کند */
 /**
+ * بریدن «کفِ» خاکستری کاتالوگ.
+ *
+ * در صفحه منبع هر محصول روی یک نوار خاکستری افقی (حدود RGB 144، خنثی و یکنواخت)
+ * نشسته است. این نوار داخل برش می‌افتاد و در کارت مثل بریدگیِ وسط عکس دیده می‌شد.
+ *
+ * سفید کردنِ پیکسل‌های نوار جواب نداد: بتنِ خود محصول در سایه هم همان خاکستری است
+ * و لبه پایین محصول خورده می‌شد. به‌جایش تصویر دقیقاً بالای نوار بریده می‌شود —
+ * همان‌جایی که محصول روی زمین می‌نشیند.
+ */
+async function cropAboveShelf(input: Buffer) {
+  const { data, info } = await sharp(input).raw().toBuffer({ resolveWithObject: true });
+  const ch = info.channels;
+  const isShelf = (i: number) => {
+    const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
+    if (Math.max(r, g, b) - Math.min(r, g, b) > 10) return false;
+    const light = (r + g + b) / 3;
+    return light >= 118 && light <= 180;
+  };
+
+  // فقط یک‌سوم پایینی را می‌گردیم؛ بالاتر از آن، خاکستریِ پهن یعنی خود محصول
+  const from = Math.floor(info.height * 0.62);
+  let top: number | null = null, run = 0;
+  for (let y = from; y < info.height; y++) {
+    let shelf = 0;
+    for (let x = 0; x < info.width; x++) if (isShelf((y * info.width + x) * ch)) shelf++;
+    if (shelf / info.width >= 0.6) {
+      if (run === 0) top = y;
+      run++;
+    } else if (run) {
+      if (run >= 4) break;
+      run = 0; top = null;
+    }
+  }
+  if (top === null || run < 4) return input;
+
+  const height = Math.max(1, top);
+  return sharp(input).extract({ left: 0, top: 0, width: info.width, height }).png().toBuffer();
+}
+
+/**
  * محصول وسط یک قاب ۴:۳، طوری که همیشه همان کسر از قاب را پر کند.
  *
  * قاب ثابت کار نمی‌کرد: اندازه منبعِ محصول‌ها خیلی فرق دارد، پس سقف بزرگ‌نمایی برای
@@ -332,7 +372,7 @@ async function framed(
   limits: { minWidth: number; maxWidth: number; maxUpscale: number },
 ) {
   // trim لبه و سایه زیر محصول را می‌بُرید؛ خودِ جعبه تشخیص‌داده‌شده با کمی حاشیه برش می‌خورد
-  const cut = await sharp(file).extract(box).png().toBuffer();
+  const cut = await cropAboveShelf(await sharp(file).extract(box).png().toBuffer());
   const { width = 1, height = 1 } = await sharp(cut).metadata();
 
   // بزرگ‌نمایی فقط تا جایی که قاب به کف اندازه برسد؛ بیشتر از آن جزئیات اضافه نمی‌کند
