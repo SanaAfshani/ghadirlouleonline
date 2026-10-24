@@ -25,7 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const latestPost = posts.reduce<Date | undefined>((a, p) => (!a || p.updatedAt > a ? p.updatedAt : a), undefined);
 
   const staticPages: MetadataRoute.Sitemap = [
-    { url: baseUrl, lastModified: pricesModified, changeFrequency: 'daily', priority: 1, images: imgs(['/images/site/hero-wm.webp', '/images/site/factory-aerial-wm.webp']) },
+    { url: baseUrl, lastModified: pricesModified, changeFrequency: 'daily', priority: 1, images: imgs(['/images/site/hero-v2-wm.webp', '/images/site/factory-aerial-wm.webp']) },
     { url: `${baseUrl}/products`, changeFrequency: 'daily', priority: 0.9 },
     { url: `${baseUrl}/prices`, lastModified: pricesModified, changeFrequency: 'daily', priority: 0.9 },
     { url: `${baseUrl}/categories`, changeFrequency: 'weekly', priority: 0.85 },
