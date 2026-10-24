@@ -14,6 +14,9 @@ import { prisma } from '../src/shared/lib/prisma';
 const APPLY = process.argv.includes('--apply');
 
 const STEPS = [
+  // اول عکس دریچه‌ها ساخته و ستون images همین محصول‌ها نوشته می‌شود؛ نام فایل‌ها هشِ محتوا
+  // دارند، پس اگر این قدم نباشد دیتابیس به نام‌های قدیمیِ پاک‌شده اشاره می‌کند و گالری خالی می‌ماند
+  'scripts/build-cover-images.ts',
   'scripts/add-irrigation-products.ts',
   'scripts/add-infra-products.ts',
   'scripts/set-category-images.ts',

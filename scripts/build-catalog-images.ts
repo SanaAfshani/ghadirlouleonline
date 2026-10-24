@@ -106,6 +106,11 @@ async function buildVispar(src: string) {
 }
 
 // ───────────────────── ب) دریچه و منهول (صفحات کاتالوگ PDF) ─────────────────────
+//
+// این مسیر دیگر اجرا نمی‌شود: صفحه‌های خام کاتالوگ (p-NNN.jpg) روی هیچ سیستمی نمانده‌اند و
+// تشخیص نوارش هم محصول را وسط بدنه می‌بُرید. عکس این خانواده‌ها حالا با
+// scripts/build-cover-images.ts از روی assets/catalog-bands ساخته می‌شود.
+// اگر فایل اصلی کاتالوگ پیدا شد، این مسیر نقطه شروع دوباره است.
 
 /**
  * عکسی که باید اول گالری بیاید (پیش‌فرض ۱).
@@ -264,11 +269,12 @@ async function splitProducts(file: string, band: { left: number; top: number; wi
 async function cropAboveShelf(input: Buffer) {
   const { data, info } = await sharp(input).raw().toBuffer({ resolveWithObject: true });
   const ch = info.channels;
+  const light = (i: number) => (data[i] + data[i + 1] + data[i + 2]) / 3;
   const isShelf = (i: number) => {
     const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
     if (Math.max(r, g, b) - Math.min(r, g, b) > 10) return false;
-    const light = (r + g + b) / 3;
-    return light >= 118 && light <= 180;
+    const l = (r + g + b) / 3;
+    return l >= 118 && l <= 180;
   };
 
   // فقط یک‌سوم پایینی را می‌گردیم؛ بالاتر از آن، خاکستریِ پهن یعنی خود محصول
@@ -276,8 +282,16 @@ async function cropAboveShelf(input: Buffer) {
   let top: number | null = null, run = 0;
   for (let y = from; y < info.height; y++) {
     let shelf = 0;
-    for (let x = 0; x < info.width; x++) if (isShelf((y * info.width + x) * ch)) shelf++;
-    if (shelf / info.width >= 0.6) {
+    const levels: number[] = [];
+    for (let x = 0; x < info.width; x++) {
+      const i = (y * info.width + x) * ch;
+      if (isShelf(i)) { shelf++; levels.push(light(i)); }
+    }
+    // نوار کاتالوگ یکدستِ تمام‌عرض است. بدنه بتنیِ خود محصول هم همان خاکستری است، ولی
+    // نقش‌دار: اگر یکدستی و تمام‌عرض بودن را نخواهیم، دریچه از وسط بدنه بریده می‌شود.
+    const mean = levels.reduce((a, b) => a + b, 0) / Math.max(1, levels.length);
+    const sd = Math.sqrt(levels.reduce((a, b) => a + (b - mean) ** 2, 0) / Math.max(1, levels.length));
+    if (shelf / info.width >= 0.85 && sd <= 6) {
       if (run === 0) top = y;
       run++;
     } else if (run) {
