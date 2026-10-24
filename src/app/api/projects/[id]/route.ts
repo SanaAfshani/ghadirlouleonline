@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/shared/lib/admin-auth';
 import { prisma } from '@/shared/lib/prisma';
-import { serializeProject } from '@/shared/lib/serializers';
+import { normalizeProjectImages, serializeProject } from '@/shared/lib/serializers';
 import { slugify } from '@/shared/lib/utils';
 import { recordRedirect } from '@/shared/lib/redirects';
 
@@ -41,12 +41,18 @@ export async function PUT(request: NextRequest, { params }: Props) {
         ...(body.slug != null && { slug: slugify(String(body.slug)) }),
         ...(body.description != null && { description: body.description }),
         ...(body.content != null && { content: body.content }),
-        ...(body.images != null && { images: JSON.stringify(body.images) }),
+        ...(body.images != null && { images: JSON.stringify(normalizeProjectImages(body.images)) }),
         ...(body.location != null && { location: body.location }),
         ...(body.year != null && { year: Number(body.year) }),
         ...(body.client != null && { client: body.client }),
         ...(body.published != null && { published: Boolean(body.published) }),
         ...(body.featured != null && { featured: Boolean(body.featured) }),
+        ...(body.metaTitle != null && { metaTitle: body.metaTitle || null }),
+        ...(body.metaDescription != null && { metaDescription: body.metaDescription || null }),
+        ...(body.focusKeyword != null && { focusKeyword: body.focusKeyword || null }),
+        ...(body.ogTitle != null && { ogTitle: body.ogTitle || null }),
+        ...(body.ogDescription != null && { ogDescription: body.ogDescription || null }),
+        ...(body.faqs != null && { faqs: JSON.stringify(body.faqs) }),
       },
     });
 

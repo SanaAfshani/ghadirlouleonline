@@ -3,11 +3,12 @@ import { formatPersianNumber, slugify, stripHtml } from '@/shared/lib/utils';
 export { stripHtml };
 
 /** نوع محتوایی که پنل سئو روی آن کار می‌کند — متن‌های راهنما و چک‌ها را تعیین می‌کند */
-export type SeoVariant = 'article' | 'product';
+export type SeoVariant = 'article' | 'product' | 'project';
 
 export const VARIANT_LABELS: Record<SeoVariant, { entity: string; summary: string; body: string }> = {
   article: { entity: 'مقاله', summary: 'خلاصه مقاله', body: 'متن مقاله' },
   product: { entity: 'محصول', summary: 'توضیح کوتاه محصول', body: 'توضیحات محصول' },
+  project: { entity: 'پروژه', summary: 'توضیح کوتاه پروژه', body: 'شرح پروژه' },
 };
 
 /** فیلدهای سئو — همه اختیاری‌اند و در صورت خالی بودن fallback می‌شوند */

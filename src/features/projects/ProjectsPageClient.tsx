@@ -38,7 +38,7 @@ export function ProjectsPageClient({ projects }: Props) {
                   <Link href={`/projects/${project.slug}`} className="group block">
                     <div className="relative aspect-[16/10] rounded-3xl overflow-hidden bg-[var(--ink-2)]">
                       {project.images[0] ? (
-                        <Image src={project.images[0]} alt={project.title} fill sizes="(max-width:640px) 100vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
+                        <Image src={project.images[0].url} alt={project.images[0].alt || project.title} fill sizes="(max-width:640px) 100vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
                       ) : (
                         <span className="absolute inset-0 bp-grid" aria-hidden />
                       )}

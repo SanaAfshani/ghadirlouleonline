@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { m as motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Plus, Search, Trash2, Building2, MapPin, Loader2, Pencil, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatPersianNumber } from '@/shared/lib/utils';
@@ -150,8 +151,18 @@ export default function AdminProjectsPage() {
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-[var(--muted)] flex items-center justify-center flex-shrink-0">
-                          <Building2 className="w-5 h-5 text-[var(--muted-foreground)]" />
+                        <div className="relative w-10 h-10 rounded-xl bg-[var(--muted)] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                          {project.images[0] ? (
+                            <Image
+                              src={project.images[0].url}
+                              alt=""
+                              fill
+                              sizes="40px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <Building2 className="w-5 h-5 text-[var(--muted-foreground)]" />
+                          )}
                         </div>
                         <div>
                           <div className="text-[var(--foreground)] font-medium">{project.title}</div>

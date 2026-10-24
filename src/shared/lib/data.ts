@@ -5,6 +5,7 @@ import { prisma } from '@/shared/lib/prisma';
 import { getMarketNow } from '@/shared/lib/price-board';
 import { categoryRank, isComingSoon } from '@/shared/lib/catalog';
 import {
+  normalizeProjectImages,
   serializeBlogPost,
   serializeProduct,
   serializeProject,
@@ -228,7 +229,12 @@ export async function getSitemapData() {
         images: parseImageList(p.images),
       };
     }),
-    projects: projects.map((p) => ({ slug: p.slug, updatedAt: p.updatedAt, images: parseImageList(p.images) })),
+    // تصاویر پروژه {url, alt} هستند (ردیف قدیمی: رشته) — سایت‌مپ فقط آدرس می‌خواهد
+    projects: projects.map((p) => ({
+      slug: p.slug,
+      updatedAt: p.updatedAt,
+      images: normalizeProjectImages(p.images).map((img) => img.url).slice(0, 10),
+    })),
     pricesUpdatedAt: prices._max.updatedAt,
   };
 }

@@ -1,4 +1,4 @@
-import type { FaqItem, BlogPost, Category, Product, Project } from '@/shared/types';
+import type { FaqItem, BlogPost, Category, Product, Project, ProjectImage } from '@/shared/types';
 import { formatPersianNumber } from '@/shared/lib/utils';
 import { isComingSoon } from '@/shared/lib/catalog';
 import { parseCatalogs } from '@/shared/lib/catalog-files';
@@ -178,6 +178,30 @@ export function serializeBlogPost(p: DbBlogPost): BlogPost {
   };
 }
 
+/**
+ * تصاویر پروژه از هر دو شکل خوانده می‌شوند: آرایه رشته (ردیف‌های قبل از افزودن alt) و آرایه {url, alt}.
+ * پس ردیف‌های قدیمی بدون مهاجرت داده کار می‌کنند و اولین باری که ادمین ذخیره کند شکل جدید نوشته می‌شود.
+ */
+export function normalizeProjectImages(value: unknown): ProjectImage[] {
+  const list = typeof value === 'string' ? safeJson(value) : value;
+  if (!Array.isArray(list)) return [];
+  return list
+    .map((item) => {
+      if (typeof item === 'string') return { url: item.trim(), alt: '' };
+      const record = item as { url?: unknown; alt?: unknown };
+      return { url: String(record?.url ?? '').trim(), alt: String(record?.alt ?? '').trim() };
+    })
+    .filter((img) => img.url.length > 0);
+}
+
+function safeJson(value: string): unknown {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return [];
+  }
+}
+
 export function serializeProject(p: {
   id: string;
   title: string;
@@ -190,14 +214,26 @@ export function serializeProject(p: {
   client: string | null;
   published: boolean;
   featured: boolean;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  focusKeyword?: string | null;
+  ogTitle?: string | null;
+  ogDescription?: string | null;
+  faqs?: string;
   createdAt: Date;
 }): Project {
   return {
     ...p,
     description: p.description ?? '',
     content: p.content ?? '',
-    images: parseJsonArray(p.images),
+    images: normalizeProjectImages(p.images),
     location: p.location ?? '',
     client: p.client ?? undefined,
+    metaTitle: p.metaTitle ?? '',
+    metaDescription: p.metaDescription ?? '',
+    focusKeyword: p.focusKeyword ?? '',
+    ogTitle: p.ogTitle ?? '',
+    ogDescription: p.ogDescription ?? '',
+    faqs: parseFaqs(p.faqs),
   };
 }

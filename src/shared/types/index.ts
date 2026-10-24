@@ -85,18 +85,31 @@ export interface BlogPost {
   updatedAt: Date;
 }
 
+/** تصویر پروژه — alt جدا نگه داشته می‌شود تا هر عکس متن جایگزین خودش را برای سئوی تصویر داشته باشد */
+export interface ProjectImage {
+  url: string;
+  /** خالی باشد، موقع نمایش از عنوان پروژه استفاده می‌شود */
+  alt: string;
+}
+
 export interface Project {
   id: string;
   title: string;
   slug: string;
   description: string;
   content: string;
-  images: string[];
+  images: ProjectImage[];
   location: string;
   year: number;
   client?: string;
   published: boolean;
   featured: boolean;
+  metaTitle: string;
+  metaDescription: string;
+  focusKeyword: string;
+  ogTitle: string;
+  ogDescription: string;
+  faqs: FaqItem[];
   createdAt: Date;
 }
 

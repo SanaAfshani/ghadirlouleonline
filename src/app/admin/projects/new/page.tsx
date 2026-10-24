@@ -6,18 +6,37 @@ import { ArrowRight, Save, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { slugify } from '@/shared/lib/utils';
+import { HtmlContentEditor } from '@/features/admin/editor/HtmlContentEditor';
+import { SeoPanel } from '@/features/admin/seo/SeoPanel';
+import { FaqEditor } from '@/features/admin/seo/FaqEditor';
+import { ProjectImageEditor } from '@/features/admin/projects/ProjectImageEditor';
+import type { SeoFields } from '@/features/admin/seo/seo';
+import type { FaqItem, ProjectImage } from '@/shared/types';
 
 export default function NewProjectPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     title: '',
+    slug: '',
     location: '',
+    client: '',
     description: '',
+    content: '',
+    images: [] as ProjectImage[],
     year: new Date().getFullYear() - 621,
     published: true,
     featured: false,
+    // فیلدهای سئو — در SeoPanel ویرایش می‌شوند
+    metaTitle: '',
+    metaDescription: '',
+    focusKeyword: '',
+    ogTitle: '',
+    ogDescription: '',
+    faqs: [] as FaqItem[],
   });
+
+  const handleSeoChange = (patch: Partial<SeoFields>) => setForm((f) => ({ ...f, ...patch }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,12 +48,21 @@ export default function NewProjectPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: form.title,
-          slug: slugify(form.title),
+          slug: slugify(form.slug || form.title),
           location: form.location || undefined,
+          client: form.client || undefined,
           description: form.description || undefined,
+          content: form.content || undefined,
+          images: form.images,
           year: form.year,
           published: form.published,
           featured: form.featured,
+          metaTitle: form.metaTitle,
+          metaDescription: form.metaDescription,
+          focusKeyword: form.focusKeyword,
+          ogTitle: form.ogTitle,
+          ogDescription: form.ogDescription,
+          faqs: form.faqs,
         }),
       });
 
@@ -56,9 +84,11 @@ export default function NewProjectPage() {
 
   const inputCls =
     'w-full h-11 bg-[var(--muted)] border border-[var(--border)] rounded-xl px-4 text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none transition-colors';
+  const textareaCls =
+    'w-full bg-[var(--muted)] border border-[var(--border)] rounded-xl px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none resize-none transition-colors';
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-4xl space-y-6">
       <div className="flex items-center gap-4">
         <Link
           href="/admin/projects"
@@ -72,75 +102,138 @@ export default function NewProjectPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">عنوان پروژه *</label>
-          <input
-            type="text"
-            required
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-            className={inputCls}
-          />
+      <form onSubmit={handleSubmit}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 space-y-4">
+              <h2 className="text-[var(--foreground)] font-bold">مشخصات پروژه</h2>
+
+              <div>
+                <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">عنوان پروژه *</label>
+                <input
+                  type="text"
+                  required
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  className={inputCls}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">توضیح کوتاه</label>
+                <textarea
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  rows={3}
+                  placeholder="یک یا دو جمله — در کارت پروژه و توضیح گوگل استفاده می‌شود"
+                  className={textareaCls}
+                />
+              </div>
+
+              <HtmlContentEditor
+                label="شرح کامل پروژه"
+                value={form.content}
+                onChange={(content) => setForm((f) => ({ ...f, content }))}
+                rows={12}
+              />
+            </div>
+
+            <SeoPanel
+              value={{
+                slug: form.slug,
+                metaTitle: form.metaTitle,
+                metaDescription: form.metaDescription,
+                focusKeyword: form.focusKeyword,
+                ogTitle: form.ogTitle,
+                ogDescription: form.ogDescription,
+              }}
+              onChange={handleSeoChange}
+              context={{ title: form.title, excerpt: form.description, content: form.content }}
+              variant="project"
+              previewPath="projects"
+            />
+
+            <FaqEditor
+              value={form.faqs}
+              onChange={(faqs) => setForm((f) => ({ ...f, faqs }))}
+              entityLabel="پروژه"
+            />
+          </div>
+
+          <div className="space-y-6">
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6">
+              <h2 className="text-[var(--foreground)] font-bold mb-4">تصاویر پروژه</h2>
+              <ProjectImageEditor
+                value={form.images}
+                onChange={(images) => setForm((f) => ({ ...f, images }))}
+                projectTitle={form.title}
+              />
+            </div>
+
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 space-y-4">
+              <h2 className="text-[var(--foreground)] font-bold">جزئیات</h2>
+
+              <div>
+                <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">موقعیت</label>
+                <input
+                  type="text"
+                  value={form.location}
+                  onChange={(e) => setForm({ ...form, location: e.target.value })}
+                  placeholder="مثال: شهرک صنعتی"
+                  className={inputCls}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">کارفرما</label>
+                <input
+                  type="text"
+                  value={form.client}
+                  onChange={(e) => setForm({ ...form, client: e.target.value })}
+                  placeholder="مثال: شهرداری مشهد"
+                  className={inputCls}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">سال</label>
+                <input
+                  type="number"
+                  value={form.year}
+                  onChange={(e) => setForm({ ...form, year: Number(e.target.value) })}
+                  className={inputCls}
+                />
+              </div>
+
+              <label className="flex items-center gap-2 text-[var(--foreground)] text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.published}
+                  onChange={(e) => setForm({ ...form, published: e.target.checked })}
+                />
+                منتشر شده
+              </label>
+
+              <label className="flex items-center gap-2 text-[var(--foreground)] text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.featured}
+                  onChange={(e) => setForm({ ...form, featured: e.target.checked })}
+                />
+                پروژه ویژه
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full h-12 rounded-xl bg-[var(--accent)] text-[var(--accent-foreground)] font-bold hover:bg-[var(--accent)]/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+              ذخیره پروژه
+            </button>
+          </div>
         </div>
-
-        <div>
-          <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">موقعیت</label>
-          <input
-            type="text"
-            value={form.location}
-            onChange={(e) => setForm({ ...form, location: e.target.value })}
-            placeholder="مثال: شهرک صنعتی"
-            className={inputCls}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">توضیحات</label>
-          <textarea
-            value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-            rows={4}
-            className="w-full bg-[var(--muted)] border border-[var(--border)] rounded-xl px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none resize-none"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">سال</label>
-          <input
-            type="number"
-            value={form.year}
-            onChange={(e) => setForm({ ...form, year: Number(e.target.value) })}
-            className={inputCls}
-          />
-        </div>
-
-        <label className="flex items-center gap-2 text-[var(--foreground)] text-sm cursor-pointer">
-          <input
-            type="checkbox"
-            checked={form.published}
-            onChange={(e) => setForm({ ...form, published: e.target.checked })}
-          />
-          منتشر شده
-        </label>
-
-        <label className="flex items-center gap-2 text-[var(--foreground)] text-sm cursor-pointer">
-          <input
-            type="checkbox"
-            checked={form.featured}
-            onChange={(e) => setForm({ ...form, featured: e.target.checked })}
-          />
-          پروژه ویژه
-        </label>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full h-12 rounded-xl bg-[var(--accent)] text-[var(--accent-foreground)] font-bold hover:bg-[var(--accent)]/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-        >
-          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-          ذخیره پروژه
-        </button>
       </form>
     </div>
   );

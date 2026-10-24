@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin, isAdmin } from '@/shared/lib/admin-auth';
 import { prisma } from '@/shared/lib/prisma';
-import { serializeProject } from '@/shared/lib/serializers';
+import { normalizeProjectImages, serializeProject } from '@/shared/lib/serializers';
 import { slugify } from '@/shared/lib/utils';
 
 export async function GET(request: NextRequest) {
@@ -37,12 +37,18 @@ export async function POST(request: NextRequest) {
         slug: slugify(String(body.slug || '').trim() || title),
         description: body.description || null,
         content: body.content || null,
-        images: JSON.stringify(body.images || []),
+        images: JSON.stringify(normalizeProjectImages(body.images)),
         location: body.location || null,
         year: body.year ? Number(body.year) : new Date().getFullYear(),
         client: body.client || null,
         published: body.published ?? true,
         featured: body.featured ?? false,
+        metaTitle: body.metaTitle || null,
+        metaDescription: body.metaDescription || null,
+        focusKeyword: body.focusKeyword || null,
+        ogTitle: body.ogTitle || null,
+        ogDescription: body.ogDescription || null,
+        faqs: JSON.stringify(body.faqs || []),
       },
     });
 

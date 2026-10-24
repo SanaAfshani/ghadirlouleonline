@@ -114,12 +114,23 @@ model Project {
   slug        String   @unique
   description String?
   content     String?
+  /** آرایه JSON از {url, alt} — ردیف‌های قدیمی آرایه ساده رشته‌اند و موقع خواندن نرمال می‌شوند */
   images      String   @default("[]")
   location    String?
   year        Int
   client      String?
   published   Boolean  @default(true)
   featured    Boolean  @default(false)
+
+  // --- فیلدهای سئو (همه اختیاری؛ خالی باشند از عنوان/توضیح پروژه fallback می‌شود) ---
+  metaTitle       String?
+  metaDescription String?
+  focusKeyword    String?
+  ogTitle         String?
+  ogDescription   String?
+  /** سوالات متداول اختصاصی پروژه — آرایه JSON از {question, answer} */
+  faqs            String  @default("[]")
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

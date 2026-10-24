@@ -32,7 +32,14 @@ export function ProjectDetailView({ project }: Props) {
         <motion.article>
           {heroImage && (
             <div className="relative h-64 md:h-80 rounded-2xl overflow-hidden mb-8">
-              <Image src={heroImage} alt={project.title} fill className="object-cover" priority />
+              <Image
+                src={heroImage.url}
+                alt={heroImage.alt || project.title}
+                fill
+                sizes="(max-width: 896px) 100vw, 896px"
+                className="object-cover"
+                priority
+              />
             </div>
           )}
 
@@ -75,9 +82,15 @@ export function ProjectDetailView({ project }: Props) {
 
           {project.images.length > 1 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-10">
-              {project.images.slice(1).map((src) => (
-                <div key={src} className="relative h-48 rounded-xl overflow-hidden">
-                  <Image src={src} alt={project.title} fill className="object-cover" />
+              {project.images.slice(1).map((image) => (
+                <div key={image.url} className="relative h-48 rounded-xl overflow-hidden">
+                  <Image
+                    src={image.url}
+                    alt={image.alt || project.title}
+                    fill
+                    sizes="(max-width: 640px) 100vw, 440px"
+                    className="object-cover"
+                  />
                 </div>
               ))}
             </div>

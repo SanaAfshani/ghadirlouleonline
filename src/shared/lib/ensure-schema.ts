@@ -18,6 +18,13 @@ const STATEMENTS = [
   `ALTER TABLE "Quote" ADD COLUMN IF NOT EXISTS "trackingNote" TEXT NOT NULL DEFAULT ''`,
   // 20261020000000_product_catalogs
   `ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "catalogs" TEXT NOT NULL DEFAULT '[]'`,
+  // 20261024000000_project_seo
+  `ALTER TABLE "Project" ADD COLUMN IF NOT EXISTS "metaTitle" TEXT`,
+  `ALTER TABLE "Project" ADD COLUMN IF NOT EXISTS "metaDescription" TEXT`,
+  `ALTER TABLE "Project" ADD COLUMN IF NOT EXISTS "focusKeyword" TEXT`,
+  `ALTER TABLE "Project" ADD COLUMN IF NOT EXISTS "ogTitle" TEXT`,
+  `ALTER TABLE "Project" ADD COLUMN IF NOT EXISTS "ogDescription" TEXT`,
+  `ALTER TABLE "Project" ADD COLUMN IF NOT EXISTS "faqs" TEXT NOT NULL DEFAULT '[]'`,
 ];
 
 export async function ensureSchema() {

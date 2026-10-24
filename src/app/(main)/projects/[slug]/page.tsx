@@ -7,7 +7,7 @@ import { ProjectDetailView } from '@/features/projects/ProjectDetailView';
 import { getProjectBySlug } from '@/shared/lib/data';
 import { siteConfig } from '@/shared/config/site';
 import { JsonLd } from '@/shared/ui/JsonLd';
-import { absoluteUrl, breadcrumbSchema, toMetaDescription } from '@/shared/lib/seo';
+import { absoluteUrl, breadcrumbSchema, faqPageSchema, toMetaDescription } from '@/shared/lib/seo';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -18,23 +18,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!project) return { title: 'پروژه یافت نشد', robots: { index: false, follow: true } };
 
   const desc = toMetaDescription(
-    project.description ||
+    project.metaDescription ||
+      project.description ||
       project.content ||
       `پروژه ${project.title}${project.location ? ` در ${project.location}` : ''} — تامین لوله و اتصالات توسط ${siteConfig.name}.`
   );
   const canonical = `${siteConfig.url}/projects/${encodeURIComponent(slug)}`;
-  const image = project.images?.[0] ? absoluteUrl(project.images[0]) : undefined;
+  const cover = project.images?.[0];
+  const image = cover ? absoluteUrl(cover.url) : undefined;
+  const ogTitle = project.ogTitle || project.metaTitle || `${project.title} | ${siteConfig.name}`;
+  const ogDescription = toMetaDescription(project.ogDescription || desc);
 
   return {
-    title: `${project.title} | پروژه‌ها`,
+    // metaTitle دقیقاً همان چیزی است که ادمین در پیش‌نمایش گوگل دیده — پس template سایت روی آن اعمال نمی‌شود
+    title: project.metaTitle ? { absolute: project.metaTitle } : `${project.title} | پروژه‌ها`,
     description: desc,
     alternates: { canonical },
     openGraph: {
-      title: `${project.title} | ${siteConfig.name}`,
-      description: desc,
+      title: ogTitle,
+      description: ogDescription,
       url: canonical,
       type: 'article',
-      ...(image ? { images: [{ url: image, alt: project.title }] } : {}),
+      ...(image ? { images: [{ url: image, alt: cover?.alt || project.title }] } : {}),
     },
   };
 }
@@ -46,13 +51,13 @@ export default async function ProjectDetailPage({ params }: Props) {
   const project = await ensureProject(slug);
 
   const canonical = `${siteConfig.url}/projects/${encodeURIComponent(slug)}`;
-  const images = (project.images ?? []).map((src) => absoluteUrl(src));
+  const images = (project.images ?? []).map((image) => absoluteUrl(image.url));
 
   const projectSchema = {
     '@context': 'https://schema.org',
     '@type': 'CreativeWork',
     name: project.title,
-    description: toMetaDescription(project.description || project.content, 400),
+    description: toMetaDescription(project.metaDescription || project.description || project.content, 400),
     url: canonical,
     inLanguage: 'fa-IR',
     ...(images.length ? { image: images } : {}),
@@ -64,6 +69,7 @@ export default async function ProjectDetailPage({ params }: Props) {
   return (
     <>
       <JsonLd data={projectSchema} />
+      {project.faqs.length > 0 && <JsonLd data={faqPageSchema(project.faqs)} />}
       <JsonLd
         data={breadcrumbSchema([
           { name: 'پروژه‌ها', path: '/projects' },
