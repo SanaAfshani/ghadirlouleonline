@@ -34,7 +34,7 @@ export function HeroSection({ categories }: { categories: NavCategory[] }) {
   // نور پس‌زمینه دنبال نشانگر می‌آید — با lerp تا حرکتش نرم باشد و با rAF تا فریم‌ها جا نیفتند
   useEffect(() => {
     const el = glow.current;
-    const section = el?.parentElement;
+    const section = el?.closest('section');
     if (!el || !section) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
@@ -75,12 +75,13 @@ export function HeroSection({ categories }: { categories: NavCategory[] }) {
         پارالاکس می‌خورند (جزئیات در HeroPipes). هر دو نرم‌شده‌اند تا به‌جای پریدن، آرام دنبال موس
         بیایند. بدون موس (موبایل) هر دو همان‌جای اولشان می‌مانند.
       */}
-      <div
-        ref={glow}
-        aria-hidden
-        className="absolute inset-0 -z-10 bg-[radial-gradient(58rem_34rem_at_var(--gx,18%)_var(--gy,4%),rgba(245,158,11,0.17),transparent_62%)]"
-      >
+      <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden">
+        {/* خط لوله زیر نور می‌نشیند تا جداره تیره‌اش روی گرادیان خط نیندازد */}
         <HeroPipes />
+        <div
+          ref={glow}
+          className="absolute inset-0 bg-[radial-gradient(58rem_34rem_at_var(--gx,18%)_var(--gy,4%),rgba(245,158,11,0.17),transparent_62%)]"
+        />
       </div>
 
       <div className="container-main grid grid-cols-1 lg:grid-cols-[1fr_470px] items-center gap-8 lg:gap-14 pt-8 pb-16 sm:pt-12 sm:pb-20 lg:pt-20 lg:pb-28">
