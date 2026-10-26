@@ -54,7 +54,7 @@ export default async function HomePage() {
       <JsonLd data={organizationSchema(settings)} />
       <JsonLd data={localBusinessSchema(settings)} />
       <JsonLd data={websiteSchema()} />
-      <HeroSection categories={categories} board={board} />
+      <HeroSection categories={categories} />
       <LatestPrices board={board} />
       <CategoriesSection categories={categories} />
       <FeaturedProducts products={products} />

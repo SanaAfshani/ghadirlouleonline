@@ -7,7 +7,11 @@ import type { HeroSlide } from '@/shared/lib/site-settings';
 const INTERVAL = 6000;
 
 /**
- * پس‌زمینه هرو: یک عکس ثابت یا اسلایدر محو‌شونده.
+ * عکس هرو داخل قاب: یک عکس ثابت یا اسلایدر محو‌شونده.
+ *
+ * داخل یک کارتِ position:relative رندر می‌شود، نه به‌صورت پس‌زمینه تمام‌عرض. دلیلش کیفیت است:
+ * قاب حدود ۴۸۰ پیکسل عرض دارد و با چگالی ۲ به ۹۶۰ پیکسل نیاز دارد، در حالی که هروی تمام‌عرض
+ * ۳۸۳۰ پیکسل می‌خواست و عکس‌های معمولی را ۳ تا ۵ برابر کش می‌داد.
  *
  * عکس اول همان تصویر LCP صفحه است، پس دقیقاً مثل قبل preload و fetchPriority بالا می‌گیرد.
  * عکس‌های بعدی فقط وقتی به آن‌ها می‌رسیم رندر می‌شوند، پس سرِ بارگذاری اول با LCP رقابت نمی‌کنند.
@@ -51,7 +55,7 @@ export function HeroSlides({ slides }: { slides: HeroSlide[] }) {
         const priority = first
           ? { preload: true, fetchPriority: 'high' as const }
           : { loading: 'lazy' as const };
-        const fade = `-z-20 transition-opacity duration-700 motion-reduce:transition-none ${
+        const fade = `transition-opacity duration-700 motion-reduce:transition-none ${
           i === active ? 'opacity-100' : 'opacity-0'
         }`;
 
@@ -66,8 +70,8 @@ export function HeroSlides({ slides }: { slides: HeroSlide[] }) {
                 aria-hidden
                 fill
                 loading="lazy"
-                quality={40}
-                sizes="100vw"
+                quality={50}
+                sizes="(min-width: 1024px) 470px, 100vw"
                 className={`object-cover scale-110 blur-2xl brightness-75 ${fade}`}
               />
             )}
@@ -77,7 +81,7 @@ export function HeroSlides({ slides }: { slides: HeroSlide[] }) {
               fill
               {...priority}
               quality={90}
-              sizes="100vw"
+              sizes="(min-width: 1024px) 470px, 100vw"
               style={slide.fit === 'contain' ? undefined : { objectPosition: `${slide.focusX}% ${slide.focusY}%` }}
               className={`${slide.fit === 'contain' ? 'object-contain' : 'object-cover'} ${fade}`}
             />
@@ -87,7 +91,7 @@ export function HeroSlides({ slides }: { slides: HeroSlide[] }) {
 
       {many && (
         <div
-          className="absolute bottom-16 sm:bottom-20 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2"
+          className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2"
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
         >
@@ -100,8 +104,8 @@ export function HeroSlides({ slides }: { slides: HeroSlide[] }) {
               onBlur={() => setPaused(false)}
               aria-label={`عکس ${i + 1} از ${slides.length}`}
               aria-current={i === active}
-              className={`h-2.5 rounded-full transition-all ${
-                i === active ? 'w-7 bg-[var(--accent)]' : 'w-2.5 bg-white/50 hover:bg-white/80'
+              className={`h-2 rounded-full transition-all ${
+                i === active ? 'w-6 bg-[var(--accent)]' : 'w-2 bg-white/60 hover:bg-white'
               }`}
             />
           ))}

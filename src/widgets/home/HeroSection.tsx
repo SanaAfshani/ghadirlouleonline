@@ -7,16 +7,23 @@ import { ChevronDown, ChevronLeft, Factory, Headphones, Search, ShieldCheck, Tru
 import { siteConfig } from '@/shared/config/site';
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
 import { useConsult } from '@/features/consult/ConsultProvider';
-import { HeroBoard } from '@/features/prices/HeroBoard';
 import { HeroSlides } from '@/widgets/home/HeroSlides';
 import type { NavCategory } from '@/shared/lib/data';
-import type { PriceBoard } from '@/shared/lib/price-board-types';
 
 /**
  * بخش اول صفحه بدون انیمیشن ورود: قبلاً متن، جستجو و تابلوی قیمت با opacity صفر رندر می‌شدند و تا اجرای
  * جاوااسکریپت دیده نمی‌شدند — روی موبایل با اینترنت کند چند ثانیه صفحه خالی (Speed Index و LCP بد).
+ *
+ * چیدمان دوستونی است، نه عکسِ تمام‌عرض. دو دلیل:
+ * ۱) کیفیت — قاب عکس حدود ۴۷۰ پیکسل است و با چگالی ۲ به ۹۴۰ پیکسل نیاز دارد؛ عکس‌های واقعی کارخانه
+ *    همین حدود هستند، پس در اندازه طبیعی خودشان دیده می‌شوند. عکسِ تمام‌عرض ۳۸۳۰ پیکسل می‌خواست و
+ *    همان عکس‌ها را سه تا پنج برابر کش می‌داد.
+ * ۲) خوانایی — متن روی پس‌زمینه یکدست می‌نشیند و دیگر به لایه تیره روی عکس وابسته نیست.
+ *
+ * تابلوی قیمت از اینجا برداشته شد چون همان جدول کامل بلافاصله در بخش بعد (LatestPrices) هست؛ اینجا
+ * فقط یک لینک به آن می‌ماند تا هرو یک پیام و یک دکمه اصلی داشته باشد.
  */
-export function HeroSection({ categories, board }: { categories: NavCategory[]; board: PriceBoard }) {
+export function HeroSection({ categories }: { categories: NavCategory[] }) {
   const { heroTitle, heroSubtitle, heroSlides } = useSiteSettings();
   const { open } = useConsult();
   const router = useRouter();
@@ -29,18 +36,14 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
 
   return (
     <section className="relative isolate overflow-hidden bg-[var(--ink)] text-white">
-      {/*
-        عکس‌های واقعی حیاط کارخانه از پنل «اسلایدر هرو» می‌آیند؛ تابلوی «قدیر لوله پاسارگاد» خودش داخل
-        قاب است، پس هیچ ترکیب‌سازی روی عکس انجام نمی‌شود. نقطه کانونی هر عکس جدا ذخیره می‌شود چون
-        قاب هرو در هر عرضی جور دیگری بریده می‌شود. تا وقتی چیزی تنظیم نشده، همان عکس ثابت فعلی می‌ماند.
-      */}
-      <HeroSlides slides={heroSlides} />
-      {/* پوشش فقط پشت متن: موبایل یکنواخت (متن کل عرض را می‌گیرد)، دسکتاپ از راست تیره به چپ تقریباً شفاف */}
-      <div className="absolute inset-0 -z-10 max-lg:bg-[rgba(14,18,23,0.5)] lg:bg-[linear-gradient(270deg,rgba(14,18,23,0.84)_0%,rgba(14,18,23,0.7)_35%,rgba(14,18,23,0.45)_58%,rgba(14,18,23,0.15)_80%,rgba(14,18,23,0.05)_100%)]" />
-      <div className="absolute inset-x-0 bottom-0 h-28 -z-10 bg-gradient-to-t from-[var(--ink)]/80 to-transparent" />
+      {/* درخشش ملایم پشت قاب عکس (سمت چپ در چیدمان راست‌به‌چپ) تا ستون عکس از پس‌زمینه جدا شود */}
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 bg-[radial-gradient(900px_420px_at_18%_6%,rgba(245,158,11,0.13),transparent_62%)]"
+      />
 
       <div className="container-main grid grid-cols-1 lg:grid-cols-[1fr_470px] items-center gap-8 lg:gap-14 pt-8 pb-16 sm:pt-12 sm:pb-20 lg:pt-20 lg:pb-28">
-        <div className="min-w-0 text-legible">
+        <div className="min-w-0">
           {/* جایگاه اصلی برند — اولین چیزی که دیده می‌شود؛ به صفحه گواهینامه‌ها می‌رود */}
           <Link
             href="/certificates"
@@ -95,7 +98,7 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
                     href={`/products/${c.slug}`}
                     aria-hidden={copy || undefined}
                     tabIndex={copy ? -1 : undefined}
-                    className="me-2 h-9 px-3.5 rounded-lg border border-white/25 bg-black/30 backdrop-blur-sm text-[13px] text-white flex items-center whitespace-nowrap"
+                    className="me-2 h-9 px-3.5 rounded-lg border border-white/20 bg-white/[0.06] text-[13px] text-white flex items-center whitespace-nowrap"
                   >
                     {c.name}
                   </Link>
@@ -105,7 +108,7 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
           </div>
           <div className="hidden sm:flex flex-wrap gap-2 mt-4">
             {categories.slice(0, 6).map((c) => (
-              <Link key={c.slug} href={`/products/${c.slug}`} className="h-9 px-3.5 rounded-lg border border-white/25 bg-black/30 backdrop-blur-sm text-[13px] text-white flex items-center hover:bg-white hover:text-[var(--ink)] transition-colors">
+              <Link key={c.slug} href={`/products/${c.slug}`} className="h-9 px-3.5 rounded-lg border border-white/20 bg-white/[0.06] text-[13px] text-white flex items-center hover:bg-white hover:text-[var(--ink)] transition-colors">
                 {c.name}
               </Link>
             ))}
@@ -118,12 +121,26 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
           </ul>
         </div>
 
+        {/*
+          عکس‌های واقعی حیاط کارخانه از پنل «اسلایدر هرو» می‌آیند؛ تابلوی «قدیر لوله پاسارگاد» خودش
+          داخل قاب است، پس هیچ ترکیب‌سازی روی عکس انجام نمی‌شود. نقطه کانونی هر عکس جدا ذخیره
+          می‌شود چون قاب روی موبایل افقی و روی دسکتاپ عمودی است و هر جا جور دیگری بریده می‌شود.
+        */}
         <div className="min-w-0">
-          <HeroBoard initial={board} />
-          <button onClick={() => open()} className="mt-3 w-full h-12 rounded-2xl border border-white/15 bg-white/5 backdrop-blur text-sm font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors">
-            <Headphones className="w-4.5 h-4.5 text-[var(--accent-text)]" />
+          <div className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-black/40 shadow-[0_30px_60px_-24px_rgba(0,0,0,0.75)] aspect-[4/3] lg:aspect-[13/16]">
+            <HeroSlides slides={heroSlides} />
+          </div>
+          <button onClick={() => open()} className="mt-3 w-full h-12 rounded-2xl bg-[var(--accent)] text-[var(--accent-foreground)] text-sm font-bold flex items-center justify-center gap-2 hover:bg-[var(--accent)]/90 transition-colors">
+            <Headphones className="w-4.5 h-4.5" />
             مشاوره رایگان و استعلام قیمت عمده
           </button>
+          <a
+            href="#prices"
+            className="mt-2 w-full h-11 rounded-2xl border border-white/15 bg-white/5 text-sm font-semibold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors"
+          >
+            دیدن قیمت روز لوله‌ها
+            <ChevronDown className="w-4 h-4 text-[var(--accent-text)]" aria-hidden />
+          </a>
         </div>
       </div>
 
