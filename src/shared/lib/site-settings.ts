@@ -3,6 +3,16 @@ import { siteConfig } from '@/shared/config/site';
 /** گواهینامه / استاندارد با عکس واقعی سند — از پنل «گواهینامه‌ها» */
 export type Certificate = { title: string; code: string; image: string };
 
+/**
+ * یک عکس از اسلایدر بالای صفحه اصلی — از پنل «اسلایدر هرو».
+ *
+ * focusX/focusY همان object-position است و برای هر عکس جدا نگه داشته می‌شود، چون قاب هرو
+ * در هر عرضی جور دیگری بریده می‌شود: روی گوشی فقط نوار باریکی از عرض دیده می‌شود (focusX
+ * تعیین می‌کند کدام نوار) و روی دسکتاپ از ارتفاع زده می‌شود (focusY). یک مقدار ثابت برای
+ * همه عکس‌ها جواب نمی‌دهد، چون سوژه هر عکس جای دیگری است.
+ */
+export type HeroSlide = { image: string; alt: string; focusX: number; focusY: number };
+
 export type SiteSettings = {
   siteName: string;
   siteDescription: string;
@@ -24,6 +34,7 @@ export type SiteSettings = {
   mobileHref: string;
   whatsappUrl: string;
   certificates: Certificate[];
+  heroSlides: HeroSlide[];
 };
 
 export const defaultSiteSettings: SiteSettings = {
@@ -53,6 +64,10 @@ export const defaultSiteSettings: SiteSettings = {
   mobileHref: phoneHref(siteConfig.mobile),
   whatsappUrl: whatsappFromMobile(siteConfig.mobile) ?? siteConfig.socials.whatsapp,
   certificates: [],
+  // تا وقتی چیزی در پنل تنظیم نشده، همان عکس ثابت فعلی نشان داده می‌شود
+  heroSlides: [
+    { image: '/images/site/hero-v3-wm.webp', alt: '', focusX: 100, focusY: 0 },
+  ],
 };
 
 /** فقط عکس آپلودشده خود سایت یا https — این مقدار مستقیم در src می‌نشیند */
@@ -64,6 +79,28 @@ export function parseCertificates(raw: string | undefined): Certificate[] {
       .map((c) => ({ title: String(c?.title ?? '').trim().slice(0, 120), code: String(c?.code ?? '').trim().slice(0, 60), image: String(c?.image ?? '').trim() }))
       .filter((c) => c.title && /^(\/media\/[a-z0-9]+\.[a-z0-9]+|https:\/\/\S+)$/i.test(c.image))
       .slice(0, 24);
+  } catch {
+    return [];
+  }
+}
+
+/** عکس‌های مجاز: آپلودی‌های پنل (/media)، فایل‌های ثابت پروژه (/images) و آدرس https */
+const IMAGE_SRC = /^(\/(?:media|images)\/[\w./-]+|https:\/\/\S+)$/i;
+
+export function parseHeroSlides(raw: string | undefined): HeroSlide[] {
+  try {
+    const list = JSON.parse(raw || '[]');
+    if (!Array.isArray(list)) return [];
+    const clamp = (v: unknown) => Math.min(100, Math.max(0, Math.round(Number(v) || 0)));
+    return list
+      .map((s) => ({
+        image: String(s?.image ?? '').trim(),
+        alt: String(s?.alt ?? '').trim().slice(0, 160),
+        focusX: clamp(s?.focusX ?? 50),
+        focusY: clamp(s?.focusY ?? 50),
+      }))
+      .filter((s) => IMAGE_SRC.test(s.image))
+      .slice(0, 8);
   } catch {
     return [];
   }
@@ -116,5 +153,9 @@ export function mergeSiteSettings(raw: Record<string, string>): SiteSettings {
     mobileHref: phoneHref(mobile),
     whatsappUrl: whatsappFromMobile(mobile) ?? defaultSiteSettings.whatsappUrl,
     certificates: parseCertificates(raw.certificates),
+    // خالی بودن یعنی هنوز چیزی تنظیم نشده — عکس پیش‌فرض می‌ماند تا هرو هیچ‌وقت بی‌عکس نشود
+    heroSlides: parseHeroSlides(raw.hero_slides).length
+      ? parseHeroSlides(raw.hero_slides)
+      : defaultSiteSettings.heroSlides,
   };
 }

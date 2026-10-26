@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChevronDown, ChevronLeft, Factory, Headphones, Search, ShieldCheck, Truck } from 'lucide-react';
@@ -9,6 +8,7 @@ import { siteConfig } from '@/shared/config/site';
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
 import { useConsult } from '@/features/consult/ConsultProvider';
 import { HeroBoard } from '@/features/prices/HeroBoard';
+import { HeroSlides } from '@/widgets/home/HeroSlides';
 import type { NavCategory } from '@/shared/lib/data';
 import type { PriceBoard } from '@/shared/lib/price-board-types';
 
@@ -17,7 +17,7 @@ import type { PriceBoard } from '@/shared/lib/price-board-types';
  * جاوااسکریپت دیده نمی‌شدند — روی موبایل با اینترنت کند چند ثانیه صفحه خالی (Speed Index و LCP بد).
  */
 export function HeroSection({ categories, board }: { categories: NavCategory[]; board: PriceBoard }) {
-  const { heroTitle, heroSubtitle } = useSiteSettings();
+  const { heroTitle, heroSubtitle, heroSlides } = useSiteSettings();
   const { open } = useConsult();
   const router = useRouter();
   const [q, setQ] = useState('');
@@ -30,25 +30,11 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
   return (
     <section className="relative isolate overflow-hidden bg-[var(--ink)] text-white">
       {/*
-        عکس واقعی حیاط کارخانه؛ تابلوی «قدیر لوله پاسارگاد» خودش داخل قاب است، پس دیگر هیچ ترکیب‌سازی
-        روی عکس انجام نمی‌شود. اصل عکس ۱۰۸۰ پیکسلی است؛ نسخه ۲۱۶۰ با lanczos و شارپ از قبل ساخته شده
-        تا روی رتینا تیز بماند. نام فایل با هر عکس تازه عوض می‌شود چون مرورگر و CDN آدرس ثابت را کش می‌کنند.
+        عکس‌های واقعی حیاط کارخانه از پنل «اسلایدر هرو» می‌آیند؛ تابلوی «قدیر لوله پاسارگاد» خودش داخل
+        قاب است، پس هیچ ترکیب‌سازی روی عکس انجام نمی‌شود. نقطه کانونی هر عکس جدا ذخیره می‌شود چون
+        قاب هرو در هر عرضی جور دیگری بریده می‌شود. تا وقتی چیزی تنظیم نشده، همان عکس ثابت فعلی می‌ماند.
       */}
-      <Image
-        src="/images/site/hero-v3-wm.webp"
-        alt=""
-        fill
-        // تصویر LCP صفحه اصلی: preload + اولویت بالا
-        preload
-        fetchPriority="high"
-        quality={90}
-        sizes="100vw"
-        // تابلو بالای عکس است و لوله‌ها سمت راست. زیر lg چیدمان تک‌ستونی است و object-cover فقط نوار
-        // باریکی از عرض را نشان می‌دهد؛ آن نوار از سمت راست گرفته می‌شود تا لوله‌ها بیایند و تابلو وسط
-        // کلمه بریده نشود. از lg به بالا تقریباً تمام عرض دیده می‌شود، پس لنگر بالا می‌رود تا تابلو داخل
-        // کادر بماند (با object-center، در ۱۹۲۰ خط تابلو از بالا بیرون می‌افتاد).
-        className="object-cover object-right lg:object-top -z-20"
-      />
+      <HeroSlides slides={heroSlides} />
       {/* پوشش فقط پشت متن: موبایل یکنواخت (متن کل عرض را می‌گیرد)، دسکتاپ از راست تیره به چپ تقریباً شفاف */}
       <div className="absolute inset-0 -z-10 max-lg:bg-[rgba(14,18,23,0.5)] lg:bg-[linear-gradient(270deg,rgba(14,18,23,0.84)_0%,rgba(14,18,23,0.7)_35%,rgba(14,18,23,0.45)_58%,rgba(14,18,23,0.15)_80%,rgba(14,18,23,0.05)_100%)]" />
       <div className="absolute inset-x-0 bottom-0 h-28 -z-10 bg-gradient-to-t from-[var(--ink)]/80 to-transparent" />
