@@ -22,26 +22,47 @@ export function FactorySection({ address, factoryAddress, companyPhones, mapUrl,
       <div className="absolute inset-0 bp-grid" aria-hidden />
       <div className="relative h-1.5 hazard" aria-hidden />
 
-      {/* نمای هوایی کارخانه — نشان می‌دهد فروش مستقیم از خود کارخانه است */}
+      {/*
+        نمای هوایی کارخانه کنار سردر آن — یکی نشان می‌دهد کارخانه چقدر است و دیگری تابلوی
+        «قدیر لوله پاسارگاد» را نشان می‌دهد؛ همان چیزی که ادعای نمایندگی انحصاری را ثابت می‌کند.
+        روی دسکتاپ هر دو هم‌ارتفاع در یک ردیف‌اند و روی موبایل زیر هم می‌آیند.
+      */}
       <div className="relative container-main pt-12 lg:pt-16">
-        <figure className="group relative aspect-[4/3] sm:aspect-[16/8] lg:aspect-[21/9] rounded-[var(--radius-panel)] overflow-hidden border border-white/10 shadow-2xl">
-          <Image
-            src="/images/site/factory-aerial-wm.webp"
-            alt={`نمای هوایی کارخانه ${siteConfig.legalName} در شهرک صنعتی گرمسار`}
-            fill
-            quality={90}
-            sizes="(min-width: 1280px) 1232px, 100vw"
-            className="object-cover object-[50%_60%] transition-transform duration-[1.2s] group-hover:scale-[1.03]"
-          />
-          <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
-          <figcaption className="text-legible absolute inset-x-0 bottom-0 p-5 sm:p-8 flex flex-wrap items-end justify-between gap-3">
-            <span>
-              <span className="inline-flex items-center gap-1.5 h-7 px-3 rounded-full bg-[var(--accent)] text-[var(--accent-foreground)] text-xs font-black">نمای هوایی کارخانه</span>
-              <span className="block mt-2 text-xl sm:text-3xl font-black text-white">کارخانه {siteConfig.legalName}</span>
-              <span className="mt-1 flex items-center gap-1.5 text-sm text-white/85"><MapPin className="w-4 h-4 shrink-0" />{factoryAddress}</span>
-            </span>
-          </figcaption>
-        </figure>
+        <div className="grid grid-cols-1 lg:grid-cols-[1.75fr_1fr] gap-4 lg:h-[23rem]">
+          <figure className="group relative aspect-[4/3] sm:aspect-[16/8] lg:aspect-auto lg:h-full rounded-[var(--radius-panel)] overflow-hidden border border-white/10 shadow-2xl">
+            <Image
+              src="/images/site/factory-aerial-wm.webp"
+              alt={`نمای هوایی کارخانه ${siteConfig.legalName} در شهرک صنعتی گرمسار`}
+              fill
+              quality={90}
+              sizes="(min-width: 1280px) 780px, 100vw"
+              className="object-cover object-[50%_60%] transition-transform duration-[1.2s] group-hover:scale-[1.03]"
+            />
+            <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
+            <figcaption className="text-legible absolute inset-x-0 bottom-0 p-5 sm:p-8 flex flex-wrap items-end justify-between gap-3">
+              <span>
+                <span className="inline-flex items-center gap-1.5 h-7 px-3 rounded-full bg-[var(--accent)] text-[var(--accent-foreground)] text-xs font-black">نمای هوایی کارخانه</span>
+                <span className="block mt-2 text-xl sm:text-3xl font-black text-white">کارخانه {siteConfig.legalName}</span>
+                <span className="mt-1 flex items-center gap-1.5 text-sm text-white/85"><MapPin className="w-4 h-4 shrink-0" />{factoryAddress}</span>
+              </span>
+            </figcaption>
+          </figure>
+
+          <figure className="group relative aspect-[4/3] lg:aspect-auto lg:h-full rounded-[var(--radius-panel)] overflow-hidden border border-white/10 shadow-2xl">
+            <Image
+              src="/images/site/factory-entrance-wm.webp"
+              alt={`سردر کارخانه ${siteConfig.legalName} — تولیدکننده لوله دوجداره و آبرسانی`}
+              fill
+              quality={90}
+              sizes="(min-width: 1280px) 430px, 100vw"
+              className="object-cover object-[50%_35%] transition-transform duration-[1.2s] group-hover:scale-[1.03]"
+            />
+            <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+            <figcaption className="text-legible absolute inset-x-0 bottom-0 p-5">
+              <span className="inline-flex items-center gap-1.5 h-7 px-3 rounded-full bg-white/15 backdrop-blur text-white text-xs font-black">سردر کارخانه</span>
+            </figcaption>
+          </figure>
+        </div>
       </div>
 
       <div className="relative container-main py-12 lg:py-16 grid grid-cols-1 lg:grid-cols-[1.15fr_1fr] gap-10 lg:gap-14 items-start">
