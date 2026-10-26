@@ -7,6 +7,7 @@ import { ChevronDown, ChevronLeft, Factory, Headphones, Search, ShieldCheck, Tru
 import { siteConfig } from '@/shared/config/site';
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
 import { useConsult } from '@/features/consult/ConsultProvider';
+import { HeroPipes } from '@/widgets/home/HeroPipes';
 import { HeroSlides } from '@/widgets/home/HeroSlides';
 import type { NavCategory } from '@/shared/lib/data';
 
@@ -70,14 +71,17 @@ export function HeroSection({ categories }: { categories: NavCategory[] }) {
   return (
     <section className="relative isolate overflow-hidden bg-[var(--ink)] text-white">
       {/*
-        پس‌زمینه مینیمال: یک سطح تیره یکدست و یک نور نرم که با نشانگر جابه‌جا می‌شود. حرکت نور
-        نرم‌شده است تا به‌جای پریدن، آرام دنبال موس بیاید. بدون موس (موبایل) همان‌جای اولش می‌ماند.
+        پس‌زمینه: یک نور نرم که با نشانگر جابه‌جا می‌شود، و چند لوله کم‌رنگ که با همان حرکت
+        پارالاکس می‌خورند (جزئیات در HeroPipes). هر دو نرم‌شده‌اند تا به‌جای پریدن، آرام دنبال موس
+        بیایند. بدون موس (موبایل) هر دو همان‌جای اولشان می‌مانند.
       */}
       <div
         ref={glow}
         aria-hidden
         className="absolute inset-0 -z-10 bg-[radial-gradient(58rem_34rem_at_var(--gx,18%)_var(--gy,4%),rgba(245,158,11,0.17),transparent_62%)]"
-      />
+      >
+        <HeroPipes />
+      </div>
 
       <div className="container-main grid grid-cols-1 lg:grid-cols-[1fr_470px] items-center gap-8 lg:gap-14 pt-8 pb-16 sm:pt-12 sm:pb-20 lg:pt-20 lg:pb-28">
         <div className="min-w-0">
