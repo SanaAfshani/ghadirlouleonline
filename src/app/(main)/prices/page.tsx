@@ -11,6 +11,7 @@ import { MarketStatus } from '@/features/prices/MarketStatus';
 import { PricesEmptyState } from '@/features/prices/PricesEmptyState';
 import { breadcrumbSchema } from '@/shared/lib/seo';
 import { faDigits } from '@/shared/lib/utils';
+import { Reveal } from '@/shared/ui/Reveal';
 
 /** سال شمسی جاری در عنوان — مثل «قیمت لوله ۱۴۰۵» که کاربران دقیقاً همین را جستجو می‌کنند */
 function persianYear() {
@@ -73,7 +74,8 @@ export default async function PricesPage() {
 
             <div className="space-y-14">
               {board.lines.map((l) => (
-                <section key={l.productId} id={l.productSlug} className="scroll-mt-44" aria-labelledby={`h-${l.productSlug}`}>
+                <Reveal key={l.productId}>
+                <section id={l.productSlug} className="scroll-mt-44" aria-labelledby={`h-${l.productSlug}`}>
                   <div className="flex items-end justify-between gap-3 mb-4">
                     <div>
                       <p className="text-xs text-[var(--muted-foreground)]">{l.categoryName}</p>
@@ -83,6 +85,7 @@ export default async function PricesPage() {
                   </div>
                   <LivePriceTable initial={board} productIds={[l.productId]} caption={`قیمت ${l.productName}`} toolbar />
                 </section>
+                </Reveal>
               ))}
             </div>
           </>

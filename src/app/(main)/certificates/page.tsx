@@ -9,6 +9,7 @@ import { siteConfig } from '@/shared/config/site';
 import { JsonLd } from '@/shared/ui/JsonLd';
 import { absoluteUrl, breadcrumbSchema } from '@/shared/lib/seo';
 import { LtrCodes } from '@/shared/ui/LtrCodes';
+import { Reveal } from '@/shared/ui/Reveal';
 
 const TITLE = `گواهینامه‌ها و مجوزهای ${siteConfig.legalName}`;
 const DESCRIPTION = `گواهینامه ISO 9001:2015 و پروانه علامت استاندارد اجباری ISIRI 9116-3 ${siteConfig.legalName}. ${siteConfig.name} ${siteConfig.exclusiveTitle} است.`;
@@ -71,6 +72,7 @@ export default async function CertificatesPage() {
       <JsonLd data={manufacturer} />
       <PageHero label="اعتبار و کیفیت" title={TITLE} description={`مدارک رسمی کیفیت و استاندارد تولید ${siteConfig.legalName}. برای دیدن هر سند روی آن بزنید.`} />
 
+      <Reveal>
       <section className="container-main section-padding-sm">
         <div className="rounded-3xl border-2 border-[var(--accent)]/50 bg-[var(--accent)]/[0.07] p-5 sm:p-6 flex items-start gap-4">
           <ShieldCheck className="w-8 h-8 shrink-0 text-[var(--accent-text)]" />
@@ -101,6 +103,7 @@ export default async function CertificatesPage() {
           ))}
         </div>
       </section>
+      </Reveal>
     </>
   );
 }
