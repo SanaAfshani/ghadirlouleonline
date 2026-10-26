@@ -1,19 +1,17 @@
 'use client';
 
-import Image from 'next/image';
 import { m as motion } from 'framer-motion';
 import Link from 'next/link';
 import { MapPin, Calendar, Building2, ArrowRight } from 'lucide-react';
 import type { Project } from '@/shared/types';
 import { faDigits } from '@/shared/lib/utils';
+import { ProjectGallery } from '@/features/projects/ProjectGallery';
 
 type Props = {
   project: Project;
 };
 
 export function ProjectDetailView({ project }: Props) {
-  const heroImage = project.images[0];
-
   return (
     <div className="min-h-screen bg-[var(--background)]">
       <div className="container-main py-10 max-w-4xl">
@@ -30,18 +28,7 @@ export function ProjectDetailView({ project }: Props) {
         </nav>
 
         <motion.article>
-          {heroImage && (
-            <div className="relative h-64 md:h-80 rounded-2xl overflow-hidden mb-8">
-              <Image
-                src={heroImage.url}
-                alt={heroImage.alt || project.title}
-                fill
-                sizes="(max-width: 896px) 100vw, 896px"
-                className="object-cover"
-                priority
-              />
-            </div>
-          )}
+          <ProjectGallery images={project.images} title={project.title} />
 
           <div className="mb-8">
             <h1 className="text-3xl md:text-4xl font-black text-[var(--foreground)] mb-5 leading-tight">
@@ -78,22 +65,6 @@ export function ProjectDetailView({ project }: Props) {
               className="prose prose-lg max-w-none text-[var(--foreground)] leading-relaxed [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mt-8 [&_h2]:mb-4 [&_p]:mb-4"
               dangerouslySetInnerHTML={{ __html: project.content }}
             />
-          )}
-
-          {project.images.length > 1 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-10">
-              {project.images.slice(1).map((image) => (
-                <div key={image.url} className="relative h-48 rounded-xl overflow-hidden">
-                  <Image
-                    src={image.url}
-                    alt={image.alt || project.title}
-                    fill
-                    sizes="(max-width: 640px) 100vw, 440px"
-                    className="object-cover"
-                  />
-                </div>
-              ))}
-            </div>
           )}
 
           <div className="mt-12 pt-8 border-t border-[var(--border)]">
