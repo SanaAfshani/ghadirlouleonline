@@ -971,6 +971,16 @@ input, textarea, select {
   -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
 }
 
+/* اسلاید هرو: بزرگ‌نمایی بسیار آرام روی عکسِ فعال (کن‌برنز).
+   از ۱.۰۶ شروع می‌شود نه ۱ — اسلاید همیشه کمی بزرگ‌تر از قاب است، پس موقع محوشدنِ دو عکس
+   هیچ لبه‌ای بیرون نمی‌زند. مدت انیمیشن کمی بیشتر از فاصله دو اسلاید است تا هیچ‌وقت وسط راه
+   به ته حرکت نرسد و بایستد. */
+@keyframes hero-kenburns {
+  from { transform: scale(1.06); }
+  to   { transform: scale(1.14); }
+}
+.hero-kenburns { animation: hero-kenburns 9s ease-out forwards; }
+
 /* جریان آب داخل لوله‌ها (خط‌چین متحرک SVG) */
 @keyframes flow-dash { to { stroke-dashoffset: -120; } }
 .flow-dash {
@@ -1161,7 +1171,7 @@ input, textarea, select {
 .live-dot::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: inherit; animation: ping-soft 1.6s cubic-bezier(0, 0, 0.2, 1) infinite; }
 
 @media (prefers-reduced-motion: reduce) {
-  .flow-dash, .float-y { animation: none; }
+  .flow-dash, .float-y, .hero-kenburns { animation: none; }
   .page-enter, .icon-tile--float, .live-dot::after { animation: none; }
   .icon-tile, .icon-tile::after { transition: none; }
   [style*="pipe-spin"], [style*="gauge"] { animation: none !important; }

@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import type { Metadata } from 'next';
 import { HeroSection } from '@/widgets/home/HeroSection';
+import { Reveal } from '@/shared/ui/Reveal';
 import { CategoriesSection } from '@/widgets/home/CategoriesSection';
 import { LatestPrices } from '@/widgets/home/LatestPrices';
 import { FeaturedProducts } from '@/widgets/home/FeaturedProducts';
@@ -54,15 +55,30 @@ export default async function HomePage() {
       <JsonLd data={organizationSchema(settings)} />
       <JsonLd data={localBusinessSchema(settings)} />
       <JsonLd data={websiteSchema()} />
-      <HeroSection categories={categories} />
-      <LatestPrices board={board} />
+      <HeroSection categories={categories} board={board} />
+      {/*
+        بخش‌هایی که خودشان انیمیشن ورود دارند (CategoriesSection، FeaturedProducts، ServicesSection
+        و تیترها) دست‌نخورده می‌مانند؛ بقیه با همان حرکت داخل Reveal می‌آیند تا کل صفحه یکدست باشد.
+        هرو پوشانده نمی‌شود — اولین چیز صفحه است و نباید منتظر اسکرول بماند.
+      */}
+      <Reveal>
+        <LatestPrices board={board} />
+      </Reveal>
       <CategoriesSection categories={categories} />
       <FeaturedProducts products={products} />
       <ServicesSection />
-      <BrandsSection />
-      <BlogPreview posts={posts} />
-      <FactorySection address={settings.address} factoryAddress={settings.factoryAddress} companyPhones={settings.companyPhones} mapUrl={settings.mapUrl} certificates={settings.certificates} />
-      <SeoContent html={settings.homeSeoContent} />
+      <Reveal>
+        <BrandsSection />
+      </Reveal>
+      <Reveal>
+        <BlogPreview posts={posts} />
+      </Reveal>
+      <Reveal>
+        <FactorySection address={settings.address} factoryAddress={settings.factoryAddress} companyPhones={settings.companyPhones} mapUrl={settings.mapUrl} certificates={settings.certificates} />
+      </Reveal>
+      <Reveal>
+        <SeoContent html={settings.homeSeoContent} />
+      </Reveal>
     </>
   );
 }
