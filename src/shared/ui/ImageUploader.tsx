@@ -10,9 +10,11 @@ interface ImageUploaderProps {
   images: string[];
   onChange: (images: string[]) => void;
   max?: number;
+  /** سقف اندازه/کیفیت ذخیره‌سازی — «hero» برای عکس‌های تمام‌عرض */
+  profile?: 'default' | 'hero';
 }
 
-export function ImageUploader({ images, onChange, max = 8 }: ImageUploaderProps) {
+export function ImageUploader({ images, onChange, max = 8, profile }: ImageUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -31,7 +33,7 @@ export function ImageUploader({ images, onChange, max = 8 }: ImageUploaderProps)
     const results: string[] = [];
     for (const file of toUpload) {
       try {
-        const url = await uploadImage(file);
+        const url = await uploadImage(file, profile);
         results.push(url);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'خطا در آپلود تصویر');

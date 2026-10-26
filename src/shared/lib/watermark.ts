@@ -60,6 +60,8 @@ export async function addWatermark(input: Buffer, mime: string): Promise<Buffer 
 
   const out = img.composite([layer]);
   if (mime === 'image/png') return out.png().toBuffer();
-  if (mime === 'image/webp') return out.webp({ quality: 88 }).toBuffer();
-  return out.jpeg({ quality: 88, mozjpeg: true }).toBuffer();
+  // این دومین فشرده‌سازی روی همان عکس است (اولی موقع آپلود): با ۸۸ افت روی هم جمع می‌شد
+  // و در اسلاید تمام‌عرض هرو به چشم می‌آمد.
+  if (mime === 'image/webp') return out.webp({ quality: 95 }).toBuffer();
+  return out.jpeg({ quality: 95, mozjpeg: true }).toBuffer();
 }

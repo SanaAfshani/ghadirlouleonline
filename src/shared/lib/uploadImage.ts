@@ -4,7 +4,7 @@ const ENDPOINT = '/api/upload/image';
 const MAX_MB = 10;
 const ALLOWED = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
 
-export async function uploadImage(file: File): Promise<string> {
+export async function uploadImage(file: File, profile?: string): Promise<string> {
   if (file.size > MAX_MB * 1024 * 1024)
     throw new Error(`حجم تصویر نباید بیشتر از ${MAX_MB} مگابایت باشد`);
   if (!ALLOWED.includes(file.type)) throw new Error('فقط JPG، PNG و WebP مجاز است');
@@ -22,6 +22,7 @@ export async function uploadImage(file: File): Promise<string> {
 
   const fd = new FormData();
   fd.append('file', file);
+  if (profile) fd.append('profile', profile);
   const res = await fetch(ENDPOINT, { method: 'POST', body: fd });
   const json = (await res.json().catch(() => ({}))) as {
     success?: boolean;

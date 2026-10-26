@@ -1,8 +1,20 @@
 import sharp from 'sharp';
 import { prisma } from '@/shared/lib/prisma';
 
-/** بزرگ‌ترین ضلع تصویر ذخیره‌شده — برای کاور و متن مقاله کافی است؛ next/image سایزهای کوچک‌تر را خودش می‌سازد */
-const MAX_SIDE = 2000;
+/**
+ * سقف اندازه و کیفیت ذخیره‌سازی، بر اساس اینکه عکس کجا نمایش داده می‌شود.
+ *
+ * عکس کاور مقاله و گالری محصول حداکثر نصف عرض صفحه را می‌گیرند، پس ۲۰۰۰ پیکسل کافی است.
+ * اسلاید هرو اما تمام عرض صفحه است: روی نمایشگر ۱۹۲۰ با رتینا، مرورگر تصویری تا ۳۸۴۰ پیکسل
+ * می‌خواهد. با سقف ۲۰۰۰ همان فایل کِش داده می‌شد و نتیجه‌اش عکسِ نرم و بی‌کیفیت بود — دقیقاً
+ * فرقی که بین اسلاید آپلودی و عکس ثابت قبلی دیده می‌شد.
+ */
+export const IMAGE_PROFILES = {
+  default: { maxSide: 2000, quality: 90 },
+  hero: { maxSide: 3400, quality: 95 },
+} as const;
+
+export type ImageProfile = keyof typeof IMAGE_PROFILES;
 
 export class InvalidImageError extends Error {}
 
@@ -10,14 +22,15 @@ export class InvalidImageError extends Error {}
  * تصویر آپلودی را فشرده (WebP) در دیتابیس ذخیره می‌کند و آدرس عمومی آن را برمی‌گرداند.
  * sharp محتوای واقعی فایل را می‌خواند؛ فایلی که فقط پسوند/نوعش تصویر است ولی تصویر نیست رد می‌شود.
  */
-export async function saveImage(file: File): Promise<string> {
+export async function saveImage(file: File, profile: ImageProfile = 'default'): Promise<string> {
+  const { maxSide, quality } = IMAGE_PROFILES[profile] ?? IMAGE_PROFILES.default;
   const input = Buffer.from(await file.arrayBuffer());
   let output: { data: Buffer; info: sharp.OutputInfo };
   try {
     output = await sharp(input, { animated: file.type === 'image/gif' })
       .rotate() // جهت درست بر اساس EXIF عکس موبایل
-      .resize({ width: MAX_SIDE, height: MAX_SIDE, fit: 'inside', withoutEnlargement: true })
-      .webp({ quality: 90 })
+      .resize({ width: maxSide, height: maxSide, fit: 'inside', withoutEnlargement: true })
+      .webp({ quality })
       .toBuffer({ resolveWithObject: true });
   } catch {
     throw new InvalidImageError('فایل تصویر معتبر نیست');

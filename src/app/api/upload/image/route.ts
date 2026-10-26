@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/shared/lib/admin-auth';
-import { InvalidImageError, saveImage } from '@/shared/lib/media';
+import { IMAGE_PROFILES, InvalidImageError, saveImage, type ImageProfile } from '@/shared/lib/media';
 
 export const maxDuration = 30;
 
@@ -67,7 +67,10 @@ export async function POST(request: NextRequest) {
     }
 
     // ذخیره در دیتابیس مشترک (نه دیسک همین سرور) تا روی همه سرورها و بعد از هر دیپلوی باز شود
-    return NextResponse.json({ success: true, url: await saveImage(file) });
+    // پروفایل تعیین می‌کند عکس با چه سقف اندازه و کیفیتی ذخیره شود (اسلاید هرو تمام‌عرض است)
+    const asked = String(formData.get('profile') ?? 'default');
+    const profile = (asked in IMAGE_PROFILES ? asked : 'default') as ImageProfile;
+    return NextResponse.json({ success: true, url: await saveImage(file, profile) });
   } catch (err) {
     if (err instanceof InvalidImageError) {
       return NextResponse.json({ success: false, error: err.message }, { status: 400 });

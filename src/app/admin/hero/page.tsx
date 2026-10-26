@@ -154,6 +154,7 @@ export default function AdminHeroPage() {
                   images={slide.image ? [slide.image] : []}
                   onChange={(imgs) => update(i, { image: imgs[0] ?? '' })}
                   max={1}
+                  profile="hero"
                 />
                 <div>
                   <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
