@@ -23,7 +23,7 @@ const FOCUS: { x: number; y: number; label: string }[] = [
   { x: 0, y: 100, label: 'پایین چپ' }, { x: 50, y: 100, label: 'پایین وسط' }, { x: 100, y: 100, label: 'پایین راست' },
 ];
 
-const EMPTY: HeroSlide = { image: '', alt: '', focusX: 50, focusY: 0 };
+const EMPTY: HeroSlide = { image: '', alt: '', focusX: 50, focusY: 0, fit: 'cover' };
 
 export default function AdminHeroPage() {
   const [list, setList] = useState<HeroSlide[] | null>(null);
@@ -101,8 +101,12 @@ export default function AdminHeroPage() {
         با یک عکس، همان حالت ثابت قبلی است. از دو عکس به بالا، هر ۶ ثانیه محو می‌شود و نقطه‌های پایین
         هرو برای جابه‌جایی دستی می‌آیند. اگر هیچ عکسی نگذارید، عکس پیش‌فرض سایت نمایش داده می‌شود.
         <br />
-        <strong className="text-[var(--foreground)]">نقطه کانونی</strong> مهم‌ترین تنظیم است: قاب هرو روی
-        گوشی فقط نوار باریکی از <em>عرض</em> عکس را نشان می‌دهد و روی دسکتاپ از <em>ارتفاع</em> آن می‌زند.
+        <strong className="text-[var(--foreground)]">نحوه نمایش</strong>: «پر کردن کادر» حالت معمول هرو است —
+        عکس تا پرشدن قاب بزرگ می‌شود و لبه‌هایش بریده می‌شود (روی دسکتاپ حدود ۱.۸ برابر). اگر سوژه عکس با این
+        برش خراب می‌شود، «نمایش کامل» را بزنید: کل عکس بدون زوم دیده می‌شود و اطرافش با نسخه محو خودش پر می‌شود.
+        <br />
+        <strong className="text-[var(--foreground)]">نقطه کانونی</strong> فقط در حالت «پر کردن کادر» اثر دارد:
+        قاب هرو روی گوشی نوار باریکی از <em>عرض</em> عکس را نشان می‌دهد و روی دسکتاپ از <em>ارتفاع</em> می‌زند.
         نقطه را روی بخشی بگذارید که حتماً باید دیده شود.
       </div>
 
@@ -171,6 +175,28 @@ export default function AdminHeroPage() {
               </div>
 
               <div>
+                <span className="block text-sm font-medium text-[var(--foreground)] mb-1.5">نحوه نمایش</span>
+                <div className="flex rounded-xl overflow-hidden border border-[var(--border)] mb-4">
+                  {([
+                    { v: 'cover', label: 'پر کردن کادر' },
+                    { v: 'contain', label: 'نمایش کامل' },
+                  ] as const).map(({ v, label }) => (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => update(i, { fit: v })}
+                      className={cn(
+                        'flex-1 h-9 text-xs font-bold transition-colors',
+                        slide.fit === v
+                          ? 'bg-[var(--accent)] text-[var(--accent-foreground)]'
+                          : 'bg-[var(--background)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]',
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+
                 <span className="block text-sm font-medium text-[var(--foreground)] mb-1.5">نقطه کانونی</span>
                 <div className="grid grid-cols-3 gap-1.5">
                   {FOCUS.map((f) => {
@@ -203,8 +229,11 @@ export default function AdminHeroPage() {
                   })}
                 </div>
                 <p className="text-xs text-[var(--muted-foreground)] mt-2 leading-relaxed">
-                  هر مربع همان برش را نشان می‌دهد. انتخاب فعلی:{' '}
-                  {FOCUS.find((f) => f.x === slide.focusX && f.y === slide.focusY)?.label ?? 'دلخواه'}
+                  {slide.fit === 'contain'
+                    ? 'در حالت «نمایش کامل» کل عکس بدون برش دیده می‌شود، پس نقطه کانونی اثری ندارد.'
+                    : `هر مربع همان برش را نشان می‌دهد. انتخاب فعلی: ${
+                        FOCUS.find((f) => f.x === slide.focusX && f.y === slide.focusY)?.label ?? 'دلخواه'
+                      }`}
                 </p>
               </div>
             </div>

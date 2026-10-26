@@ -11,7 +11,19 @@ export type Certificate = { title: string; code: string; image: string };
  * تعیین می‌کند کدام نوار) و روی دسکتاپ از ارتفاع زده می‌شود (focusY). یک مقدار ثابت برای
  * همه عکس‌ها جواب نمی‌دهد، چون سوژه هر عکس جای دیگری است.
  */
-export type HeroSlide = { image: string; alt: string; focusX: number; focusY: number };
+export type HeroSlide = {
+  image: string;
+  alt: string;
+  focusX: number;
+  focusY: number;
+  /**
+   * cover: کادر را پر می‌کند و لبه‌ها بریده می‌شوند — حالت استاندارد هرو.
+   * contain: کل عکس بدون برش دیده می‌شود و جای خالی با نسخه محوِ همان عکس پر می‌شود.
+   * کادر هرو روی دسکتاپ نسبت ۲.۴ دارد و عکس معمولی ۱.۳۳، یعنی cover حدود ۱.۸ برابر
+   * بزرگ‌نمایی می‌کند؛ برای عکسی که سوژه‌اش با این برش خراب می‌شود contain بهتر است.
+   */
+  fit: 'cover' | 'contain';
+};
 
 export type SiteSettings = {
   siteName: string;
@@ -66,7 +78,7 @@ export const defaultSiteSettings: SiteSettings = {
   certificates: [],
   // تا وقتی چیزی در پنل تنظیم نشده، همان عکس ثابت فعلی نشان داده می‌شود
   heroSlides: [
-    { image: '/images/site/hero-v3-wm.webp', alt: '', focusX: 100, focusY: 0 },
+    { image: '/images/site/hero-v3-wm.webp', alt: '', focusX: 100, focusY: 0, fit: 'cover' },
   ],
 };
 
@@ -98,6 +110,8 @@ export function parseHeroSlides(raw: string | undefined): HeroSlide[] {
         alt: String(s?.alt ?? '').trim().slice(0, 160),
         focusX: clamp(s?.focusX ?? 50),
         focusY: clamp(s?.focusY ?? 50),
+        // اسلایدهای ذخیره‌شده قبل از افزودن این گزینه fit ندارند — پیش‌فرض همان رفتار قبلی
+        fit: s?.fit === 'contain' ? ('contain' as const) : ('cover' as const),
       }))
       .filter((s) => IMAGE_SRC.test(s.image))
       .slice(0, 8);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import Image from 'next/image';
 import type { HeroSlide } from '@/shared/lib/site-settings';
 
@@ -48,22 +48,40 @@ export function HeroSlides({ slides }: { slides: HeroSlide[] }) {
       {slides.map((slide, i) => {
         const first = i === 0;
         if (i > seen) return null;
+        const priority = first
+          ? { preload: true, fetchPriority: 'high' as const }
+          : { loading: 'lazy' as const };
+        const fade = `-z-20 transition-opacity duration-700 motion-reduce:transition-none ${
+          i === active ? 'opacity-100' : 'opacity-0'
+        }`;
+
+        // contain: کل عکس دیده می‌شود، و جای خالی دو طرفش با نسخه بزرگ و محوِ همان عکس پر
+        // می‌شود تا به‌جای نوار خالی، ادامه رنگی خود تصویر باشد.
         return (
-          <Image
-            key={`${i}-${slide.image}`}
-            src={slide.image}
-            alt={slide.alt}
-            fill
-            {...(first
-              ? { preload: true, fetchPriority: 'high' as const }
-              : { loading: 'lazy' as const })}
-            quality={90}
-            sizes="100vw"
-            style={{ objectPosition: `${slide.focusX}% ${slide.focusY}%` }}
-            className={`object-cover -z-20 transition-opacity duration-700 motion-reduce:transition-none ${
-              i === active ? 'opacity-100' : 'opacity-0'
-            }`}
-          />
+          <Fragment key={`${i}-${slide.image}`}>
+            {slide.fit === 'contain' && (
+              <Image
+                src={slide.image}
+                alt=""
+                aria-hidden
+                fill
+                loading="lazy"
+                quality={40}
+                sizes="100vw"
+                className={`object-cover scale-110 blur-2xl brightness-75 ${fade}`}
+              />
+            )}
+            <Image
+              src={slide.image}
+              alt={slide.alt}
+              fill
+              {...priority}
+              quality={90}
+              sizes="100vw"
+              style={slide.fit === 'contain' ? undefined : { objectPosition: `${slide.focusX}% ${slide.focusY}%` }}
+              className={`${slide.fit === 'contain' ? 'object-contain' : 'object-cover'} ${fade}`}
+            />
+          </Fragment>
         );
       })}
 
