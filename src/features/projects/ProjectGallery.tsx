@@ -26,6 +26,19 @@ export function ProjectGallery({ images, title }: { images: ProjectImage[]; titl
   const [zoom, setZoom] = useState<number | null>(null);
   const closeZoom = useCallback(() => setZoom(null), []);
 
+  /**
+   * نسبت واقعی عکس را از خود المان می‌خواند.
+   *
+   * هم از ref صدا زده می‌شود و هم از onLoad، چون اگر عکس قبل از وصل‌شدن onLoad لود شده باشد
+   * (مثلاً از کش مرورگر یا موقع جابه‌جایی بین صفحه‌ها) آن رویداد هیچ‌وقت نمی‌رسد و کاشی تا آخر
+   * روی نسبت پیش‌فرض می‌ماند — یعنی دقیقاً همان برشی که قرار بود حذف شود.
+   */
+  const measure = useCallback((img: HTMLImageElement | null, url: string) => {
+    if (!img?.naturalHeight) return;
+    const ratio = img.naturalWidth / img.naturalHeight;
+    setRatios((r) => (r[url] ? r : { ...r, [url]: ratio }));
+  }, []);
+
   if (images.length === 0) return null;
 
   const urls = images.map((image) => image.url);
@@ -50,13 +63,8 @@ export function ProjectGallery({ images, title }: { images: ProjectImage[]; titl
               sizes="(max-width: 1024px) 50vw, 300px"
               quality={90}
               priority={i < 2}
-              onLoad={(e) => {
-                const { naturalWidth, naturalHeight } = e.currentTarget;
-                if (!naturalHeight) return;
-                setRatios((r) =>
-                  r[image.url] ? r : { ...r, [image.url]: naturalWidth / naturalHeight },
-                );
-              }}
+              ref={(img) => measure(img, image.url)}
+              onLoad={(e) => measure(e.currentTarget, image.url)}
               // کادر دقیقاً نسبت خود عکس را دارد، پس cover چیزی نمی‌برد و فقط لبه‌های گرد را پر می‌کند
               className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
             />
