@@ -54,6 +54,8 @@ model Product {
   inStock          Boolean  @default(true)
   featured         Boolean  @default(false)
   published        Boolean  @default(true)
+  /// محصول بدون قیمت عمومی: هیچ قیمتی (تکی یا جدول) بیرون نمی‌رود و همه‌جا «استعلام قیمت» دیده می‌شود
+  quoteOnly        Boolean  @default(false)
 
   // --- فیلدهای سئو (همه اختیاری؛ خالی باشند از نام/توضیح کوتاه محصول fallback می‌شود) ---
   metaTitle        String?

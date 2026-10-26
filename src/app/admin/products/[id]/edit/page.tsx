@@ -23,6 +23,7 @@ interface FormState {
   shortDescription: string;
   description: string;
   price: string;
+  quoteOnly: boolean;
   images: string[];
   inStock: boolean;
   featured: boolean;
@@ -47,7 +48,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState<FormState>({
     name: '', categoryId: '', shortDescription: '', description: '',
-    price: '', images: [], inStock: true, featured: false, published: true,
+    price: '', images: [], inStock: true, featured: false, published: true, quoteOnly: false,
     specs: [{ key: '', value: '' }],
     slug: '',
     metaTitle: '',
@@ -90,6 +91,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           shortDescription: product.shortDescription || '',
           description: product.description || '',
           price: product.price != null ? String(product.price) : '',
+          quoteOnly: Boolean(product.quoteOnly),
           images: product.images || [],
           inStock: product.inStock,
           featured: product.featured,
@@ -133,6 +135,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           shortDescription: form.shortDescription,
           description: form.description,
           price: form.price || null,
+          quoteOnly: form.quoteOnly,
           images: form.images,
           specifications,
           inStock: form.inStock,
@@ -167,7 +170,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     setForm((f) => ({ ...f, specs }));
   };
   const removeSpec = (i: number) => setForm((f) => ({ ...f, specs: f.specs.filter((_, idx) => idx !== i) }));
-  const toggleField = (key: 'inStock' | 'featured' | 'published') =>
+  const toggleField = (key: 'quoteOnly' | 'inStock' | 'featured' | 'published') =>
     setForm((f) => ({ ...f, [key]: !f[key] }));
 
   const inputCls =
@@ -325,15 +328,23 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">قیمت (تومان)</label>
                 <input type="number" value={form.price}
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
-                  placeholder="خالی = استعلام"
-                  className={inputCls} />
+                  disabled={form.quoteOnly}
+                  placeholder={form.quoteOnly ? 'غیرفعال — فقط استعلام' : 'خالی = استعلام'}
+                  className={`${inputCls} disabled:opacity-50`} />
+                {form.quoteOnly && (
+                  <p className="text-xs text-[var(--muted-foreground)] mt-1.5 leading-relaxed">
+                    با فعال‌بودن «فقط استعلام قیمت»، نه این عدد و نه ردیف‌های تابلوی قیمت بیرون نمی‌روند؛
+                    همه‌جا «استعلام قیمت» دیده می‌شود. ردیف‌های جدول پاک نمی‌شوند و با خاموش‌کردن این کلید برمی‌گردند.
+                  </p>
+                )}
               </div>
 
               {([
+                { key: 'quoteOnly', label: 'فقط استعلام قیمت' },
                 { key: 'inStock', label: 'موجود در انبار' },
                 { key: 'featured', label: 'محصول ویژه' },
                 { key: 'published', label: 'منتشر شده' },
-              ] as { key: 'inStock' | 'featured' | 'published'; label: string }[]).map(({ key, label }) => (
+              ] as { key: 'quoteOnly' | 'inStock' | 'featured' | 'published'; label: string }[]).map(({ key, label }) => (
                 <label key={key} className="flex items-center gap-3 cursor-pointer">
                   <button type="button" onClick={() => toggleField(key)}
                     className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${form[key] ? 'bg-[var(--accent)]' : 'bg-[var(--border)]'}`}>

@@ -20,6 +20,8 @@ export interface Product {
   ogDescription?: string | null;
   /** سوالات متداول اختصاصی این محصول (در انتهای صفحه به صورت آکاردئون) */
   faqs: FaqItem[];
+  /** محصول بدون قیمت عمومی — همه‌جا «استعلام قیمت» دیده می‌شود */
+  quoteOnly: boolean;
   /** کاتالوگ‌ها و مدارک فنی محصول (PDF) */
   catalogs: CatalogFile[];
   createdAt: Date;

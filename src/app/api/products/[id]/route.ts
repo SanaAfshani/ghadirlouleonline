@@ -56,6 +56,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
     if (body.inStock != null) data.inStock = Boolean(body.inStock);
     if (body.featured != null) data.featured = Boolean(body.featured);
     if (body.published != null) data.published = Boolean(body.published);
+    if (body.quoteOnly != null) data.quoteOnly = Boolean(body.quoteOnly);
     if (body.images != null) data.images = JSON.stringify(body.images);
     if (body.specifications != null) data.specifications = JSON.stringify(body.specifications);
     if (body.price !== undefined) {

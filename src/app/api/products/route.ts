@@ -85,6 +85,7 @@ export async function POST(request: NextRequest) {
         inStock: body.inStock ?? true,
         featured: body.featured ?? false,
         published: body.published ?? true,
+        quoteOnly: body.quoteOnly ?? false,
         metaTitle: optionalText(body.metaTitle),
         metaDescription: optionalText(body.metaDescription),
         focusKeyword: optionalText(body.focusKeyword),

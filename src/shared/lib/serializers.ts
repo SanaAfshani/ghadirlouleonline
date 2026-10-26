@@ -40,6 +40,7 @@ type DbProduct = {
   inStock: boolean;
   featured: boolean;
   published: boolean;
+  quoteOnly?: boolean;
   metaTitle?: string | null;
   metaDescription?: string | null;
   focusKeyword?: string | null;
@@ -58,7 +59,8 @@ export function serializeProduct(p: DbProduct): Product {
     ...p,
     description: p.description ?? '',
     shortDescription: p.shortDescription ?? '',
-    price: p.price ?? undefined,
+    price: p.quoteOnly ? undefined : p.price ?? undefined,
+    quoteOnly: p.quoteOnly ?? false,
     images: parseJsonArray(p.images),
     specifications: parseJsonObject(p.specifications),
     faqs: parseFaqs(p.faqs),
@@ -79,6 +81,8 @@ export type ProductListItem = {
   image?: string;
   /** دسته فعلاً فروش ندارد — کارت «به زودی» بدون قیمت */
   comingSoon: boolean;
+  /** محصول عمداً بدون قیمت عمومی — کارت «استعلام قیمت» */
+  quoteOnly: boolean;
   /** خلاصه جدول قیمت: تعداد ردیف، کمترین قیمت و تاریخ آخرین به‌روزرسانی */
   priceRows: number;
   priceFrom: number | null;
@@ -92,8 +96,9 @@ export function toProductListItem(
   const specs = parseJsonObject(p.specifications);
   const images = parseJsonArray(p.images);
   const comingSoon = isComingSoon(p.category.slug);
-  // دسته «به زودی» هیچ قیمتی (تکی یا جدول) بیرون نمی‌دهد
-  const withPrices = showPrices && !comingSoon;
+  const quoteOnly = p.quoteOnly ?? false;
+  // دسته «به زودی» و محصولِ «فقط استعلام» هیچ قیمتی (تکی یا جدول) بیرون نمی‌دهند
+  const withPrices = showPrices && !comingSoon && !quoteOnly;
   return {
     id: p.id,
     slug: p.slug,
@@ -105,6 +110,7 @@ export function toProductListItem(
     inStock: p.inStock,
     featured: p.featured,
     comingSoon,
+    quoteOnly,
     specs,
     image: images[0] || p.category.image || undefined,
     ...(() => {

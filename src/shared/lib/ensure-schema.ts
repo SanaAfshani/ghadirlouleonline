@@ -25,6 +25,8 @@ const STATEMENTS = [
   `ALTER TABLE "Project" ADD COLUMN IF NOT EXISTS "ogTitle" TEXT`,
   `ALTER TABLE "Project" ADD COLUMN IF NOT EXISTS "ogDescription" TEXT`,
   `ALTER TABLE "Project" ADD COLUMN IF NOT EXISTS "faqs" TEXT NOT NULL DEFAULT '[]'`,
+  // 20261026000000_product_quote_only
+  `ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "quoteOnly" BOOLEAN NOT NULL DEFAULT false`,
 ];
 
 export async function ensureSchema() {

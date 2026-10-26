@@ -28,6 +28,8 @@ export const getPriceBoard = cache(async (): Promise<PriceBoard> => {
       // فقط دسته‌های فعال — قیمت دسته‌های «به زودی» حتی در API زنده هم بیرون نمی‌رود
       where: {
         published: true,
+        // محصولِ «فقط استعلام قیمت» هیچ ردیفی در تابلو نمی‌گذارد؛ ردیف‌هایش در دیتابیس می‌مانند
+        quoteOnly: false,
         category: { published: true, slug: { notIn: [...siteConfig.comingSoonCategorySlugs] } },
         priceItems: { some: {} },
       },
