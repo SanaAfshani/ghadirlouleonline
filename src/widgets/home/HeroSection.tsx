@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChevronDown, ChevronLeft, Factory, Headphones, Search, ShieldCheck, Truck } from 'lucide-react';
@@ -28,6 +28,39 @@ export function HeroSection({ categories }: { categories: NavCategory[] }) {
   const { open } = useConsult();
   const router = useRouter();
   const [q, setQ] = useState('');
+  const glow = useRef<HTMLDivElement>(null);
+
+  // نور پس‌زمینه دنبال نشانگر می‌آید — با lerp تا حرکتش نرم باشد و با rAF تا فریم‌ها جا نیفتند
+  useEffect(() => {
+    const el = glow.current;
+    const section = el?.parentElement;
+    if (!el || !section) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const at = { x: 0.18, y: 0.04 };
+    const to = { ...at };
+    let raf = 0;
+
+    const move = (e: PointerEvent) => {
+      const r = section.getBoundingClientRect();
+      to.x = (e.clientX - r.left) / r.width;
+      to.y = (e.clientY - r.top) / r.height;
+    };
+    const tick = () => {
+      at.x += (to.x - at.x) * 0.06;
+      at.y += (to.y - at.y) * 0.06;
+      el.style.setProperty('--gx', `${(at.x * 100).toFixed(2)}%`);
+      el.style.setProperty('--gy', `${(at.y * 100).toFixed(2)}%`);
+      raf = requestAnimationFrame(tick);
+    };
+
+    window.addEventListener('pointermove', move, { passive: true });
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('pointermove', move);
+    };
+  }, []);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,10 +69,14 @@ export function HeroSection({ categories }: { categories: NavCategory[] }) {
 
   return (
     <section className="relative isolate overflow-hidden bg-[var(--ink)] text-white">
-      {/* درخشش ملایم پشت قاب عکس (سمت چپ در چیدمان راست‌به‌چپ) تا ستون عکس از پس‌زمینه جدا شود */}
+      {/*
+        پس‌زمینه مینیمال: یک سطح تیره یکدست و یک نور نرم که با نشانگر جابه‌جا می‌شود. حرکت نور
+        نرم‌شده است تا به‌جای پریدن، آرام دنبال موس بیاید. بدون موس (موبایل) همان‌جای اولش می‌ماند.
+      */}
       <div
+        ref={glow}
         aria-hidden
-        className="absolute inset-0 -z-10 bg-[radial-gradient(900px_420px_at_18%_6%,rgba(245,158,11,0.13),transparent_62%)]"
+        className="absolute inset-0 -z-10 bg-[radial-gradient(58rem_34rem_at_var(--gx,18%)_var(--gy,4%),rgba(245,158,11,0.17),transparent_62%)]"
       />
 
       <div className="container-main grid grid-cols-1 lg:grid-cols-[1fr_470px] items-center gap-8 lg:gap-14 pt-8 pb-16 sm:pt-12 sm:pb-20 lg:pt-20 lg:pb-28">
