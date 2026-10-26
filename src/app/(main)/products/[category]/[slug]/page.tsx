@@ -110,9 +110,20 @@ export default async function ProductDetailPage({ params }: Props) {
           }
         : null;
 
-  // گوگل Product بدون offers/review/aggregateRating را خطا می‌داند. بیرون از ساعت فروش و برای دسته «به زودی»
-  // قیمتی در صفحه نیست و قیمت schema باید با صفحه یکی باشد — پس آن موقع Product schema اصلاً نمی‌گذاریم
-  const productSchema = offers && {
+  // مشخصات فنی به صورت ماشین‌خوان: «چه سایزی دارید»، «استانداردش چیست»، «صلبیتش چند است» را
+  // دستیارهای هوش مصنوعی از همین‌جا برمی‌دارند، نه از جدول HTML
+  const specs = Object.entries(product.specifications ?? {})
+    .filter(([name, value]) => name && value)
+    .map(([name, value]) => ({ '@type': 'PropertyValue', name, value }));
+
+  // Product همیشه منتشر می‌شود، حتی بدون قیمت.
+  //
+  // قبلاً فقط وقتی offers داشت منتشر می‌شد، چون گوگل برای *رفتن به نتیجه غنی* offers می‌خواهد.
+  // ولی بیرون از ساعت فروش و روی محصول‌های «فقط استعلام» اصلاً offer وجود ندارد، یعنی عملاً هیچ‌وقت
+  // منتشر نمی‌شد. Product بدون offer خطا نیست؛ فقط نتیجه غنیِ قیمت نمی‌گیرد — در عوض نام، مشخصات
+  // فنی و دسته محصول برای خزنده‌ها و دستیارهای هوش مصنوعی خوانا می‌ماند. offers همچنان فقط وقتی
+  // می‌آید که واقعاً قیمتی در صفحه باشد، تا schema و صفحه هیچ‌وقت دو حرف نزنند.
+  const productSchema = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
@@ -126,13 +137,14 @@ export default async function ProductDetailPage({ params }: Props) {
     // داده ساختاریافته باید با واقعیت و محتوای صفحه یکی باشد (فروشنده در offers.seller آمده)
     category: product.category?.name,
     ...(images.length ? { image: images } : {}),
+    ...(specs.length ? { additionalProperty: specs } : {}),
     url: canonical,
-    offers,
+    ...(offers ? { offers } : {}),
   };
 
   return (
     <>
-      {productSchema && <JsonLd data={productSchema} />}
+      <JsonLd data={productSchema} />
       {/* سوالات متداول اختصاصی محصول — واجد شرایط rich result آکاردئونی */}
       {product.faqs.length > 0 && <JsonLd data={faqPageSchema(product.faqs)} />}
       <JsonLd
