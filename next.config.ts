@@ -28,16 +28,16 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
-  // نسخه www همان محتوا را با ۲۰۰ برمی‌گرداند و برای گوگل محتوای تکراری است — ریدایرکت دائمی به دامنه اصلی
+  // هر دامنه‌ای جز دامنه اصلی همان محتوا را با ۲۰۰ برمی‌گرداند و برای گوگل محتوای تکراری است.
+  // فهرست در siteConfig.altDomains است: www و دامنه .com هر دو با ۳۰۱ به دامنه اصلی می‌روند تا
+  // اعتبار و لینک‌ها بین چند آدرس تقسیم نشود.
   async redirects() {
-    return [
-      {
-        source: '/:path*',
-        has: [{ type: 'host', value: `www.${new URL(siteConfig.url).host}` }],
-        destination: `${siteConfig.url}/:path*`,
-        permanent: true,
-      },
-    ];
+    return siteConfig.altDomains.map((host) => ({
+      source: '/:path*',
+      has: [{ type: 'host' as const, value: host }],
+      destination: `${siteConfig.url}/:path*`,
+      permanent: true,
+    }));
   },
 };
 
