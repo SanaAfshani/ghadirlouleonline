@@ -6,7 +6,7 @@ import {
   ArrowDownLeft, ArrowDownWideNarrow, ArrowUpLeft, ArrowUpNarrowWide, ChartLine, ChevronsUpDown, FileSpreadsheet, Lock,
   MessageSquareText, Search, ShoppingBag,
 } from 'lucide-react';
-import { cn, faDigits, latinDigits } from '@/shared/lib/utils';
+import { cn, faDigits, formatDate, latinDigits } from '@/shared/lib/utils';
 import { GRADES, compareItems, itemLabel, type SortDir, type SortKey } from '@/shared/lib/price-item';
 import { Select } from '@/shared/ui/Select';
 import { useConsult } from '@/features/consult/ConsultProvider';
@@ -49,11 +49,32 @@ function Change({ price, previous }: { price: number | null; previous: number | 
   );
 }
 
-function Price({ price, open }: { price: number | null; open: boolean }) {
+/**
+ * بیرون از ساعت فروش، عدد پنهان نمی‌شود — کم‌رنگ‌تر و با تاریخ ثبتش می‌آید.
+ *
+ * دلیلش هم خریدار است و هم موتور جستجو: کسی که ساعت ۱۱ شب دنبال قیمت لوله کاروگیت است باید
+ * رقم تقریبی را ببیند، و خزنده گوگل که ساعت کاری نمی‌شناسد باید صفحه را با عدد ایندکس کند.
+ * «قطعی نبودن» با برچسب تاریخ و دکمه استعلام منتقل می‌شود، نه با خالی‌گذاشتن ستون.
+ */
+function Price({ price, open, changedAt }: { price: number | null; open: boolean; changedAt?: string }) {
   if (!open) {
+    if (price == null) {
+      return (
+        <span className="inline-flex items-center gap-1 text-sm text-[var(--muted-foreground)]">
+          <Lock className="w-3.5 h-3.5" /> استعلام
+        </span>
+      );
+    }
     return (
-      <span className="inline-flex items-center gap-1 text-sm text-[var(--muted-foreground)]">
-        <Lock className="w-3.5 h-3.5" /> استعلام
+      <span className="inline-flex flex-col gap-0.5">
+        <span className="font-bold text-[15px] num whitespace-nowrap text-[var(--muted-foreground)]">
+          {faDigits(price.toLocaleString('fa-IR'))} <span className="text-xs font-normal">تومان</span>
+        </span>
+        {changedAt && (
+          <span className="text-[11px] leading-4 text-[var(--muted-foreground)]">
+            آخرین قیمت ثبت‌شده · {formatDate(changedAt)}
+          </span>
+        )}
       </span>
     );
   }
@@ -190,7 +211,9 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
             <Lock className="w-4 h-4 mt-1 shrink-0 text-[var(--muted-foreground)]" />
             <span>
               <span className="font-bold">فروش بسته است.</span>{' '}
-              <span className="text-[var(--muted-foreground)]">قیمت روز را استعلام بگیرید تا کارشناسان ما تماس بگیرند.</span>
+              <span className="text-[var(--muted-foreground)]">
+                عددهای زیر آخرین قیمت ثبت‌شده‌اند، نه قیمت قطعی امروز. برای قیمت قطعی استعلام بگیرید.
+              </span>
             </span>
           </p>
           <button onClick={() => openConsult()} className="shrink-0 h-10 px-5 rounded-xl bg-[var(--foreground)] text-[var(--background)] text-sm font-bold">
@@ -306,7 +329,7 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
                   )}
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-2">
-                      <Price price={r.price} open={open} />
+                      <Price price={r.price} open={open} changedAt={r.priceChangedAt} />
                       {open && <Change price={r.price} previous={r.previousPrice} />}
                     </div>
                   </td>
@@ -365,7 +388,7 @@ export function LivePriceTable({ initial, productIds, limit, showProduct = false
               )}
               <div className="mt-2 flex items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <Price price={r.price} open={open} />
+                  <Price price={r.price} open={open} changedAt={r.priceChangedAt} />
                   {open && <Change price={r.price} previous={r.previousPrice} />}
                 </div>
                 <div className="shrink-0 flex items-center gap-1.5">

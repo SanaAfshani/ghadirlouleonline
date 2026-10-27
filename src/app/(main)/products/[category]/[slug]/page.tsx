@@ -97,8 +97,14 @@ export default async function ProductDetailPage({ params }: Props) {
   // قیمت‌ها در پنل به تومان ثبت می‌شوند؛ schema.org واحد رسمی ریال را می‌خواهد (×۱۰)
   const seller = { '@type': 'Organization', name: siteConfig.name, url: siteConfig.url };
   const availability = product.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
+  // offers فقط در ساعت فروش.
+  //
+  // بیرون از آن، جدول «آخرین قیمت ثبت‌شده» را با تاریخش نشان می‌دهد و همین برای خزنده‌ها و
+  // دستیارهای هوش مصنوعی که متن صفحه را می‌خوانند کافی است. ولی offers در schema یعنی «قیمت
+  // فروش همین حالا» و گوگل آن را در نتایج به‌عنوان قیمت روز نشان می‌دهد — گذاشتن قیمت دیروز
+  // در آن، هم با صفحه نمی‌خواند و هم کاربر را پای یک عدد قطعی‌نما می‌نشاند.
   const offers =
-    priceSummary.minPrice != null
+    showPrice && priceSummary.minPrice != null
       ? {
           '@type': 'AggregateOffer',
           url: canonical,

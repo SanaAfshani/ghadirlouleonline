@@ -8,6 +8,11 @@ import { siteConfig } from '@/shared/config/site';
 
 export * from '@/shared/lib/price-board-types';
 
+/** قیمت قدیمی‌تر از این، دیگر نمایش داده نمی‌شود */
+const STALE_AFTER_DAYS = 7;
+const isFresh = (changedAt: Date, now: number) =>
+  now - changedAt.getTime() < STALE_AFTER_DAYS * 24 * 60 * 60 * 1000;
+
 export const getMarketNow = cache(async (): Promise<MarketStatus> => {
   return getMarketStatus(parseMarketConfig(await getSiteSettingsMap()));
 });
@@ -44,6 +49,7 @@ export const getPriceBoard = cache(async (): Promise<PriceBoard> => {
     getBoardVersion(),
   ]);
 
+  const now = Date.now();
   const lines = products
     .sort((a, b) => categoryRank(a.category.slug) - categoryRank(b.category.slug) || a.category.order - b.category.order || a.name.localeCompare(b.name, 'fa'))
     .map((p) => ({
@@ -60,7 +66,17 @@ export const getPriceBoard = cache(async (): Promise<PriceBoard> => {
         grade: i.grade,
         spec: i.spec,
         dimensions: i.dimensions,
-        price: market.open ? i.price : null,
+        // بیرون از ساعت فروش هم عدد می‌رود، ولی به‌عنوان «آخرین قیمت ثبت‌شده» با تاریخش،
+        // نه قیمت قطعی امروز (برچسبش در LivePriceTable).
+        //
+        // قبلاً اینجا null می‌شد و نتیجه‌اش این بود که بیشتر ساعات شبانه‌روز صفحه قیمت هیچ عددی
+        // نداشت — همان صفحه‌ای که کل سئوی سایت رویش بنا شده. خزنده گوگل ساعت کاری نمی‌شناسد و
+        // نسخه‌ای که ایندکس می‌کرد بی‌قیمت بود. رقبا هم قیمت لحظه‌ای نمی‌دهند؛ قیمت تاریخ‌دار
+        // می‌دهند («قیمت ۲ آبان» در عنوانشان).
+        //
+        // قیمت کهنه اطلاعات نیست، گمراهی است: اگر از STALE_AFTER_DAYS قدیمی‌تر باشد پنهان می‌شود.
+        price: market.open || isFresh(i.priceChangedAt, now) ? i.price : null,
+        // درصد تغییر فقط وقتی معنا دارد که قیمت زنده باشد
         previousPrice: market.open ? i.previousPrice : null,
         note: i.note,
         priceChangedAt: i.priceChangedAt.toISOString(),
