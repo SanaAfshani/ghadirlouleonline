@@ -2,7 +2,7 @@ import { safeDecode } from '@/shared/lib/utils';
 import { ensureBlogPost } from '@/shared/lib/route-guards';
 import type { Metadata } from 'next';
 import { BlogPostView } from '@/features/blog/BlogPostView';
-import { getBlogPostBySlug, getNavCategories } from '@/shared/lib/data';
+import { getBlogPostBySlug, getNavCategories, getPublishedBlogPosts } from '@/shared/lib/data';
 import { siteConfig } from '@/shared/config/site';
 import { JsonLd } from '@/shared/ui/JsonLd';
 import { absoluteUrl, breadcrumbSchema, faqPageSchema, toMetaDescription } from '@/shared/lib/seo';
@@ -12,6 +12,17 @@ import { stripHtml } from '@/shared/lib/utils';
 export const revalidate = 1800;
 
 type Props = { params: Promise<{ slug: string }> };
+
+
+/**
+ * بدون این، سگمنت پارامتری در هر درخواست از نو رندر می‌شود و revalidate به‌تنهایی کاری نمی‌کند —
+ * با هدر no-store دیده می‌شد. با فهرست‌کردن آدرس‌های موجود، همان‌ها موقع build ساخته و کش می‌شوند.
+ * dynamicParams پیش‌فرض روشن است، پس محصول یا مقاله‌ای که بعداً اضافه شود هم کار می‌کند.
+ */
+export async function generateStaticParams() {
+  const posts = await getPublishedBlogPosts();
+  return posts.map((p) => ({ slug: p.slug }));
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug: rawSlug } = await params;

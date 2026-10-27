@@ -5,7 +5,7 @@ import { safeDecode } from '@/shared/lib/utils';
 import { ensureCategory } from '@/shared/lib/route-guards';
 import type { Metadata } from 'next';
 import { CategoryProductsClient } from '@/features/products/CategoryProductsClient';
-import { getCategoryBySlug, getPublishedProducts, resolveCategoryImage } from '@/shared/lib/data';
+import { getCategoryBySlug, getPublishedCategories, getPublishedProducts, resolveCategoryImage } from '@/shared/lib/data';
 import { getPriceBoard } from '@/shared/lib/price-board';
 import { siteConfig } from '@/shared/config/site';
 import { JsonLd } from '@/shared/ui/JsonLd';
@@ -13,6 +13,17 @@ import { absoluteUrl, breadcrumbSchema, toMetaDescription } from '@/shared/lib/s
 import { isComingSoon } from '@/shared/lib/catalog';
 
 type Props = { params: Promise<{ category: string }> };
+
+
+/**
+ * بدون این، سگمنت پارامتری در هر درخواست از نو رندر می‌شود و revalidate به‌تنهایی کاری نمی‌کند —
+ * با هدر no-store دیده می‌شد. با فهرست‌کردن آدرس‌های موجود، همان‌ها موقع build ساخته و کش می‌شوند.
+ * dynamicParams پیش‌فرض روشن است، پس محصول یا مقاله‌ای که بعداً اضافه شود هم کار می‌کند.
+ */
+export async function generateStaticParams() {
+  const categories = await getPublishedCategories();
+  return categories.map((c) => ({ category: c.slug }));
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category: rawSlug } = await params;
