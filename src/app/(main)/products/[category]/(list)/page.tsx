@@ -5,7 +5,8 @@ import { safeDecode } from '@/shared/lib/utils';
 import { ensureCategory } from '@/shared/lib/route-guards';
 import type { Metadata } from 'next';
 import { CategoryProductsClient } from '@/features/products/CategoryProductsClient';
-import { getCategoryBySlug, getPublishedCategories, getPublishedProducts, resolveCategoryImage } from '@/shared/lib/data';
+import { CategoryGuides } from '@/features/products/CategoryGuides';
+import { getCategoryBySlug, getPublishedCategories, getPublishedProducts, getRelatedBlogPosts, resolveCategoryImage } from '@/shared/lib/data';
 import { getPriceBoard } from '@/shared/lib/price-board';
 import { siteConfig } from '@/shared/config/site';
 import { JsonLd } from '@/shared/ui/JsonLd';
@@ -60,7 +61,12 @@ export default async function CategoryPage({ params }: Props) {
   // ریدایرکت/۴۰۴ قبلاً در layout همین مسیر انجام شده
   const category = await ensureCategory(slug);
 
-  const [products, board] = await Promise.all([getPublishedProducts({ categorySlug: slug }), getPriceBoard()]);
+  const [products, board, guides] = await Promise.all([
+    getPublishedProducts({ categorySlug: slug }),
+    getPriceBoard(),
+    // خطا نباید صفحه دسته را بیندازد؛ نبودِ راهنما فقط یعنی این بخش نمایش داده نمی‌شود
+    getRelatedBlogPosts(category.name).catch(() => []),
+  ]);
   const priceProductIds = board.lines.filter((l) => l.categorySlug === slug).map((l) => l.productId);
 
   const canonical = `${siteConfig.url}/products/${encodeURIComponent(slug)}`;
@@ -107,6 +113,7 @@ export default async function CategoryPage({ params }: Props) {
       board={board}
       priceProductIds={priceProductIds}
     />
+      <CategoryGuides categoryName={category.name} guides={guides} />
     </>
   );
 }

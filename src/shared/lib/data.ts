@@ -113,6 +113,64 @@ export const getProductBySlug = cache(async (slug: string, categorySlug?: string
   return product ? serializeProduct(product) : null;
 });
 
+/**
+ * مقاله‌های مرتبط با یک موضوع — برای لینک‌دادن از صفحه دسته به راهنماهای همان محصول.
+ *
+ * صفحه دسته تا امروز هیچ لینکی به وبلاگ نداشت، در حالی که مثلاً برای کاروگیت سه مقاله درباره
+ * انتخاب سایز و مقایسه با پلی‌اتیلن وجود داشت. این لینک‌ها هم خواننده را به جواب سوالش می‌رسانند
+ * و هم به گوگل نشان می‌دهند این صفحه‌ها یک موضوع واحدند.
+ *
+ * BlogPost رابطه‌ای با Category ندارد، پس بر اساس نام دسته در عنوان، برچسب‌ها یا کلیدواژه کانونی
+ * تطبیق داده می‌شود — همان چیزی که نویسنده مقاله به‌هرحال می‌نویسد.
+ *
+ * اول کل نام دسته امتحان می‌شود چون دقیق‌ترین است («لوله کاروگیت» سه مقاله خودش را می‌آورد).
+ * اگر چیزی پیدا نشد، سراغ تک‌واژه‌ها می‌رویم: نام دسته‌ای مثل «منهول و دریچه» هیچ‌وقت عیناً در
+ * عنوان مقاله نمی‌آید، ولی «منهول» و «دریچه» می‌آیند.
+ */
+/** واژه‌های آن‌قدر عمومی که در یک سایت لوله‌فروشی تقریباً با همه‌چیز تطبیق می‌خورند */
+const TOO_GENERIC = new Set(['لوله', 'قیمت', 'خرید', 'فروش', 'انواع']);
+
+export async function getRelatedBlogPosts(term: string, limit = 3) {
+  const needle = term.trim();
+  if (!needle) return [];
+
+  const find = (value: string) =>
+    prisma.blogPost.findMany({
+      where: {
+        published: true,
+        OR: [
+          { title: { contains: value, mode: 'insensitive' } },
+          { tags: { contains: value, mode: 'insensitive' } },
+          { focusKeyword: { contains: value, mode: 'insensitive' } },
+        ],
+      },
+      select: { slug: true, title: true, excerpt: true },
+      orderBy: [{ featured: 'desc' }, { createdAt: 'desc' }],
+      take: limit,
+    });
+
+  const exact = await find(needle);
+  if (exact.length > 0) return exact;
+
+  // از مشخص‌ترین واژه شروع می‌کنیم و به اولین نتیجه بسنده می‌کنیم.
+  // OR کردن همه واژه‌ها نتیجه شلی می‌داد: «سپتیک تانک پلی اتیلن» با «اتیلن» مقاله‌های پلی‌اتیلن را
+  // می‌آورد و «مبلمان و تجهیزات شهری» با «شهری» مقاله فاضلاب شهری را — ربطی که فقط لفظی است.
+  // لینک داخلی بی‌ربط هم خواننده را سر می‌دواند و هم موضوع صفحه را نزد گوگل مبهم می‌کند؛
+  // نبودِ این بخش بهتر از پرکردنش با چیز نامربوط است.
+  const words = needle
+    .split(/\s+/)
+    // چهارحرفی‌ها در فارسی اغلب عمومی‌اند («آب»، «شهری»، «تانک») و تطبیق لفظی می‌سازند:
+    // «مبلمان و تجهیزات شهری» با «شهری» به مقاله فاضلاب شهری می‌رسید
+    .filter((w) => w.length >= 5 && !TOO_GENERIC.has(w))
+    .sort((a, b) => b.length - a.length);
+
+  for (const word of words) {
+    const found = await find(word);
+    if (found.length > 0) return found;
+  }
+  return [];
+}
+
 export async function getPublishedBlogPosts(options?: { featured?: boolean; limit?: number }) {
   const posts = await prisma.blogPost.findMany({
     where: { published: true, ...(options?.featured ? { featured: true } : {}) },
