@@ -6,7 +6,8 @@ import { siteConfig } from '@/shared/config/site';
 import { JsonLd } from '@/shared/ui/JsonLd';
 import { breadcrumbSchema } from '@/shared/lib/seo';
 
-export const dynamic = 'force-dynamic';
+/** با انتشار مقاله تازه عوض می‌شود. */
+export const revalidate = 1800;
 
 export const metadata: Metadata = {
   title: 'وبلاگ | راهنمای خرید و مقالات تخصصی لوله',

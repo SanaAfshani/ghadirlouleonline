@@ -1,4 +1,5 @@
-export const dynamic = 'force-dynamic';
+/** فهرست محصولات یک دسته. */
+export const revalidate = 900;
 
 import { safeDecode } from '@/shared/lib/utils';
 import { ensureCategory } from '@/shared/lib/route-guards';

@@ -8,7 +8,8 @@ import { JsonLd } from '@/shared/ui/JsonLd';
 import { absoluteUrl, breadcrumbSchema, faqPageSchema, toMetaDescription } from '@/shared/lib/seo';
 import { stripHtml } from '@/shared/lib/utils';
 
-export const dynamic = 'force-dynamic';
+/** متن مقاله پس از انتشار کم دست می‌خورد. */
+export const revalidate = 1800;
 
 type Props = { params: Promise<{ slug: string }> };
 

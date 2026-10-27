@@ -1,4 +1,5 @@
-export const dynamic = 'force-dynamic';
+/** سوالات متداول کم عوض می‌شوند. */
+export const revalidate = 1800;
 
 import type { Metadata } from 'next';
 import { FAQPageClient } from '@/features/faq/FAQPageClient';

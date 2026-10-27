@@ -1,4 +1,5 @@
-export const dynamic = 'force-dynamic';
+/** دسته‌ها به‌ندرت عوض می‌شوند. */
+export const revalidate = 1800;
 
 import type { Metadata } from 'next';
 import { CategoriesPageClient } from '@/features/categories/CategoriesPageClient';

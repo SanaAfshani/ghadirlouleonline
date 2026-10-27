@@ -1,4 +1,5 @@
-export const dynamic = 'force-dynamic';
+/** صفحه یک پروژه. */
+export const revalidate = 1800;
 
 import { safeDecode } from '@/shared/lib/utils';
 import { ensureProject } from '@/shared/lib/route-guards';

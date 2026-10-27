@@ -1,4 +1,5 @@
-export const dynamic = 'force-dynamic';
+/** جدول قیمت محصول دارد؛ همان ملاحظه صفحه اصلی. */
+export const revalidate = 300;
 
 import { safeDecode } from '@/shared/lib/utils';
 import { ensureProduct } from '@/shared/lib/route-guards';

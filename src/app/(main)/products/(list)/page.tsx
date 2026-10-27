@@ -1,4 +1,5 @@
-export const dynamic = 'force-dynamic';
+/** فهرست محصولات با افزودن یا ویرایش محصول عوض می‌شود، نه بیشتر. */
+export const revalidate = 900;
 
 import type { Metadata } from 'next';
 import { ProductsPageClient } from '@/features/products/ProductsPageClient';

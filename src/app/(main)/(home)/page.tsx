@@ -1,4 +1,5 @@
-export const dynamic = 'force-dynamic';
+/** تابلوی قیمت دارد؛ کوتاه نگه داشته می‌شود. جدول سمت کلاینت هر ۵ ثانیه خودش تازه می‌شود. */
+export const revalidate = 300;
 
 import type { Metadata } from 'next';
 import { HeroSection } from '@/widgets/home/HeroSection';

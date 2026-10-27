@@ -1,4 +1,5 @@
-export const dynamic = 'force-dynamic';
+/** پروژه‌ها به‌ندرت اضافه می‌شوند. */
+export const revalidate = 1800;
 
 import type { Metadata } from 'next';
 import { ProjectsPageClient } from '@/features/projects/ProjectsPageClient';
