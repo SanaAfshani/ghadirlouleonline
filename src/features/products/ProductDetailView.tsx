@@ -23,6 +23,8 @@ import { siteConfig } from '@/shared/config/site';
 import { IconTile } from '@/shared/ui/IconTile';
 import { SpecCards, specMeta, withDerivedSpecs } from '@/features/products/SpecCards';
 import { ProductCatalogs } from '@/features/products/ProductCatalogs';
+import { DimensionTable } from '@/features/products/DimensionTable';
+import { pipeDimensionsFor } from '@/shared/lib/pipe-dimensions';
 import { subjectFor } from '@/features/products/SpecIllustration';
 import { CertificateStrip } from '@/features/certificates/Certificates';
 import { ImageLightbox } from '@/shared/ui/ImageLightbox';
@@ -121,6 +123,7 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
 
   const images = product.images.length ? product.images : product.category.image ? [product.category.image] : [];
   const specs = Object.entries(product.specifications ?? {});
+  const dimensions = pipeDimensionsFor(product.slug);
   const catalogs = product.catalogs ?? [];
   const showCertificates = siteConfig.certificateCategorySlugs.includes(product.category.slug);
   const { board } = useLiveBoard(initialBoard);
@@ -135,6 +138,7 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
     ...(summary.count ? [{ id: 'price-table', label: 'جدول قیمت' }] : []),
     ...(product.description ? [{ id: 'overview', label: 'معرفی محصول' }] : []),
     ...(specs.length ? [{ id: 'specs', label: 'مشخصات فنی' }] : []),
+    ...(dimensions.length ? [{ id: 'dimensions', label: 'جدول ابعاد' }] : []),
     ...(catalogs.length ? [{ id: 'catalog', label: 'کاتالوگ' }] : []),
     ...(product.faqs.length ? [{ id: 'faq', label: 'سوالات متداول' }] : []),
   ];
@@ -373,6 +377,8 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
               </dl>
             </section>
           )}
+
+          <DimensionTable rows={dimensions} productName={product.name} />
 
           {catalogs.length > 0 && (
             <section id="catalog" aria-labelledby="catalog-title" className="scroll-mt-40">
