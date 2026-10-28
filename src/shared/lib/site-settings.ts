@@ -59,7 +59,7 @@ export const defaultSiteSettings: SiteSettings = {
   companyPhones: siteConfig.companyPhones,
   factoryAddress: siteConfig.factoryAddress,
   mapUrl: siteConfig.mapUrl,
-  heroTitle: 'تولید و فروش لوله کاروگیت با قیمت روز',
+  heroTitle: siteConfig.tagline,
   heroSubtitle:
     `${siteConfig.legalName} تولیدکننده لوله دوجداره پلی اتیلن (کاروگیت) برای شبکه فاضلاب و آب‌های سطحی است؛ ${siteConfig.name} تنها نماینده انحصاری آن با ارسال به سراسر ایران.`,
   homeSeoContent: `<h2>فروشگاه آنلاین لوله و اتصالات ${siteConfig.name}</h2>

@@ -15,7 +15,7 @@ const vazirmatn = Vazirmatn({ subsets: ['arabic', 'latin'], display: 'swap', var
 
 const baseMetadata: Metadata = {
   title: {
-    default: siteConfig.name + ' | خرید لوله کاروگیت از کارخانه',
+    default: `${siteConfig.tagline} | ${siteConfig.name}`,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -33,7 +33,7 @@ const baseMetadata: Metadata = {
     type: 'website',
     locale: 'fa_IR',
     url: siteConfig.url,
-    title: siteConfig.name + ' | خرید لوله کاروگیت از کارخانه',
+    title: `${siteConfig.tagline} | ${siteConfig.name}`,
     description: siteConfig.description,
     siteName: siteConfig.name,
   },
