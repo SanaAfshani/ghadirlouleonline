@@ -3,7 +3,7 @@ import { prisma } from '@/shared/lib/prisma';
 import { getSiteSettingsMap } from '@/shared/lib/site-settings-store';
 import { getMarketStatus, parseMarketConfig, type MarketStatus } from '@/shared/lib/market';
 import type { PriceBoard } from '@/shared/lib/price-board-types';
-import { categoryRank } from '@/shared/lib/catalog';
+import { categoryRank, productRank } from '@/shared/lib/catalog';
 import { siteConfig } from '@/shared/config/site';
 
 export * from '@/shared/lib/price-board-types';
@@ -51,7 +51,7 @@ export const getPriceBoard = cache(async (): Promise<PriceBoard> => {
 
   const now = Date.now();
   const lines = products
-    .sort((a, b) => categoryRank(a.category.slug) - categoryRank(b.category.slug) || a.category.order - b.category.order || a.name.localeCompare(b.name, 'fa'))
+    .sort((a, b) => categoryRank(a.category.slug) - categoryRank(b.category.slug) || a.category.order - b.category.order || productRank(a.slug) - productRank(b.slug) || a.name.localeCompare(b.name, 'fa'))
     .map((p) => ({
       productId: p.id,
       productSlug: p.slug,
