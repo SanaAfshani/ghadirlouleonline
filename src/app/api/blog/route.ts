@@ -4,6 +4,7 @@ import { prisma } from '@/shared/lib/prisma';
 import { parseFaqs } from '@/shared/lib/serializers';
 import { estimateReadTimeMinutes, slugify } from '@/shared/lib/utils';
 import { serializeFaqs } from '@/shared/lib/page-faqs';
+import { pingIndexNow } from '@/shared/lib/indexnow';
 
 /** فیلد متنی اختیاری: رشته خالی را به null تبدیل می‌کند تا fallback سئو درست کار کند */
 function optionalText(value: unknown): string | null {
@@ -108,6 +109,9 @@ export async function POST(request: NextRequest) {
       },
       include: { author: { select: { id: true, name: true, email: true } } },
     });
+
+    // مقاله تازه همان روز به Bing (و از آن به ChatGPT و Copilot) می‌رسد، نه هفته‌ها بعد
+    if (post.published) pingIndexNow([`/blog/${post.slug}`, '/blog']);
 
     return NextResponse.json({ success: true, data: mapPost(post) }, { status: 201 });
   } catch (error) {

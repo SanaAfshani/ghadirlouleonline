@@ -6,6 +6,7 @@ import { slugify } from '@/shared/lib/utils';
 import { serializeFaqs } from '@/shared/lib/page-faqs';
 import { serializeCatalogs } from '@/shared/lib/catalog-files';
 import { getMarketNow } from '@/shared/lib/price-board';
+import { pingIndexNow } from '@/shared/lib/indexnow';
 
 /** فیلد متنی اختیاری: رشته خالی را به null تبدیل می‌کند تا fallback سئو درست کار کند */
 function optionalText(value: unknown): string | null {
@@ -97,6 +98,10 @@ export async function POST(request: NextRequest) {
       },
       include: { category: true },
     });
+
+    if (product.published) {
+      pingIndexNow([`/products/${product.category.slug}`, `/products/${product.category.slug}/${product.slug}`]);
+    }
 
     return NextResponse.json({ success: true, data: serializeProduct(product) }, { status: 201 });
   } catch (error) {

@@ -6,6 +6,7 @@ import { serializeFaqs } from '@/shared/lib/page-faqs';
 import { serializeCatalogs } from '@/shared/lib/catalog-files';
 import { slugify } from '@/shared/lib/utils';
 import { recordRedirect } from '@/shared/lib/redirects';
+import { pingIndexNow } from '@/shared/lib/indexnow';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -73,7 +74,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
 
     const before = await prisma.product.findUnique({
       where: { id },
-      select: { slug: true, category: { select: { slug: true } } },
+      select: { slug: true, published: true, category: { select: { slug: true } } },
     });
 
     const product = await prisma.product.update({
@@ -88,6 +89,14 @@ export async function PUT(request: NextRequest, { params }: Props) {
         `/products/${before.category.slug}/${before.slug}`,
         `/products/${product.category.slug}/${product.slug}`,
       );
+    }
+
+    if (product.published || before?.published) {
+      pingIndexNow([
+        `/products/${product.category.slug}`,
+        `/products/${product.category.slug}/${product.slug}`,
+        ...(before ? [`/products/${before.category.slug}/${before.slug}`] : []),
+      ]);
     }
 
     return NextResponse.json({ success: true, data: serializeProduct(product) });

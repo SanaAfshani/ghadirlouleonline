@@ -5,6 +5,7 @@ import { slugify } from '@/shared/lib/utils';
 import { recordRedirect } from '@/shared/lib/redirects';
 import { parseFaqs } from '@/shared/lib/serializers';
 import { serializeFaqs } from '@/shared/lib/page-faqs';
+import { pingIndexNow } from '@/shared/lib/indexnow';
 
 type RouteContext = { params: Promise<{ slug: string }> };
 
@@ -99,6 +100,11 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     if (post.slug !== existing.slug) {
       await recordRedirect(`/blog/${existing.slug}`, `/blog/${post.slug}`);
+    }
+
+    // منتشر یا از انتشار خارج شد یا ویرایش شد — آدرس قدیم و جدید هر دو خبر داده می‌شوند
+    if (post.published || existing.published) {
+      pingIndexNow(['/blog', `/blog/${existing.slug}`, `/blog/${post.slug}`]);
     }
 
     let tags: string[] = [];
