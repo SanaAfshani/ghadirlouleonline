@@ -45,6 +45,8 @@ export const metadata: Metadata = {
     description: HOME_DESCRIPTION,
     url: siteConfig.url,
     type: 'website',
+    // openGraph صفحه جایگزین openGraph روت می‌شود و تصویر opengraph-image.tsx را با خودش می‌برد
+    images: '/opengraph-image',
   },
 };
 

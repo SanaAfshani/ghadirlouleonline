@@ -33,7 +33,8 @@ export async function generateMetadata(): Promise<Metadata> {
     title,
     description,
     alternates: { canonical: `${siteConfig.url}/prices` },
-    openGraph: { title, description, url: `${siteConfig.url}/prices`, type: 'website' },
+    // images: openGraph صفحه جایگزین openGraph روت می‌شود و تصویر opengraph-image.tsx را با خودش می‌برد
+    openGraph: { title, description, url: `${siteConfig.url}/prices`, type: 'website', images: '/opengraph-image' },
   };
 }
 
