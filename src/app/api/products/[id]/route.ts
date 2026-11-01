@@ -111,7 +111,14 @@ export async function DELETE(request: NextRequest, { params }: Props) {
   if (auth instanceof NextResponse) return auth;
   try {
     const { id } = await params;
-    await prisma.product.delete({ where: { id } });
+    const product = await prisma.product.delete({
+      where: { id },
+      select: { slug: true, published: true, category: { select: { slug: true } } },
+    });
+    // آدرس حالا ۴۰۴ می‌دهد — خبر دادن باعث می‌شود Bing (و ChatGPT و Copilot) زودتر از نتایج برش دارند
+    if (product.published) {
+      pingIndexNow([`/products/${product.category.slug}`, `/products/${product.category.slug}/${product.slug}`]);
+    }
     return NextResponse.json({ success: true, message: 'محصول حذف شد' });
   } catch (error) {
     console.error('Product DELETE error:', error);

@@ -135,6 +135,9 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
 
     await prisma.blogPost.delete({ where: { id: existing.id } });
 
+    // آدرس حالا ۴۰۴ می‌دهد — خبر دادن باعث می‌شود Bing (و ChatGPT و Copilot) زودتر از نتایج برش دارند
+    if (existing.published) pingIndexNow(['/blog', `/blog/${existing.slug}`]);
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Blog slug DELETE error:', error);
