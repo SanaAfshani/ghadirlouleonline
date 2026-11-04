@@ -17,7 +17,7 @@ const DESCRIPTION = `گواهینامه ISO 9001:2015 و پروانه علامت
 export async function generateMetadata(): Promise<Metadata> {
   const certificates = parseCertificates((await getSiteSettingsMap()).certificates);
   return {
-    title: `${TITLE} | نماینده انحصاری`,
+    title: TITLE,
     description: DESCRIPTION,
     alternates: { canonical: `${siteConfig.url}/certificates` },
     openGraph: {

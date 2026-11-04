@@ -10,7 +10,7 @@ import { breadcrumbSchema } from '@/shared/lib/seo';
 import { isComingSoon } from '@/shared/lib/catalog';
 
 export const metadata: Metadata = {
-  title: 'دسته‌بندی محصولات | لوله کاروگیت و لوله آب و فاضلاب',
+  title: 'دسته‌بندی محصولات | کاروگیت، آب و فاضلاب',
   description:
     'دسته‌بندی محصولات قدیر لوله آنلاین: لوله کاروگیت، پلی اتیلن، پلیکا، منهول، سپتیک تانک، آبیاری قطره‌ای و اتصالات با قیمت روز.',
   alternates: { canonical: `${siteConfig.url}/categories` },

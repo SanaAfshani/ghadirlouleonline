@@ -9,9 +9,9 @@ import { FACTORY_FAQS, FactoryAbout, factorySchema } from '@/features/contact/Fa
 import { FaqAccordion } from '@/shared/ui/FaqAccordion';
 
 export const metadata: Metadata = {
-  title: `تماس با ما | ${siteConfig.exclusiveTitle}`,
+  title: `تماس با ما | نماینده ${siteConfig.legalName}`,
   description:
-    `تماس با ${siteConfig.name}، ${siteConfig.exclusiveTitle}: تلفن ${siteConfig.companyPhones[0]}، دفتر تهران (شادآباد) و کارخانه گرمسار. معرفی کارخانه از ۱۳۹۱، استاندارد ISIRI 9116-3 و ابعاد لوله کاروگیت.`,
+    `تماس با ${siteConfig.name}، ${siteConfig.exclusiveTitle}: تلفن ${siteConfig.companyPhones[0]}، دفتر تهران (شادآباد) و کارخانه گرمسار با استاندارد ISIRI 9116-3.`,
   alternates: { canonical: `${siteConfig.url}/contact` },
 };
 

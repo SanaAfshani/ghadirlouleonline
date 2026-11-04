@@ -5,9 +5,9 @@ import { JsonLd } from '@/shared/ui/JsonLd';
 import { breadcrumbSchema } from '@/shared/lib/seo';
 
 export const metadata: Metadata = {
-  title: 'خدمات | مشاوره فنی، برش لوله و Mill Certificate',
+  title: 'خدمات | مشاوره فنی و Mill Certificate',
   description:
-    'خدمات قدیر لوله آنلاین، تنها نماینده انحصاری قدیر لوله پاسارگاد: مشاوره فنی رایگان، مستندات و گواهینامه‌های کارخانه (ISIRI 9116-3، ISO 9001)، گارانتی کیفیت و ارسال به سراسر ایران.',
+    'خدمات قدیر لوله آنلاین، نماینده انحصاری قدیر لوله پاسارگاد: مشاوره فنی رایگان، گواهینامه‌های کارخانه (ISIRI 9116-3، ISO 9001)، گارانتی کیفیت و ارسال سراسری.',
   alternates: { canonical: `${siteConfig.url}/services` },
 };
 

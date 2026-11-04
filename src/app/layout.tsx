@@ -29,18 +29,17 @@ const baseMetadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, 'max-image-preview': 'large' },
   },
+  // title و description شبکه‌های اجتماعی عمداً اینجا نیست: Next.js فقط وقتی og:title و twitter:title را از
+  // عنوان و توضیحات خود صفحه پر می‌کند که لایه بالاتر آن‌ها را تعیین نکرده باشد. قبلاً همه صفحه‌های بدون
+  // openGraph اختصاصی (محصولات، وبلاگ، تماس، درباره ما، سوالات متداول) عنوان صفحه اصلی را می‌گرفتند.
   openGraph: {
     type: 'website',
     locale: 'fa_IR',
     url: siteConfig.url,
-    title: `${siteConfig.tagline} | ${siteConfig.name}`,
-    description: siteConfig.description,
     siteName: siteConfig.name,
   },
   twitter: {
     card: 'summary_large_image',
-    title: siteConfig.name,
-    description: siteConfig.description,
   },
   applicationName: siteConfig.name,
   publisher: siteConfig.name,

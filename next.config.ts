@@ -3,6 +3,8 @@ import path from "path";
 import { siteConfig } from "./src/shared/config/site";
 
 const nextConfig: NextConfig = {
+  // هدر x-powered-by: Next.js فقط فریم‌ورک سایت را لو می‌دهد
+  poweredByHeader: false,
   images: {
     remotePatterns: [
       {

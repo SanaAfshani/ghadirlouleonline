@@ -77,7 +77,9 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
             <Image
               key={src}
               src={src}
-              alt={i === active ? name : ''}
+              // alt برای همه: گوگل تصویرها را از همین تگ‌ها ایندکس می‌کند و alt خالی یعنی «تزئینی»؛ aria-hidden
+              // همچنان صفحه‌خوان را فقط به عکس فعال محدود می‌کند
+              alt={i === 0 ? name : `${name} — تصویر ${faDigits(i + 1)}`}
               aria-hidden={i !== active}
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
@@ -97,7 +99,7 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
                 aria-label={`تصویر ${faDigits(i + 1)}`}
                 className={cn('relative w-20 xl:w-24 aspect-square rounded-2xl overflow-hidden border-2 transition-colors', i === active ? 'border-[var(--accent)]' : 'border-transparent opacity-70 hover:opacity-100')}
               >
-                <Image src={src} alt="" fill sizes="10vw" className="object-cover" />
+                <Image src={src} alt={`${name} — تصویر ${faDigits(i + 1)}`} fill sizes="10vw" className="object-cover" />
               </button>
             ))}
           </div>

@@ -33,7 +33,7 @@ import { localBusinessSchema, organizationSchema, websiteSchema } from '@/shared
  */
 const HOME_TITLE = `${siteConfig.tagline} | قیمت روز لوله کاروگیت`;
 const HOME_DESCRIPTION =
-  'قدیر لوله آنلاین، تنها نماینده انحصاری قدیر لوله پاسارگاد: قیمت روز لوله کاروگیت دوجداره با استاندارد ISIRI 9116 و ISO 9001، تامین پروژه‌ای و ارسال از کارخانه گرمسار به سراسر ایران.';
+  'قدیر لوله آنلاین، نماینده انحصاری قدیر لوله پاسارگاد: قیمت روز لوله کاروگیت دوجداره با استاندارد ISIRI 9116 و ارسال از کارخانه گرمسار به سراسر ایران.';
 
 export const metadata: Metadata = {
   // absolute: وگرنه قالب «%s | نام سایت» لایه روت نام سایت را دوباره اضافه می‌کند

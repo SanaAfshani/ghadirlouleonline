@@ -31,18 +31,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const slug = safeDecode(rawSlug);
   const category = await getCategoryBySlug(slug);
   if (!category) return { title: 'دسته‌بندی یافت نشد', robots: { index: false, follow: true } };
-  const desc = toMetaDescription(
-    category.description ??
-      `خرید انواع ${category.name} با قیمت مناسب و تحویل سریع به سراسر کشور. استعلام قیمت و مشاوره رایگان از ${siteConfig.name}.`
-  );
+  const generic = `خرید انواع ${category.name} با قیمت مناسب و تحویل سریع به سراسر کشور. استعلام قیمت و مشاوره رایگان از ${siteConfig.name}.`;
+  // توضیح دسته در پنل گاهی فقط یک عبارت کوتاه است (مثل «منهول پلیمری و بتنی و دریچه فاضلاب»)؛ گوگل زیر ۷۰ حرف را
+  // ناقص می‌داند و خودش تکه‌ای از صفحه را جایش می‌گذارد — پس جمله عمومی پشتش می‌آید
+  const own = category.description?.trim() ?? '';
+  const desc = toMetaDescription(own.length >= 70 ? own : own ? `${own}. ${generic}` : generic);
   const canonical = `${siteConfig.url}/products/${encodeURIComponent(slug)}`;
   const image = category.image ? absoluteUrl(category.image) : undefined;
+  // دسته = نیت «قیمت و انتخاب سایز»؛ صفحه محصول = «مشخصات یک مدل» — عنوان‌ها هم‌پوشانی نکنند
+  // دسته «به زودی» جدول قیمت ندارد؛ عنوان نباید وعده قیمت بدهد
+  const title = isComingSoon(category.slug)
+    ? `${category.name} | مشخصات و استعلام (به زودی)`
+    : `قیمت ${category.name} | جدول سایز و خرید عمده`;
   return {
-    // دسته = نیت «قیمت و انتخاب سایز»؛ صفحه محصول = «مشخصات یک مدل» — عنوان‌ها هم‌پوشانی نکنند
-    // دسته «به زودی» جدول قیمت ندارد؛ عنوان نباید وعده قیمت بدهد
-    title: isComingSoon(category.slug)
-      ? `${category.name} | مشخصات و استعلام (به زودی)`
-      : `قیمت ${category.name} | جدول سایز و خرید عمده`,
+    // با «| نام سایت» قالب روت، دسته‌های با نام بلند از ۶۰ حرف رد می‌شدند و گوگل عنوان را می‌برید
+    title: title.length + ` | ${siteConfig.name}`.length > 60 ? { absolute: title } : title,
     description: desc,
     alternates: { canonical },
     openGraph: {
