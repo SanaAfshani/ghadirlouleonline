@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Sparkles, Loader2, Download, Pencil, RefreshCw, KeyRound } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { formatDate } from '@/shared/lib/utils';
+import { formatDate, formatPersianNumber } from '@/shared/lib/utils';
 import { useConfirm } from '@/shared/ui/ConfirmDialog';
 
 type ArticleRow = {
@@ -46,14 +46,16 @@ function writeTask(id: string | null) {
 }
 
 type ListResult =
-  | { ok: true; configured: boolean; articles: ArticleRow[] }
+  | { ok: true; configured: boolean; articles: ArticleRow[]; hidden: number }
   | { ok: false; error: string };
 
 async function fetchArticles(): Promise<ListResult> {
   try {
     const res = await fetch('/api/admin/youtix');
     const json = await res.json();
-    if (json.success) return { ok: true, configured: json.data.configured, articles: json.data.articles };
+    if (json.success) {
+      return { ok: true, configured: json.data.configured, articles: json.data.articles, hidden: json.data.hidden ?? 0 };
+    }
     return { ok: false, error: json.error || 'بارگذاری مقالات یوتیکس ناموفق بود' };
   } catch {
     return { ok: false, error: 'خطا در ارتباط با سرور' };
@@ -66,6 +68,8 @@ export default function AdminYoutixPage() {
 
   const [configured, setConfigured] = useState(true);
   const [articles, setArticles] = useState<ArticleRow[]>([]);
+  /** مقاله‌هایی که از قبل (دستی) در وبلاگ هستند و در لیست نمی‌آیند */
+  const [hidden, setHidden] = useState(0);
   const [loading, setLoading] = useState(true);
   const [taskId, setTaskId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
@@ -75,6 +79,7 @@ export default function AdminYoutixPage() {
     if (result.ok) {
       setConfigured(result.configured);
       setArticles(result.articles);
+      setHidden(result.hidden);
     } else {
       toast.error(result.error);
     }
@@ -188,6 +193,11 @@ export default function AdminYoutixPage() {
           <p className="text-[var(--muted-foreground)] text-sm mt-1">
             مقاله‌های تولیدشده در یوتیکس را به‌صورت پیش‌نویس به وبلاگ وارد کنید
           </p>
+          {hidden > 0 && (
+            <p className="text-[var(--muted-foreground)] text-xs mt-1">
+              {formatPersianNumber(hidden)} مقاله که از قبل با همین عنوان در وبلاگ هست نمایش داده نمی‌شود
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <button
