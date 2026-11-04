@@ -103,6 +103,8 @@ model BlogPost {
   ogDescription   String?
   /** سوالات متداول اختصاصی مقاله — آرایه JSON از {question, answer} */
   faqs            String  @default("[]")
+  /** شناسه مقاله در یوتیکس — برای جلوگیری از وارد کردن دوباره همان مقاله */
+  youtixId        String? @unique
 
   authorId   String
   author     User     @relation(fields: [authorId], references: [id])

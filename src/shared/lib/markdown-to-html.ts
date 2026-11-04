@@ -8,8 +8,9 @@
  * واقعی دیده می‌شوند (تیتر، بولد، لینک، لیست، جدول، نقل‌قول، کد).
  */
 
+/** کوتیشن هم escape می‌شود: آدرس لینک/تصویر داخل href="..." می‌نشیند و `"` در آن اتریبیوت تازه (onmouseover) می‌سازد */
 function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 /** عناصر درون‌خطی: بولد، ایتالیک، کد، لینک، تصویر */

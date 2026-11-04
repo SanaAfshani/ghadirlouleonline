@@ -66,3 +66,4 @@ npm run db:seed      # seed داده‌های اولیه
 - [x] کاتالوگ دریچه و منهول کامپوزیتی با برند خودمان: `GET /api/catalogs/composite-covers/pdf` از روی همان محصولات دیتابیس رندر می‌شود، پس کاتالوگ و سایت هیچ‌وقت از هم عقب نمی‌افتند
 - [x] عکس محصول و دسته از صفحات کاتالوگ: `scripts/build-catalog-images.ts` (برش + واترمارک سایت + WebP) و `scripts/add-irrigation-products.ts` / `scripts/add-infra-products.ts` برای ثبت محصولات
 - [x] پیش‌فاکتور آنلاین: سبد مشتری از جدول قیمت → درخواست → تأیید ادمین → صفحه `/q/[token]` + PDF (`Quote` / `QuoteItem`)
+- [x] اتصال یوتیکس (تولید مقاله سئو): یوتیکس فقط در وردپرس/میکسین منتشر می‌کند، پس مقاله را خودمان از API آن (`YOUTIX_API_KEY`) می‌خوانیم؛ صفحه `/admin/youtix` تولید مقاله تازه و «ورود به وبلاگ» به‌صورت پیش‌نویس (`youtixId` یکتا روی BlogPost، عکس شاخص در Media) — `src/shared/lib/youtix.ts`
