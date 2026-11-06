@@ -16,6 +16,8 @@ import { useConsult } from '@/features/consult/ConsultProvider';
 import { siteConfig } from '@/shared/config/site';
 import { phoneHref as toTel } from '@/shared/lib/site-settings';
 import type { NavCategory } from '@/shared/lib/data';
+import { RubikaButton } from '@/shared/ui/RubikaButton';
+import { RubikaIcon } from '@/shared/ui/RubikaIcon';
 
 const NAV = [
   { href: '/', label: 'خانه' },
@@ -140,6 +142,7 @@ export function Header({ categories }: { categories: NavCategory[] }) {
                 </a>
               )}
               <a href={phoneHref} className="flex items-center gap-1.5 hover:text-white font-bold"><Phone className="w-3.5 h-3.5 text-[var(--accent-text)]" /><span dir="ltr" className="num">{faDigits(phone)}</span></a>
+              <RubikaButton className="flex items-center gap-1.5 hover:text-white"><RubikaIcon className="w-3.5" />روبیکا</RubikaButton>
             </div>
           </div>
         </div>
@@ -376,7 +379,7 @@ export function Header({ categories }: { categories: NavCategory[] }) {
                 </ul>
               </div>
 
-              <div className="p-4 border-t border-[var(--border)] grid grid-cols-[1fr_auto_auto] gap-2">
+              <div className="p-4 border-t border-[var(--border)] grid grid-cols-[1fr_auto_auto_auto] gap-2">
                 <a href={phoneHref} className="h-12 rounded-xl bg-[var(--accent)] text-[var(--accent-foreground)] font-black flex items-center justify-center gap-2 min-w-0">
                   <Phone className="w-5 h-5 shrink-0" /><span dir="ltr" className="num truncate">{faDigits(phone)}</span>
                 </a>
@@ -385,6 +388,9 @@ export function Header({ categories }: { categories: NavCategory[] }) {
                     <MessageCircle className="w-5 h-5" />
                   </a>
                 )}
+                <RubikaButton className="w-12 h-12 rounded-xl bg-white border border-[var(--border)] grid place-items-center">
+                  <RubikaIcon className="w-6" />
+                </RubikaButton>
                 <button
                   onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
                   aria-label="تغییر حالت روشن و تیره"

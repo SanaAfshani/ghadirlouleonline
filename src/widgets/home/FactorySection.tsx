@@ -6,6 +6,8 @@ import { faDigits } from '@/shared/lib/utils';
 import { IconTile } from '@/shared/ui/IconTile';
 import { CertificateStrip } from '@/features/certificates/Certificates';
 import { LtrCodes } from '@/shared/ui/LtrCodes';
+import { RubikaButton } from '@/shared/ui/RubikaButton';
+import { RubikaIcon } from '@/shared/ui/RubikaIcon';
 
 const STEPS = [
   { title: 'ثبت سفارش یا استعلام', desc: 'آنلاین از جدول قیمت یا تماس با دفتر فروش' },
@@ -164,6 +166,10 @@ export function FactorySection({ address, factoryAddress, companyPhones, mapUrl,
                     <span dir="ltr" className="num">{faDigits(p)}</span>
                   </a>
                 ))}
+                <RubikaButton className="h-11 rounded-xl border border-white/15 flex items-center justify-center gap-2 text-sm font-bold hover:bg-white/10 transition-colors">
+                  <RubikaIcon className="w-4" />
+                  روبیکا
+                </RubikaButton>
               </div>
             )}
           </article>

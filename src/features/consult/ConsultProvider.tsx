@@ -7,6 +7,8 @@ import { CheckCircle2, Loader2, X } from 'lucide-react';
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
 import { faDigits } from '@/shared/lib/utils';
 import { siteConfig } from '@/shared/config/site';
+import { RubikaButton } from '@/shared/ui/RubikaButton';
+import { RubikaIcon } from '@/shared/ui/RubikaIcon';
 
 type ConsultContext = { open: (product?: string) => void };
 
@@ -175,6 +177,10 @@ function ConsultSheet({ open, product, onClose }: { open: boolean; product: stri
                 <a href={phoneHref} className="block text-center text-sm text-[var(--muted-foreground)] pt-1">
                   یا تماس مستقیم: <span dir="ltr" className="font-bold text-[var(--foreground)] num">{faDigits(phone)}</span>
                 </a>
+                <RubikaButton className="mx-auto flex items-center justify-center gap-1.5 text-sm text-[var(--muted-foreground)]">
+                  <RubikaIcon className="w-4" />
+                  روبیکا: <span dir="ltr" className="font-bold text-[var(--foreground)]">{siteConfig.socials.rubikaId}</span>
+                </RubikaButton>
               </form>
             )}
           </motion.div>

@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { Clock, User, Share2, MessageCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
+import { siteConfig } from '@/shared/config/site';
+import { RubikaButton } from '@/shared/ui/RubikaButton';
+import { RubikaIcon } from '@/shared/ui/RubikaIcon';
 
 const postData: Record<string, {
   title: string;
@@ -178,6 +181,10 @@ export function BlogPostClient({ slug }: Props) {
             >
               {phone}
             </a>
+            <RubikaButton className="mt-2 w-full py-2.5 rounded-xl border border-[var(--accent-foreground)]/30 text-[var(--accent-foreground)] font-semibold text-sm flex items-center justify-center gap-2 hover:bg-[var(--accent-foreground)]/10">
+              <RubikaIcon className="w-4" />
+              روبیکا: <span dir="ltr">{siteConfig.socials.rubikaId}</span>
+            </RubikaButton>
           </motion.div>
         </aside>
       </div>

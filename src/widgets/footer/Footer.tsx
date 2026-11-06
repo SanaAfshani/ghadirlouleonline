@@ -11,6 +11,7 @@ import { faDigits } from '@/shared/lib/utils';
 import type { NavCategory } from '@/shared/lib/data';
 import { CertificateStrip } from '@/features/certificates/Certificates';
 import { RubikaIcon } from '@/shared/ui/RubikaIcon';
+import { RubikaButton } from '@/shared/ui/RubikaButton';
 
 const QUICK_LINKS = [
   { href: '/prices', label: 'لیست قیمت روز' },
@@ -79,9 +80,9 @@ export function Footer({ categories }: { categories: NavCategory[] }) {
               <a href={whatsappUrl} target="_blank" rel="noopener" aria-label="واتس‌اپ" className="grid place-items-center w-11 h-11 rounded-2xl bg-white/5 border border-white/10 hover:bg-[#128C7E] hover:text-white transition-colors">
                 <MessageCircle className="w-5 h-5" />
               </a>
-              <a href={siteConfig.socials.rubika} target="_blank" rel="noopener" aria-label="روبیکا" className="grid place-items-center w-11 h-11 rounded-2xl bg-white border border-white/10 hover:scale-105 transition-transform">
+              <RubikaButton className="grid place-items-center w-11 h-11 rounded-2xl bg-white border border-white/10 hover:scale-105 transition-transform">
                 <RubikaIcon className="w-6" />
-              </a>
+              </RubikaButton>
               <a href={`mailto:${email}`} aria-label="ایمیل" className="grid place-items-center w-11 h-11 rounded-2xl bg-white/5 border border-white/10 hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition-colors">
                 <Mail className="w-5 h-5" />
               </a>
@@ -126,10 +127,10 @@ export function Footer({ categories }: { categories: NavCategory[] }) {
                 </li>
               )}
               <li>
-                <a href={siteConfig.socials.rubika} target="_blank" rel="noopener" className="flex items-center gap-3 hover:text-white">
+                <RubikaButton className="flex items-center gap-3 hover:text-white text-right">
                   <span className="grid place-items-center w-9 h-9 rounded-xl bg-white"><RubikaIcon /></span>
-                  <span>روبیکا: <span dir="ltr" className="font-bold">@amiryousefi1370</span></span>
-                </a>
+                  <span>روبیکا: <span dir="ltr" className="font-bold">{siteConfig.socials.rubikaId}</span></span>
+                </RubikaButton>
               </li>
               <li className="flex items-center gap-3">
                 <span className="grid place-items-center w-9 h-9 rounded-xl bg-white/5"><Clock className="w-4 h-4 text-[var(--accent-text)]" /></span>

@@ -84,8 +84,12 @@ export const siteConfig = {
     // instagram: 'https://instagram.com/luleonlinemashhad',
     // telegram: 'https://t.me/luleonlinemashhad',
     whatsapp: 'https://wa.me/989123837505',
-    /** حساب روبیکای کارشناس فروش (@amiryousefi1370) — همان شماره موبایل واتس‌اپ */
-    rubika: 'https://rubika.ir/amiryousefi1370',
+    /**
+     * حساب پیام‌رسان روبیکا. rubikaUrl همان لینکی است که کد QR «اشتراک حساب» خود روبیکا برای این حساب می‌سازد؛
+     * روی گوشیِ دارای روبیکا اپ را باز می‌کند. در مرورگر دسکتاپ فقط صفحه وب روبیکاست، پس شناسه هم کپی می‌شود.
+     */
+    rubikaId: '@Ghadirlouleonline',
+    rubikaUrl: 'https://rubika.ir/Ghadirlouleonline',
     // linkedin: 'https://linkedin.com/company/luleonlinemashhad',
   },
   keywords: [

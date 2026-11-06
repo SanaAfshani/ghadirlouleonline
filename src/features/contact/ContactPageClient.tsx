@@ -8,6 +8,7 @@ import { PageHero } from '@/shared/ui/PageHero';
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
 import { cn, faDigits } from '@/shared/lib/utils';
 import { RubikaIcon } from '@/shared/ui/RubikaIcon';
+import { RubikaButton } from '@/shared/ui/RubikaButton';
 import { IconTile, type IconTone } from '@/shared/ui/IconTile';
 
 export type ContactInfoItem = {
@@ -70,7 +71,7 @@ export function ContactPageClient({ contactInfo, locations, whatsappUrl, intro }
       <PageHero label="تماس با ما" title="با ما در تماس باشید" description="تیم کارشناسی ما آماده پاسخگویی به سوالات فنی و استعلام قیمت شما است" />
 
       {/* موبایل: تماس مستقیم پیش از هر چیز */}
-      <div className="lg:hidden container-main -mt-5 relative z-10 grid grid-cols-2 gap-2">
+      <div className="lg:hidden container-main -mt-5 relative z-10 grid grid-cols-3 gap-2">
         <a href={phoneHref} className="h-14 rounded-2xl bg-[var(--accent)] text-[var(--accent-foreground)] font-black flex items-center justify-center gap-2 shadow-lg">
           <Phone className="w-5 h-5" /> تماس
         </a>
@@ -79,6 +80,9 @@ export function ContactPageClient({ contactInfo, locations, whatsappUrl, intro }
             <MessageCircle className="w-5 h-5" /> واتس‌اپ
           </a>
         )}
+        <RubikaButton className="h-14 rounded-2xl bg-white border border-[var(--border)] font-black flex items-center justify-center gap-2 shadow-lg">
+          <RubikaIcon className="w-5" /> روبیکا
+        </RubikaButton>
       </div>
 
       {intro}
@@ -109,7 +113,11 @@ export function ContactPageClient({ contactInfo, locations, whatsappUrl, intro }
                     <ul className={cn(icon === 'phone' && 'mt-0.5 flex flex-wrap gap-x-4 gap-y-0.5')}>
                       {items.filter((it) => it.text).map((it) => (
                         <li key={it.text}>
-                          {it.href ? (
+                          {icon === 'rubika' ? (
+                            <RubikaButton className="block mt-0.5 font-bold hover:text-[var(--accent-text)] transition-colors">
+                              <span dir="ltr">{it.text}</span>
+                            </RubikaButton>
+                          ) : it.href ? (
                             <a href={it.href} dir={it.ltr ? 'ltr' : undefined} className="block mt-0.5 font-bold hover:text-[var(--accent-text)] transition-colors text-right num break-all">
                               {icon === 'phone' ? faDigits(it.text) : it.text}
                             </a>

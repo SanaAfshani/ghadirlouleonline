@@ -4,6 +4,8 @@ import { m as motion } from 'framer-motion';
 import Link from 'next/link';
 import { Phone, MessageCircle } from 'lucide-react';
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
+import { RubikaButton } from '@/shared/ui/RubikaButton';
+import { RubikaIcon } from '@/shared/ui/RubikaIcon';
 
 export function CTASection() {
   const { phone, phoneHref } = useSiteSettings();
@@ -63,6 +65,10 @@ export function CTASection() {
               <Phone className="w-5 h-5" />
               {phone}
             </a>
+            <RubikaButton className="flex items-center gap-3 h-14 px-8 rounded-2xl border-2 border-slate-600 text-white text-base font-semibold hover:border-[var(--accent)] transition-all duration-300 hover:-translate-y-1">
+              <RubikaIcon className="w-6" />
+              روبیکا
+            </RubikaButton>
           </div>
         </motion.div>
       </div>

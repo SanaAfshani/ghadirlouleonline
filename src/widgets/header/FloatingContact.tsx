@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { ArrowUp, MessageCircle, Phone } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
-import { siteConfig } from '@/shared/config/site';
 import { RubikaIcon } from '@/shared/ui/RubikaIcon';
+import { RubikaButton } from '@/shared/ui/RubikaButton';
 
 /** دکمه‌های شناور تماس — فقط دسکتاپ؛ در موبایل نوار پایین همین کار را می‌کند */
 export function FloatingContact() {
@@ -25,9 +25,9 @@ export function FloatingContact() {
       <a href={whatsappUrl} target="_blank" rel="noopener" aria-label="واتس‌اپ" className={cn(btn, 'bg-[#128C7E] text-white')}>
         <MessageCircle className="w-6 h-6" />
       </a>
-      <a href={siteConfig.socials.rubika} target="_blank" rel="noopener" aria-label="روبیکا" className={cn(btn, 'bg-white border border-[var(--border)]')}>
+      <RubikaButton className={cn(btn, 'bg-white border border-[var(--border)]')}>
         <RubikaIcon className="w-7" />
-      </a>
+      </RubikaButton>
       <a href={phoneHref} aria-label="تماس تلفنی" className={cn(btn, 'bg-[var(--accent)] text-[var(--accent-foreground)]')}>
         <Phone className="w-5 h-5" />
       </a>

@@ -6,6 +6,8 @@ import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
 import { useConsult } from '@/features/consult/ConsultProvider';
 import { faDigits } from '@/shared/lib/utils';
 import { IconTile, type IconTone } from '@/shared/ui/IconTile';
+import { RubikaButton } from '@/shared/ui/RubikaButton';
+import { RubikaIcon } from '@/shared/ui/RubikaIcon';
 
 /** همان خدماتی که در صفحه «خدمات» سایت اعلام شده */
 const services = [
@@ -45,7 +47,7 @@ export function ServicesSection() {
                   <Headphones className="w-5 h-5 shrink-0" />
                   ثبت درخواست مشاوره
                 </button>
-                <div className="grid grid-cols-1 min-[400px]:grid-cols-[1.45fr_1fr] gap-3">
+                <div className="grid grid-cols-2 min-[400px]:grid-cols-[1.3fr_1fr_1fr] gap-3 [&>:first-child]:max-[399px]:col-span-2">
                   <a href={phoneHref} className="min-w-0 h-12 px-3 rounded-2xl border border-white/15 bg-white/5 font-bold flex items-center justify-center gap-2 hover:bg-white/10">
                     <Phone className="w-4 h-4 shrink-0 text-[var(--accent-text)]" />
                     <span dir="ltr" className="num text-sm truncate">{faDigits(phone)}</span>
@@ -54,6 +56,10 @@ export function ServicesSection() {
                     <MessageCircle className="w-4 h-4 shrink-0" />
                     <span className="text-sm">واتس‌اپ</span>
                   </a>
+                  <RubikaButton className="min-w-0 h-12 px-3 rounded-2xl border border-white/15 bg-white/5 font-bold flex items-center justify-center gap-2 hover:bg-white/10">
+                    <RubikaIcon className="w-4 shrink-0" />
+                    <span className="text-sm">روبیکا</span>
+                  </RubikaButton>
                 </div>
               </div>
             </div>
