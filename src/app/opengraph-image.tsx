@@ -60,20 +60,20 @@ export default async function OpengraphImage() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+          background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
           color: '#ffffff',
           padding: 80,
           fontFamily: 'Vazirmatn',
         }}
       >
-        <div style={{ display: 'flex', width: 120, height: 8, background: '#f59e0b', marginBottom: 44 }} />
+        <div style={{ display: 'flex', width: 120, height: 8, background: '#3B82F6', marginBottom: 44 }} />
         <RtlText style={{ fontSize: 72, fontWeight: 700, lineHeight: 1.35 }}>
           {siteConfig.name}
         </RtlText>
-        <RtlText style={{ fontSize: 36, color: '#cbd5e1', marginTop: 28, lineHeight: 1.5 }}>
+        <RtlText style={{ fontSize: 36, color: '#CBD5E1', marginTop: 28, lineHeight: 1.5 }}>
           لوله و اتصالات آب و فاضلاب
         </RtlText>
-        <RtlText style={{ fontSize: 30, color: '#f59e0b', marginTop: 34 }}>
+        <RtlText style={{ fontSize: 30, color: '#3B82F6', marginTop: 34 }}>
           ارسال به سراسر کشور
         </RtlText>
       </div>

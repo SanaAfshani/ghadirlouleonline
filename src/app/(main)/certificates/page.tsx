@@ -56,6 +56,7 @@ export default async function CertificatesPage() {
     '@type': 'Organization',
     name: siteConfig.legalName,
     alternateName: siteConfig.legalNameEn,
+    url: siteConfig.manufacturerUrl,
     description: `تولیدکننده لوله دوجداره پلی اتیلن (کاروگیت) در شهرک صنعتی گرمسار. ${siteConfig.name} ${siteConfig.exclusiveTitle} است.`,
     hasCredential: certificates.map((c) => ({
       '@type': 'EducationalOccupationalCredential',

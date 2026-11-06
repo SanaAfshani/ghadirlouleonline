@@ -9,7 +9,7 @@ export function CTASection() {
   const { phone, phoneHref } = useSiteSettings();
 
   return (
-    <section className="surface-dark home-section bg-[var(--foreground)] dark:bg-[#0A1120] relative overflow-hidden text-white">
+    <section className="surface-dark home-section bg-[var(--foreground)] dark:bg-[var(--ink)] relative overflow-hidden text-white">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div

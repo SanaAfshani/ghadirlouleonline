@@ -13,6 +13,8 @@ import { CertificateStrip } from '@/features/certificates/Certificates';
 
 const QUICK_LINKS = [
   { href: '/prices', label: 'لیست قیمت روز' },
+  { href: '/official-representative', label: 'نمایندگی رسمی قدیر لوله پاسارگاد' },
+  { href: '/factory', label: 'کارخانه و توانمندی تأمین' },
   { href: '/services', label: 'خدمات ما' },
   { href: '/blog', label: 'مجله تخصصی' },
   { href: '/projects', label: 'پروژه‌های اجراشده' },
@@ -61,11 +63,17 @@ export function Footer({ categories }: { categories: NavCategory[] }) {
               <Image src="/images/logo.png" alt="" width={52} height={52} className="w-12 h-12 object-contain" />
               <span className="text-xl font-black text-white">{siteName}</span>
             </Link>
-            <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-black text-[var(--accent-text)]">
+            <Link href="/official-representative" className="mt-4 inline-flex items-center gap-1.5 text-sm font-black text-[var(--accent-text)] hover:underline">
               <ShieldCheck className="w-4 h-4 shrink-0" aria-hidden />
               <strong>{siteConfig.exclusiveTitle}</strong>
-            </p>
+            </Link>
             <p className="mt-2 text-sm leading-7 text-slate-400 max-w-sm">{siteDescription}</p>
+            <p className="mt-2 text-sm text-slate-400">
+              وب‌سایت رسمی کارخانه:{' '}
+              <a href={siteConfig.manufacturerUrl} target="_blank" rel="noopener" className="font-bold text-slate-200 hover:text-[var(--accent-text)]" dir="ltr">
+                ghadirlouleh.com
+              </a>
+            </p>
             <div className="mt-5 flex gap-2">
               <a href={whatsappUrl} target="_blank" rel="noopener" aria-label="واتس‌اپ" className="grid place-items-center w-11 h-11 rounded-2xl bg-white/5 border border-white/10 hover:bg-[#128C7E] hover:text-white transition-colors">
                 <MessageCircle className="w-5 h-5" />

@@ -63,6 +63,8 @@ English: ${siteConfig.nameEn} (${siteConfig.url}) is the exclusive sales agent o
 - [محصولات](${siteConfig.url}/products): مشخصات فنی، سایزبندی، استانداردها و کاتالوگ هر محصول.
 - [پروژه‌ها](${siteConfig.url}/projects): نمونه پروژه‌های اجراشده.
 - [سوالات متداول](${siteConfig.url}/faq): پاسخ پرسش‌های رایج درباره انتخاب سایز، کلاس و نحوه خرید.
+- [نمایندگی رسمی](${siteConfig.url}/official-representative): پیام رسمی ${siteConfig.legalName} (امضای جمشید شاطری، مدیریت شرکت) درباره معرفی ${siteConfig.name} به مدیریت امیر یوسفی به‌عنوان نماینده رسمی و اختصاصی فروش و عرضه آنلاین محصولاتش، همراه با تصویر گواهی نمایندگی. وب‌سایت رسمی کارخانه: ${siteConfig.manufacturerUrl}
+- [کارخانه و توانمندی تأمین](${siteConfig.url}/factory): عکس و فیلم واقعی خط تولید، انبار و بارگیری.
 - [درباره ما](${siteConfig.url}/about) · [تماس](${siteConfig.url}/contact) · [گواهینامه‌ها](${siteConfig.url}/certificates)
 - [وبلاگ](${siteConfig.url}/blog): راهنمای فنی انتخاب و اجرای لوله.
 

@@ -36,15 +36,15 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
       */}
       <HeroSlides slides={heroSlides} />
       {/* پوشش فقط پشت متن: موبایل یکنواخت (متن کل عرض را می‌گیرد)، دسکتاپ از راست تیره به چپ تقریباً شفاف */}
-      <div className="absolute inset-0 -z-10 max-lg:bg-[rgba(14,18,23,0.5)] lg:bg-[linear-gradient(270deg,rgba(14,18,23,0.84)_0%,rgba(14,18,23,0.7)_35%,rgba(14,18,23,0.45)_58%,rgba(14,18,23,0.15)_80%,rgba(14,18,23,0.05)_100%)]" />
+      <div className="absolute inset-0 -z-10 max-lg:bg-[rgba(15,23,42,0.5)] lg:bg-[linear-gradient(270deg,rgba(15,23,42,0.84)_0%,rgba(15,23,42,0.7)_35%,rgba(15,23,42,0.45)_58%,rgba(15,23,42,0.15)_80%,rgba(15,23,42,0.05)_100%)]" />
       <div className="absolute inset-x-0 bottom-0 h-28 -z-10 bg-gradient-to-t from-[var(--ink)]/80 to-transparent" />
 
       <div className="container-main grid grid-cols-1 lg:grid-cols-[1fr_470px] items-center gap-8 lg:gap-14 pt-8 pb-16 sm:pt-12 sm:pb-20 lg:pt-20 lg:pb-28">
         <div className="min-w-0 text-legible">
-          {/* جایگاه اصلی برند — اولین چیزی که دیده می‌شود؛ به صفحه گواهینامه‌ها می‌رود */}
+          {/* جایگاه اصلی برند — اولین چیزی که دیده می‌شود؛ به پیام رسمی نمایندگی می‌رود */}
           <Link
-            href="/certificates"
-            className="group inline-flex items-center gap-3 rounded-2xl border border-[var(--accent)]/60 bg-[rgba(14,18,23,0.6)] backdrop-blur-md p-1.5 pe-4 shadow-[0_12px_32px_-12px_rgba(245,158,11,0.55)] transition-colors hover:border-[var(--accent)]"
+            href="/official-representative"
+            className="group inline-flex items-center gap-3 rounded-2xl border border-[var(--accent)]/60 bg-[rgba(15,23,42,0.6)] backdrop-blur-md p-1.5 pe-4 shadow-[0_12px_32px_-12px_rgba(37,99,235,0.55)] transition-colors hover:border-[var(--accent)]"
           >
             <span className="relative grid place-items-center w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-[var(--accent)] text-[var(--accent-foreground)] shrink-0">
               <ShieldCheck className="w-6 h-6" aria-hidden />

@@ -21,6 +21,7 @@ const NAV = [
   { href: '/', label: 'خانه' },
   { href: '/products', label: 'محصولات', mega: true },
   { href: '/prices', label: 'لیست قیمت' },
+  { href: '/factory', label: 'کارخانه' },
   { href: '/services', label: 'خدمات' },
   { href: '/blog', label: 'مجله' },
   { href: '/contact', label: 'تماس با ما' },
@@ -30,6 +31,7 @@ const NAV = [
 const DRAWER_LINKS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: '/', label: 'خانه', icon: House },
   { href: '/products', label: 'محصولات', icon: LayoutGrid },
+  { href: '/factory', label: 'کارخانه و تأمین', icon: Factory },
   { href: '/services', label: 'خدمات', icon: Wrench },
   { href: '/blog', label: 'مجله', icon: Newspaper },
   { href: '/projects', label: 'پروژه‌های اجراشده', icon: Building2 },
@@ -124,7 +126,7 @@ export function Header({ categories }: { categories: NavCategory[] }) {
         <div className="hidden lg:block h-[38px] bg-[var(--ink)] text-[12px] text-slate-300">
           <div className="container-main h-full flex items-center justify-between">
             <div className="flex items-center gap-5">
-              <strong className="flex items-center gap-1.5 font-black text-white"><Factory className="w-3.5 h-3.5 text-[var(--accent-text)]" />{siteConfig.exclusiveTitle}</strong>
+              <Link href="/official-representative" className="flex items-center gap-1.5 font-black text-white hover:text-[var(--accent-text)]"><Factory className="w-3.5 h-3.5 text-[var(--accent-text)]" />{siteConfig.exclusiveTitle}</Link>
               <span className="flex items-center gap-1.5"><Truck className="w-3.5 h-3.5 text-[var(--accent-text)]" />ارسال از انبار به سراسر کشور</span>
               <span className="hidden xl:flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-[var(--accent-text)]" />{siteConfig.workingHours}</span>
             </div>

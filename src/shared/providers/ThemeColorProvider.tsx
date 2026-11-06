@@ -2,10 +2,14 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 
-export type ThemeColor = 'amber' | 'blue' | 'green' | 'red' | 'purple' | 'teal' | 'indigo' | 'rose';
+export type ThemeColor = 'water' | 'amber' | 'blue' | 'green' | 'red' | 'purple' | 'teal' | 'indigo' | 'rose';
+
+/** رنگ پیش‌فرض: آبی صنعتی — همان مقادیر :root در globals.css */
+const DEFAULT_COLOR: ThemeColor = 'water';
 
 export const themeColors: { id: ThemeColor; label: string; hex: string }[] = [
-  { id: 'amber',  label: 'طلایی (پیش‌فرض)', hex: '#F59E0B' },
+  { id: 'water',  label: 'آبی صنعتی (پیش‌فرض)', hex: '#2563EB' },
+  { id: 'amber',  label: 'طلایی',           hex: '#F59E0B' },
   { id: 'blue',   label: 'آبی',             hex: '#3B82F6' },
   { id: 'green',  label: 'سبز',             hex: '#22C55E' },
   { id: 'teal',   label: 'فیروزه‌ای',       hex: '#14B8A6' },
@@ -22,13 +26,13 @@ interface ThemeColorContextValue {
 }
 
 const ThemeColorContext = createContext<ThemeColorContextValue>({
-  color: 'amber',
+  color: DEFAULT_COLOR,
   setColor: () => {},
   colors: themeColors,
 });
 
 export function ThemeColorProvider({ children }: { children: React.ReactNode }) {
-  const [color, setColorState] = useState<ThemeColor>('amber');
+  const [color, setColorState] = useState<ThemeColor>(DEFAULT_COLOR);
 
   const applyColor = useCallback((c: ThemeColor) => {
     document.documentElement.setAttribute('data-theme-color', c);
@@ -44,8 +48,9 @@ export function ThemeColorProvider({ children }: { children: React.ReactNode }) 
       return false;
     };
 
-    const saved = localStorage.getItem('site-theme-color');
-    if (applyIfValid(saved)) return;
+    // رنگ ذخیره‌شده مرورگر فقط برای نمایش سریع است؛ مقدار پنل همیشه خوانده می‌شود، وگرنه تغییر رنگ
+    // در پنل هیچ‌وقت به بازدیدکننده‌ای که قبلاً آمده بود نمی‌رسید
+    applyIfValid(localStorage.getItem('site-theme-color'));
 
     fetch('/api/settings')
       .then((r) => r.json())
@@ -54,10 +59,10 @@ export function ThemeColorProvider({ children }: { children: React.ReactNode }) 
         if (applyIfValid(fromDb)) {
           localStorage.setItem('site-theme-color', fromDb!);
         } else {
-          applyColor('amber');
+          applyColor(DEFAULT_COLOR);
         }
       })
-      .catch(() => applyColor('amber'));
+      .catch(() => {});
   }, [applyColor]);
 
   const setColor = useCallback((c: ThemeColor) => {
