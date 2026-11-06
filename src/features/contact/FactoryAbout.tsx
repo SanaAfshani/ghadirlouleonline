@@ -1,7 +1,6 @@
 import Link from 'next/link';
-import { BadgeCheck, Calendar, ChevronLeft, Factory, Ruler, ShieldCheck, Waves } from 'lucide-react';
+import { BadgeCheck, Calendar, ChevronLeft, Factory, ShieldCheck, Waves } from 'lucide-react';
 import { siteConfig } from '@/shared/config/site';
-import { faDigits } from '@/shared/lib/utils';
 import { IconTile } from '@/shared/ui/IconTile';
 import { LtrCodes } from '@/shared/ui/LtrCodes';
 import type { FaqItem } from '@/shared/types';
@@ -23,15 +22,11 @@ const FACTS = [
   { icon: Waves, title: 'جنس و اتصال', text: 'پلی اتیلن سنگین HDPE، جداره داخلی صاف و روشن؛ اتصال با کوپلر و واشر آب‌بند EPDM' },
 ];
 
-/** ابعاد اسمی پروفیل لوله کاروگیت (میلیمتر) */
-const DIMENSIONS = [
-  [160, 160, 187, 14],
-  [200, 200, 232.8, 17.4],
-  [250, 250, 292, 21],
-  [315, 315, 368.2, 27.1],
-  [400, 400, 467.5, 33.7],
-  [500, 500, 584, 42],
-  [600, 600, 708, 54],
+/** صفحه‌های مرتبط — جزئیات کارخانه و مدارک جای خودشان را دارند و اینجا تکرار نمی‌شوند */
+const LINKS = [
+  { href: '/factory', icon: Factory, title: 'کارخانه و توانمندی تأمین', text: 'فرایند تولید، کنترل کیفیت، فیلم و عکس خط تولید و انبار' },
+  { href: '/official-representative', icon: ShieldCheck, title: 'پیام رسمی نمایندگی', text: `متن رسمی ${siteConfig.legalName} و گواهی نمایندگی انحصاری` },
+  { href: '/certificates', icon: BadgeCheck, title: 'مدارک و تأییدیه‌های فنی', text: 'پروانه ISIRI 9116-3، گواهینامه ISO 9001:2015 و اعتبار آن‌ها' },
 ];
 
 const USES = ['شبکه جمع‌آوری فاضلاب شهری و روستایی', 'زهکشی اراضی کشاورزی و آب‌های سطحی', 'انتقال ثقلی آب', 'غلاف محافظ کابل برق و مخابرات'];
@@ -130,38 +125,20 @@ export function FactoryAbout() {
           </div>
 
           <div className="grid gap-6 content-start">
-            <div className="rounded-3xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
-              <p className="flex items-center gap-2 px-5 py-4 border-b border-[var(--border)] font-black text-sm">
-                <Ruler className="w-4 h-4 text-[var(--accent-text)]" />
-                ابعاد لوله کاروگیت {siteConfig.legalName} (میلیمتر)
-              </p>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm num">
-                  <caption className="sr-only">ابعاد اسمی لوله کاروگیت: قطر داخلی، قطر خارجی و ارتفاع پروفیل</caption>
-                  <thead className="bg-[var(--muted)] text-[var(--muted-foreground)] text-xs">
-                    <tr>
-                      <th scope="col" className="px-4 py-2.5 text-right font-bold">سایز اسمی</th>
-                      <th scope="col" className="px-4 py-2.5 text-right font-bold">قطر داخلی</th>
-                      <th scope="col" className="px-4 py-2.5 text-right font-bold">قطر خارجی</th>
-                      <th scope="col" className="px-4 py-2.5 text-right font-bold">ارتفاع پروفیل</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {DIMENSIONS.map(([dn, id, od, h]) => (
-                      <tr key={dn} className="border-t border-[var(--border)]">
-                        <th scope="row" className="px-4 py-2.5 text-right font-black">{faDigits(String(dn))}</th>
-                        <td className="px-4 py-2.5">{faDigits(String(id))}</td>
-                        <td className="px-4 py-2.5">{faDigits(String(od))}</td>
-                        <td className="px-4 py-2.5">{faDigits(String(h))}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <p className="px-5 py-3 text-[11px] leading-6 text-[var(--muted-foreground)] border-t border-[var(--border)]">
-                ابعاد اسمی؛ هنگام سفارش متعلقات، کوپلر و واشر را متناسب با قطر خارجی همین لوله بخواهید.
-              </p>
-            </div>
+            <ul className="grid gap-3">
+              {LINKS.map((l) => (
+                <li key={l.href}>
+                  <Link href={l.href} className="group flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 hover:border-[var(--accent)] transition-colors">
+                    <IconTile icon={l.icon} size="sm" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-black text-sm">{l.title}</span>
+                      <span className="block mt-0.5 text-sm leading-7 text-[var(--muted-foreground)] num"><LtrCodes text={l.text} /></span>
+                    </span>
+                    <ChevronLeft className="w-5 h-5 shrink-0 text-[var(--muted-foreground)] group-hover:text-[var(--accent-text)]" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
 
             <div className="rounded-3xl border border-[var(--border)] bg-[var(--card)] p-5">
               <p className="font-black text-sm">کاربردها</p>

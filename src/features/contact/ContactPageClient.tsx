@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { m as motion } from 'framer-motion';
-import { Building2, Clock, Factory, Loader2, Mail, MapPin, MessageCircle, Navigation, Phone, Send, type LucideIcon } from 'lucide-react';
+import { Building2, ChevronLeft, ClipboardList, Clock, Factory, Loader2, Mail, MapPin, MessageCircle, Navigation, Phone, Send, type LucideIcon } from 'lucide-react';
+import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { PageHero } from '@/shared/ui/PageHero';
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
@@ -30,13 +31,16 @@ export type ContactLocation = {
 const iconMap: Record<Exclude<ContactInfoItem['icon'], 'rubika'>, LucideIcon> = { phone: Phone, mail: Mail, map: MapPin, clock: Clock };
 const iconTone: Record<Exclude<ContactInfoItem['icon'], 'rubika'>, IconTone> = { phone: 'emerald', mail: 'sky', map: 'rose', clock: 'violet' };
 
-/** intro: بخشی که بلافاصله بعد از سربرگ می‌آید (معرفی کارخانه، سمت سرور برای سئو) */
-type Props = { contactInfo: ContactInfoItem[]; locations: ContactLocation[]; whatsappUrl?: string; intro?: React.ReactNode };
+/**
+ * about: معرفی کارخانه (سمت سرور برای سئو) — بعد از راه‌های تماس و آدرس‌ها می‌آید؛
+ * کسی که به صفحه تماس می‌آید اول شماره و فرم را می‌خواهد، نه دو هزار پیکسل معرفی.
+ */
+type Props = { contactInfo: ContactInfoItem[]; locations: ContactLocation[]; whatsappUrl?: string; about?: React.ReactNode };
 
 const fieldCls =
   'w-full h-12 rounded-2xl bg-[var(--muted)] border border-[var(--border)] px-4 text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--foreground)]/40 focus:bg-[var(--background)] transition-colors';
 
-export function ContactPageClient({ contactInfo, locations, whatsappUrl, intro }: Props) {
+export function ContactPageClient({ contactInfo, locations, whatsappUrl, about }: Props) {
   const { phone, phoneHref } = useSiteSettings();
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
   const [loading, setLoading] = useState(false);
@@ -68,7 +72,11 @@ export function ContactPageClient({ contactInfo, locations, whatsappUrl, intro }
 
   return (
     <>
-      <PageHero label="تماس با ما" title="با ما در تماس باشید" description="تیم کارشناسی ما آماده پاسخگویی به سوالات فنی و استعلام قیمت شما است" />
+      <PageHero
+        label="تماس با ما"
+        title="تماس با قدیر لوله آنلاین"
+        description="استعلام قیمت روز، مشاوره انتخاب سایز و کلاس SN و سفارش لوله کاروگیت، اسپیرال و اتصالات — تلفن، واتس‌اپ و روبیکا واحد فروش."
+      />
 
       {/* موبایل: تماس مستقیم پیش از هر چیز */}
       <div className="lg:hidden container-main -mt-5 relative z-10 grid grid-cols-3 gap-2">
@@ -84,8 +92,6 @@ export function ContactPageClient({ contactInfo, locations, whatsappUrl, intro }
           <RubikaIcon className="w-5" /> روبیکا
         </RubikaButton>
       </div>
-
-      {intro}
 
       <section className="section-padding">
         <div className="container-main grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-8 lg:gap-12 items-start">
@@ -143,6 +149,17 @@ export function ContactPageClient({ contactInfo, locations, whatsappUrl, intro }
           </div>
 
           <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-[var(--radius-panel)] border border-[var(--border)] p-6 sm:p-10">
+            <Link
+              href="/project-inquiry"
+              className="group mb-6 flex items-center gap-3 rounded-2xl border border-[var(--accent)]/40 bg-[var(--accent)]/[0.07] p-4 hover:border-[var(--accent)] transition-colors"
+            >
+              <IconTile icon={ClipboardList} size="sm" />
+              <span className="min-w-0 flex-1">
+                <span className="block font-black text-sm">خرید پروژه‌ای و عمده</span>
+                <span className="block mt-0.5 text-xs leading-6 text-[var(--muted-foreground)]">چند سایز، کلاس SN، متراژ و شهر پروژه را در فرم استعلام پروژه‌ای ثبت کنید</span>
+              </span>
+              <ChevronLeft className="w-5 h-5 shrink-0 text-[var(--accent-text)] transition-transform group-hover:-translate-x-0.5" />
+            </Link>
             <h2 className="text-xl sm:text-2xl font-black">ارسال پیام</h2>
             <p className="mt-1 text-sm text-[var(--muted-foreground)]">
               یا مستقیم تماس بگیرید: <a href={phoneHref} dir="ltr" className="font-bold text-[var(--foreground)] num">{faDigits(phone)}</a>
@@ -204,6 +221,8 @@ export function ContactPageClient({ contactInfo, locations, whatsappUrl, intro }
           </div>
         </div>
       </section>
+
+      {about}
     </>
   );
 }

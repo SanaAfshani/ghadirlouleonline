@@ -6,6 +6,7 @@ import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
 import { CORRUGATED_PIPE_DIMENSIONS } from '@/shared/lib/pipe-dimensions';
 import { CORRUGATED_FITTINGS, SPIRAL_PIPE_SIZES } from '@/shared/config/product-lines';
 import { cn, faDigits, latinDigits } from '@/shared/lib/utils';
+import { PROJECT_INQUIRY_SUBJECT } from '@/shared/lib/leads';
 
 /**
  * فرم استعلام خرید پروژه‌ای: چند سایز در یک درخواست، با کلاس SN، متراژ، شهر پروژه و زمان تحویل.
@@ -56,7 +57,7 @@ export function ProjectInquiryForm({ initial }: { initial: Row }) {
 
   const message = () =>
     [
-      'استعلام خرید پروژه‌ای',
+      PROJECT_INQUIRY_SUBJECT,
       ...rows.map((r, i) => {
         const unit = isPipe(r.kind) ? 'متر' : 'عدد';
         const sn = isPipe(r.kind) ? ` — ${r.sn || 'کلاس SN: نیاز به مشاوره'}` : '';
@@ -85,7 +86,7 @@ export function ProjectInquiryForm({ initial }: { initial: Row }) {
         body: JSON.stringify({
           name: name.trim(),
           phone: digits,
-          subject: 'استعلام خرید پروژه‌ای',
+          subject: PROJECT_INQUIRY_SUBJECT,
           message: text,
           sourcePath: window.location.pathname,
         }),

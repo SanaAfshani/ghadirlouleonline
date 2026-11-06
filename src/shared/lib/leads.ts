@@ -17,3 +17,6 @@ export function cleanPath(v: unknown): string {
   if (typeof v !== 'string' || !v.startsWith('/') || v.startsWith('//')) return '';
   return v.split(/[?#]/)[0].slice(0, 200);
 }
+
+/** موضوع پیام فرم استعلام پروژه‌ای — پنل پیام‌ها با همین آن را از پیام‌های عادی جدا می‌کند */
+export const PROJECT_INQUIRY_SUBJECT = 'استعلام خرید پروژه‌ای';

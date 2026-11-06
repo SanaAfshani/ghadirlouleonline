@@ -2,10 +2,11 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowRight, Check, Loader2, Mail, MailOpen, MessageCircle, Phone, RotateCcw, Search, Trash2 } from 'lucide-react';
+import { ArrowRight, Check, ClipboardList, Loader2, Mail, MailOpen, MessageCircle, Phone, RotateCcw, Search, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { cn, faDigits, formatDate, safeDecode } from '@/shared/lib/utils';
 import { phoneHref, whatsappFromMobile } from '@/shared/lib/site-settings';
+import { PROJECT_INQUIRY_SUBJECT } from '@/shared/lib/leads';
 import { useAdminNotifications } from '@/widgets/admin/AdminNotifications';
 import { useConfirm } from '@/shared/ui/ConfirmDialog';
 
@@ -22,12 +23,31 @@ type ContactMessage = {
   createdAt: string;
 };
 
-type Filter = 'pending' | 'done' | 'all';
+type Filter = 'pending' | 'inquiry' | 'done' | 'all';
 const FILTERS: { key: Filter; label: string }[] = [
   { key: 'pending', label: 'در انتظار تماس' },
+  { key: 'inquiry', label: 'استعلام پروژه‌ای' },
   { key: 'done', label: 'پیگیری‌شده' },
   { key: 'all', label: 'همه' },
 ];
+
+/** درخواست فرم /project-inquiry — خرید عمده، جدا از پیام‌های عادی دیده می‌شود */
+const isInquiry = (m: ContactMessage) => m.subject === PROJECT_INQUIRY_SUBJECT;
+
+function matchesFilter(m: ContactMessage, filter: Filter) {
+  if (filter === 'pending') return !m.read;
+  if (filter === 'done') return m.read;
+  if (filter === 'inquiry') return isInquiry(m);
+  return true;
+}
+
+function InquiryBadge() {
+  return (
+    <span className="inline-flex h-5 px-1.5 rounded-md bg-[var(--accent)]/15 text-[var(--accent-text)] text-[10px] font-bold items-center gap-1 shrink-0">
+      <ClipboardList className="w-3 h-3" /> پروژه‌ای
+    </span>
+  );
+}
 
 function MessagesInbox() {
   const confirm = useConfirm();
@@ -60,10 +80,11 @@ function MessagesInbox() {
   const select = (id: string | null) => router.replace(id ? `/admin/messages?id=${id}` : '/admin/messages', { scroll: false });
 
   const pending = messages.filter((m) => !m.read).length;
+  const pendingInquiries = messages.filter((m) => !m.read && isInquiry(m)).length;
   const term = search.trim();
   const filtered = messages.filter(
     (m) =>
-      (filter === 'all' || (filter === 'pending' ? !m.read : m.read)) &&
+      matchesFilter(m, filter) &&
       (!term || m.name.includes(term) || m.subject?.includes(term) || m.phone?.includes(term) || m.message.includes(term)),
   );
   const current = messages.find((m) => m.id === selected);
@@ -123,7 +144,10 @@ function MessagesInbox() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">پیام‌ها و درخواست‌های مشتری</h1>
-          <p className="text-[var(--muted-foreground)] text-sm mt-1 num">{faDigits(pending)} مشتری در انتظار تماس</p>
+          <p className="text-[var(--muted-foreground)] text-sm mt-1 num">
+            {faDigits(pending)} مشتری در انتظار تماس
+            {pendingInquiries > 0 && ` · ${faDigits(pendingInquiries)} استعلام پروژه‌ای`}
+          </p>
         </div>
       </div>
 
@@ -142,6 +166,7 @@ function MessagesInbox() {
               >
                 {f.label}
                 {f.key === 'pending' && pending > 0 && <span className="num"> ({faDigits(pending)})</span>}
+                {f.key === 'inquiry' && pendingInquiries > 0 && <span className="num"> ({faDigits(pendingInquiries)})</span>}
               </button>
             ))}
           </div>
@@ -172,6 +197,7 @@ function MessagesInbox() {
                     <div className="flex items-center gap-2">
                       {!msg.read && <span className="w-2 h-2 rounded-full bg-red-600 flex-shrink-0" aria-label="در انتظار تماس" />}
                       <span className="text-sm font-bold truncate">{msg.name}</span>
+                      {isInquiry(msg) && <InquiryBadge />}
                     </div>
                     <div className="text-xs text-[var(--muted-foreground)] mt-1 truncate">{msg.subject || 'بدون موضوع'}</div>
                   </div>
@@ -181,7 +207,7 @@ function MessagesInbox() {
             ))}
             {!filtered.length && (
               <p className="py-10 text-center text-sm text-[var(--muted-foreground)]">
-                {filter === 'pending' && !term ? 'همه مشتری‌ها پیگیری شده‌اند 👌' : 'پیامی پیدا نشد'}
+                {filter === 'pending' && !term ? 'همه مشتری‌ها پیگیری شده‌اند 👌' : filter === 'inquiry' && !term ? 'هنوز استعلام پروژه‌ای ثبت نشده' : 'پیامی پیدا نشد'}
               </p>
             )}
           </div>
@@ -199,6 +225,7 @@ function MessagesInbox() {
                   <span className={cn('inline-flex h-6 px-2 rounded-md text-[11px] font-bold items-center', current.read ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-red-500/10 text-red-700 dark:text-red-400')}>
                     {current.read ? 'پیگیری شد' : 'در انتظار تماس'}
                   </span>
+                  {isInquiry(current) && <span className="ms-1.5 align-middle"><InquiryBadge /></span>}
                   <h2 className="mt-2 font-bold text-lg">{current.subject || 'بدون موضوع'}</h2>
                   <p className="mt-1 text-sm text-[var(--muted-foreground)]">
                     {current.name}

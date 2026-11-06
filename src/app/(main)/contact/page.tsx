@@ -9,9 +9,9 @@ import { FACTORY_FAQS, FactoryAbout, factorySchema } from '@/features/contact/Fa
 import { FaqAccordion } from '@/shared/ui/FaqAccordion';
 
 export const metadata: Metadata = {
-  title: `تماس با ما | نماینده ${siteConfig.legalName}`,
+  title: 'تماس با ما | خرید لوله کاروگیت و اسپیرال',
   description:
-    `تماس با ${siteConfig.name}، ${siteConfig.exclusiveTitle}: تلفن ${siteConfig.companyPhones[0]}، دفتر تهران (شادآباد) و کارخانه گرمسار با استاندارد ISIRI 9116-3.`,
+    `تماس با ${siteConfig.name}، ${siteConfig.exclusiveTitle}: فروش و سفارش عمده ${siteConfig.mobile} (تماس، واتس‌اپ و روبیکا)، دفتر ${siteConfig.companyPhones[0]}، دفتر تهران و کارخانه گرمسار.`,
   alternates: { canonical: `${siteConfig.url}/contact` },
 };
 
@@ -54,8 +54,8 @@ export default async function ContactPage() {
       <JsonLd data={breadcrumbSchema([{ name: 'تماس با ما', path: '/contact' }])} />
       <JsonLd data={factorySchema} />
       <JsonLd data={faqPageSchema(FACTORY_FAQS)} />
-      {/* اول معرفی کارخانه، بعد راه‌های تماس و نقشه، آخر سوالات متداول */}
-      <ContactPageClient contactInfo={contactInfo} locations={locations} whatsappUrl={settings.whatsappUrl} intro={<FactoryAbout />} />
+      {/* اول راه‌های تماس و فرم، بعد آدرس و نقشه، بعد معرفی کارخانه و آخر سوالات متداول */}
+      <ContactPageClient contactInfo={contactInfo} locations={locations} whatsappUrl={settings.whatsappUrl} about={<FactoryAbout />} />
       <div className="container-main pb-12 [&>section]:mt-0">
         <FaqAccordion faqs={FACTORY_FAQS} />
       </div>
