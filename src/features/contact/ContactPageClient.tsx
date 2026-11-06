@@ -7,10 +7,11 @@ import toast from 'react-hot-toast';
 import { PageHero } from '@/shared/ui/PageHero';
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
 import { cn, faDigits } from '@/shared/lib/utils';
+import { RubikaIcon } from '@/shared/ui/RubikaIcon';
 import { IconTile, type IconTone } from '@/shared/ui/IconTile';
 
 export type ContactInfoItem = {
-  icon: 'phone' | 'mail' | 'map' | 'clock';
+  icon: 'phone' | 'mail' | 'map' | 'clock' | 'rubika';
   title: string;
   /** هر شماره لینک tel خودش را دارد */
   items: { text: string; href?: string; ltr?: boolean }[];
@@ -24,8 +25,9 @@ export type ContactLocation = {
   embedUrl?: string;
 };
 
-const iconMap: Record<ContactInfoItem['icon'], LucideIcon> = { phone: Phone, mail: Mail, map: MapPin, clock: Clock };
-const iconTone: Record<ContactInfoItem['icon'], IconTone> = { phone: 'emerald', mail: 'sky', map: 'rose', clock: 'violet' };
+// روبیکا نشان رسمی خودش را دارد و جدا رسم می‌شود
+const iconMap: Record<Exclude<ContactInfoItem['icon'], 'rubika'>, LucideIcon> = { phone: Phone, mail: Mail, map: MapPin, clock: Clock };
+const iconTone: Record<Exclude<ContactInfoItem['icon'], 'rubika'>, IconTone> = { phone: 'emerald', mail: 'sky', map: 'rose', clock: 'violet' };
 
 /** intro: بخشی که بلافاصله بعد از سربرگ می‌آید (معرفی کارخانه، سمت سرور برای سئو) */
 type Props = { contactInfo: ContactInfoItem[]; locations: ContactLocation[]; whatsappUrl?: string; intro?: React.ReactNode };
@@ -85,7 +87,6 @@ export function ContactPageClient({ contactInfo, locations, whatsappUrl, intro }
         <div className="container-main grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-8 lg:gap-12 items-start">
           <div className="space-y-3">
             {contactInfo.map(({ icon, title, items }, i) => {
-              const Icon = iconMap[icon];
               return (
                 <motion.div
                   key={title}
@@ -95,7 +96,13 @@ export function ContactPageClient({ contactInfo, locations, whatsappUrl, intro }
                   transition={{ delay: i * 0.06 }}
                   className="group flex gap-4 p-5 rounded-3xl border border-[var(--border)] transition-colors hover:border-[var(--accent)]/40"
                 >
-                  <IconTile icon={Icon} tone={iconTone[icon]} />
+                  {icon === 'rubika' ? (
+                    <span aria-hidden className="w-11 h-11 rounded-2xl border border-[var(--border)] bg-white grid place-items-center shrink-0">
+                      <RubikaIcon className="w-6" />
+                    </span>
+                  ) : (
+                    <IconTile icon={iconMap[icon]} tone={iconTone[icon]} />
+                  )}
                   <div className="min-w-0">
                     <p className="text-xs text-[var(--muted-foreground)]">{title}</p>
                     {/* هر مورد در li جدا — در متن قابل خزش شماره‌ها به هم نمی‌چسبند */}

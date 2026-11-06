@@ -22,6 +22,7 @@ import { CategoryThumb } from '@/widgets/header/Header';
 import { siteConfig } from '@/shared/config/site';
 import { SIZE_SPEC_KEY } from '@/shared/config/product-lines';
 import { IconTile } from '@/shared/ui/IconTile';
+import { RubikaIcon } from '@/shared/ui/RubikaIcon';
 import { SpecCards, specMeta, withDerivedSpecs } from '@/features/products/SpecCards';
 import { ProductCatalogs } from '@/features/products/ProductCatalogs';
 import { DimensionTable } from '@/features/products/DimensionTable';
@@ -261,6 +262,7 @@ export function ProductDetailView({ product, related = [], variants = [], board:
               </div>
               <a href={phoneHref} aria-label="تماس" className="w-11 h-11 rounded-2xl bg-[var(--ink)] text-white grid place-items-center shrink-0"><Phone className="w-5 h-5" /></a>
               <a href={whatsappUrl} target="_blank" rel="noopener" aria-label="واتس‌اپ" className="w-11 h-11 rounded-2xl bg-[#128C7E] text-white grid place-items-center shrink-0"><MessageCircle className="w-5 h-5" /></a>
+              <a href={siteConfig.socials.rubika} target="_blank" rel="noopener" aria-label="روبیکا" className="w-11 h-11 rounded-2xl bg-white border border-[var(--border)] grid place-items-center shrink-0"><RubikaIcon className="w-6" /></a>
             </div>
 
             {/* خلاصه قیمت — زنده */}
@@ -347,6 +349,9 @@ export function ProductDetailView({ product, related = [], variants = [], board:
               </a>
               <a href={whatsappUrl} target="_blank" rel="noopener" aria-label="واتس‌اپ" className="h-13 w-13 rounded-2xl bg-[#128C7E] text-white grid place-items-center">
                 <MessageCircle className="w-5 h-5" />
+              </a>
+              <a href={siteConfig.socials.rubika} target="_blank" rel="noopener" aria-label="روبیکا" className="h-13 w-13 rounded-2xl bg-white border border-[var(--border)] grid place-items-center">
+                <RubikaIcon className="w-6" />
               </a>
             </div>
 
@@ -464,6 +469,9 @@ export function ProductDetailView({ product, related = [], variants = [], board:
                 )}
                 <a href={whatsappUrl} target="_blank" rel="noopener" className="flex items-center justify-center gap-2 h-12 rounded-2xl bg-[#128C7E] font-bold">
                   <MessageCircle className="w-5 h-5" /> گفتگو در واتس‌اپ
+                </a>
+                <a href={siteConfig.socials.rubika} target="_blank" rel="noopener" className="flex items-center justify-center gap-2 h-12 rounded-2xl bg-white text-[#0F172A] font-bold">
+                  <RubikaIcon /> گفتگو در روبیکا
                 </a>
               </div>
               <p className="mt-4 flex items-center gap-1.5 text-xs text-slate-400"><Clock className="w-3.5 h-3.5" />{siteConfig.workingHours}</p>

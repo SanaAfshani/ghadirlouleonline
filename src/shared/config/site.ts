@@ -84,6 +84,8 @@ export const siteConfig = {
     // instagram: 'https://instagram.com/luleonlinemashhad',
     // telegram: 'https://t.me/luleonlinemashhad',
     whatsapp: 'https://wa.me/989123837505',
+    /** حساب روبیکای کارشناس فروش (@amiryousefi1370) — همان شماره موبایل واتس‌اپ */
+    rubika: 'https://rubika.ir/amiryousefi1370',
     // linkedin: 'https://linkedin.com/company/luleonlinemashhad',
   },
   keywords: [

@@ -31,6 +31,7 @@ export default async function ContactPage() {
         .filter((p, i, all) => p && all.indexOf(p) === i)
         .map((p) => ({ text: p, href: phoneHref(p), ltr: true })),
     },
+    { icon: 'rubika', title: `روبیکا — ${siteConfig.salesExpert.name}`, items: [{ text: '@amiryousefi1370', href: siteConfig.socials.rubika, ltr: true }] },
     { icon: 'mail', title: 'ایمیل', items: [{ text: settings.email, href: `mailto:${settings.email}`, ltr: true }] },
     { icon: 'clock', title: 'ساعت کاری دفتر فروش', items: [{ text: siteConfig.workingHours }, { text: 'جمعه: تعطیل' }] },
   ];

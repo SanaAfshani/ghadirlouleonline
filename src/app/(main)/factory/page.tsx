@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 
 const CAPABILITIES = [
   { icon: Factory, title: 'تولید در گرمسار', text: `کارخانه ${siteConfig.legalName} از سال ۱۳۹۱ در شهرک صنعتی گرمسار` },
-  { icon: Ruler, title: 'سایزهای تولید', text: 'لوله کاروگیت ۱۱۰ تا ۱۲۰۰ و لوله اسپیرال ۱۴۰۰ تا ۲۰۰۰ میلی‌متر، کلاس SN4 و SN8' },
+  { icon: Ruler, title: 'سایزهای تولید', text: 'لوله کاروگیت ۱۱۰ تا ۱۲۰۰ و لوله اسپیرال ۹۰۰ تا ۲۰۰۰ میلی‌متر، کلاس SN4 و SN8' },
   { icon: ShieldCheck, title: 'استاندارد و کیفیت', text: 'پروانه استاندارد ISIRI 9116-3 و گواهینامه ISO 9001:2015' },
   { icon: Truck, title: 'ارسال از انبار', text: 'بارگیری مستقیم از انبار کارخانه و ارسال به سراسر کشور' },
 ];
