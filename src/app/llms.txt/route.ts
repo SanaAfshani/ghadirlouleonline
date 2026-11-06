@@ -55,7 +55,7 @@ export async function GET() {
 
 ${siteConfig.name} ${siteConfig.exclusiveTitle} است — کارخانه تولیدکننده لوله دوجداره پلی اتیلن (کاروگیت) در شهرک صنعتی گرمسار، استان سمنان. سفارش‌ها مستقیم از انبار کارخانه و بدون واسطه به سراسر ایران ارسال می‌شود.
 
-English: ${siteConfig.nameEn} (${siteConfig.url}) is the exclusive sales agent of ${siteConfig.legalNameEn}, an Iranian manufacturer of double-wall corrugated HDPE pipes (ISIRI 9116, ISO 9001) in Garmsar Industrial Park, Semnan. It also sells PE100 water pipes, PVC pipes, polyethylene manholes and covers, fittings and irrigation equipment, with daily factory prices and nationwide delivery in Iran.
+English: ${siteConfig.nameEn} (${siteConfig.url}) is the exclusive sales agent of ${siteConfig.legalNameEn}, an Iranian manufacturer of double-wall corrugated HDPE pipes (ISIRI 9116, ISO 9001) in Garmsar Industrial Park, Semnan. It sells three product lines only: double-wall corrugated pipes (110–1200 mm, SN4 and SN8), spiral pipes (1400–2000 mm) and corrugated pipe fittings, each size on its own page, with daily factory prices and nationwide delivery in Iran.
 
 ## صفحه‌های اصلی
 
@@ -72,7 +72,7 @@ ${categoryLines}
 ${priceLines ? `
 ## خلاصه قیمت روز
 
-قیمت‌ها به تومان است (لوله‌ها هر متر، منهول و مخزن هر عدد) و با قیمت مواد اولیه تغییر می‌کند؛ جدول کامل و آخرین عدد هر سایز در [صفحه قیمت روز](${siteConfig.url}/prices) است.
+قیمت‌ها به تومان است (لوله‌ها هر متر، اتصالات هر عدد) و با قیمت مواد اولیه تغییر می‌کند؛ جدول کامل و آخرین عدد هر سایز در [صفحه قیمت روز](${siteConfig.url}/prices) است.
 
 ${priceLines}
 ` : ''}${guideLines ? `

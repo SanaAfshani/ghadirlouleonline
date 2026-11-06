@@ -4,7 +4,11 @@
 //   DATABASE_URL="<آدرس دیتابیس لایو>" npx tsx scripts/apply-live.ts           → آزمایشی
 //   DATABASE_URL="<آدرس دیتابیس لایو>" npx tsx scripts/apply-live.ts --apply   → اعمال
 //
-// هیچ ردیفی حذف نمی‌شود: محصول‌ها با اسلاگ upsert می‌شوند و دسته‌ها فقط اگر نباشند ساخته می‌شوند.
+// هیچ ردیفی حذف نمی‌شود: محصول‌ها با اسلاگ upsert می‌شوند و بقیه فقط منتشرنشده می‌شوند.
+//
+// سایت حالا فقط سه محصول دارد (کاروگیت، اسپیرال، اتصالات کاروگیت). اسکریپت‌های قبلی
+// (add-irrigation-products، add-infra-products، build-cover-images، set-category-images) محصولات
+// حذف‌شده را دوباره منتشر می‌کردند، پس دیگر اینجا اجرا نمی‌شوند.
 import 'dotenv/config';
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -13,14 +17,7 @@ import { prisma } from '../src/shared/lib/prisma';
 
 const APPLY = process.argv.includes('--apply');
 
-const STEPS = [
-  // اول عکس دریچه‌ها ساخته و ستون images همین محصول‌ها نوشته می‌شود؛ نام فایل‌ها هشِ محتوا
-  // دارند، پس اگر این قدم نباشد دیتابیس به نام‌های قدیمیِ پاک‌شده اشاره می‌کند و گالری خالی می‌ماند
-  'scripts/build-cover-images.ts',
-  'scripts/add-irrigation-products.ts',
-  'scripts/add-infra-products.ts',
-  'scripts/set-category-images.ts',
-];
+const STEPS = ['scripts/restructure-catalog.ts'];
 
 /** عکس وضعیت فعلی، قبل از هر نوشتن — اگر چیزی اشتباه شد مرجع مقایسه داریم */
 async function backup() {
@@ -71,9 +68,8 @@ async function main() {
   console.log(
     `\nنتیجه: محصول ${before.products} → ${products}، دسته ${before.categories} → ${categories}`,
   );
-  console.log('حالا کاتالوگ‌ها را روی لایو چک کنید:');
-  console.log('  https://ghadirlouleonline.ir/api/catalogs/irrigation-valves/pdf');
-  console.log('  https://ghadirlouleonline.ir/api/catalogs/composite-covers/pdf');
+  console.log('حالا صفحه محصولات را روی لایو چک کنید:');
+  console.log('  https://ghadirlouleonline.ir/products');
 }
 
 main()

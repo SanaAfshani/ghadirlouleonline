@@ -31,6 +31,7 @@ export function subjectFor(categorySlug: string, productSlug: string): Subject {
   if (categorySlug === 'fittings') return /corrugat|karogit/.test(productSlug) ? 'fitting-corrugated' : /pvc/.test(productSlug) ? 'fitting-pvc' : 'fitting-pe';
   const byCategory: Record<string, Subject> = {
     'corrugated-pipes': 'corrugated',
+    'corrugated-fittings': 'fitting-corrugated',
     'drainage-pipes': 'drainage',
     'polyethylene-pipes': 'pe',
     'pvc-pipes': 'pvc',

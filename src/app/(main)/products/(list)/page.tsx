@@ -9,9 +9,9 @@ import { JsonLd } from '@/shared/ui/JsonLd';
 import { breadcrumbSchema } from '@/shared/lib/seo';
 
 export const metadata: Metadata = {
-  title: 'محصولات | خرید لوله کاروگیت و لوله آب و فاضلاب',
+  title: 'محصولات | خرید لوله کاروگیت، اسپیرال و اتصالات',
   description:
-    'لوله کاروگیت، پلی اتیلن، پلیکا، منهول، سپتیک تانک و اتصالات با قیمت روز، مستقیم از کارخانه و ارسال به سراسر ایران.',
+    'لوله کاروگیت دوجداره ۱۱۰ تا ۱۲۰۰، لوله اسپیرال و اتصالات کاروگیت با قیمت روز، مستقیم از کارخانه و ارسال به سراسر ایران.',
   alternates: { canonical: `${siteConfig.url}/products` },
 };
 

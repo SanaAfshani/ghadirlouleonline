@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getPriceBoard } from '@/shared/lib/price-board';
+import { getPriceBoard, groupLinesByCategory } from '@/shared/lib/price-board';
 import { siteConfig } from '@/shared/config/site';
 import { JsonLd } from '@/shared/ui/JsonLd';
 import { PageHero } from '@/shared/ui/PageHero';
@@ -40,6 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function PricesPage() {
   const board = await getPriceBoard();
+  const groups = groupLinesByCategory(board.lines);
 
   return (
     <>
@@ -58,33 +59,30 @@ export default async function PricesPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <MarketStatus market={board.market} />
               <p className="text-xs text-[var(--muted-foreground)] num">
-                {faDigits(board.lines.reduce((n, l) => n + l.items.length, 0))} قیمت در {faDigits(board.lines.length)} گروه محصول
+                {faDigits(board.lines.reduce((n, l) => n + l.items.length, 0))} قیمت در {faDigits(groups.length)} گروه محصول
               </p>
             </div>
 
             {/* پرش سریع — در موبایل زیر هدر می‌چسبد */}
             <nav aria-label="گروه‌های قیمت" className="sticky top-[var(--nav-height)] z-20 -mx-4 px-4 sm:mx-0 sm:px-0 py-3 mb-6 bg-[var(--background)]/90 backdrop-blur-xl border-b border-[var(--border)]">
               <div className="snap-row">
-                {board.lines.map((l) => (
-                  <a key={l.productId} href={`#${l.productSlug}`} className="h-9 px-4 rounded-lg border border-[var(--border)] text-sm font-bold flex items-center whitespace-nowrap hover:border-[var(--foreground)]/40">
-                    {l.productName}
+                {groups.map((g) => (
+                  <a key={g.categorySlug} href={`#${g.categorySlug}`} className="h-9 px-4 rounded-lg border border-[var(--border)] text-sm font-bold flex items-center whitespace-nowrap hover:border-[var(--foreground)]/40">
+                    {g.categoryName}
                   </a>
                 ))}
               </div>
             </nav>
 
             <div className="space-y-14">
-              {board.lines.map((l) => (
-                <Reveal key={l.productId}>
-                <section id={l.productSlug} className="scroll-mt-44" aria-labelledby={`h-${l.productSlug}`}>
+              {groups.map((g) => (
+                <Reveal key={g.categorySlug}>
+                <section id={g.categorySlug} className="scroll-mt-44" aria-labelledby={`h-${g.categorySlug}`}>
                   <div className="flex items-end justify-between gap-3 mb-4">
-                    <div>
-                      <p className="text-xs text-[var(--muted-foreground)]">{l.categoryName}</p>
-                      <h2 id={`h-${l.productSlug}`} className="text-xl sm:text-2xl font-black">قیمت {l.productName}</h2>
-                    </div>
-                    <Link href={l.href} className="text-sm font-bold text-[var(--accent-text)] shrink-0">صفحه محصول ←</Link>
+                    <h2 id={`h-${g.categorySlug}`} className="text-xl sm:text-2xl font-black">قیمت {g.categoryName}</h2>
+                    <Link href={g.href} className="text-sm font-bold text-[var(--accent-text)] shrink-0">همه سایزها ←</Link>
                   </div>
-                  <LivePriceTable initial={board} productIds={[l.productId]} caption={`قیمت ${l.productName}`} toolbar />
+                  <LivePriceTable initial={board} productIds={g.productIds} showProduct={g.productIds.length > 1} caption={`قیمت ${g.categoryName}`} toolbar />
                 </section>
                 </Reveal>
               ))}

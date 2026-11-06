@@ -3,7 +3,7 @@ import { cache } from 'react';
 import path from 'path';
 import { prisma } from '@/shared/lib/prisma';
 import { getMarketNow } from '@/shared/lib/price-board';
-import { categoryRank, isComingSoon } from '@/shared/lib/catalog';
+import { categoryRank, isComingSoon, productRank } from '@/shared/lib/catalog';
 import {
   normalizeProjectImages,
   serializeBlogPost,
@@ -94,7 +94,10 @@ export async function getPublishedProducts(options?: {
   ]);
 
   // محصولات دسته‌های فعال اول؛ limit بعد از مرتب‌سازی، وگرنه با take دیتابیس ممکن بود کاروگیت اصلاً نیاید (کاتالوگ کوچک است)
-  const sorted = products.sort((a, b) => categoryRank(a.category.slug) - categoryRank(b.category.slug));
+  // داخل هر دسته به ترتیب سایز (productRank) — هر سایز یک محصول جداست
+  const sorted = products.sort(
+    (a, b) => categoryRank(a.category.slug) - categoryRank(b.category.slug) || productRank(a.slug) - productRank(b.slug),
+  );
   // بیرون از ساعت کاری قیمت در کارت‌ها هم نمایش داده نمی‌شود
   return sorted.slice(0, options?.limit).map((p) => toProductListItem(p, { showPrices: market.open }));
 }

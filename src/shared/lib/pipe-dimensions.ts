@@ -2,10 +2,11 @@
  * جدول ابعاد کارخانه برای لوله کاروگیت دوجداره.
  *
  * این داده در `specifications` محصول جا نمی‌شود: آن یک نگاشت کلید/مقدار است و این یک جدول
- * چهارده‌ردیفی با پنج ستون. چون عدد کارخانه است و با ویرایش محتوا عوض نمی‌شود، در کد می‌ماند
+ * دوازده‌ردیفی با پنج ستون. چون عدد کارخانه است و با ویرایش محتوا عوض نمی‌شود، در کد می‌ماند
  * تا یک‌جا و قابل بازبینی باشد — نه پخش‌شده داخل HTML توضیحات محصول.
  *
- * منبع: برگه مشخصات قدیر لوله پاسارگاد.
+ * منبع: برگه مشخصات قدیر لوله پاسارگاد. سایزهای ۹۰۰ و ۱۴۰۰ هم در برگه هست ولی عرضه نمی‌شوند،
+ * پس اینجا نیامده‌اند — این فهرست همان سایزهای سایت است (هر سایز یک صفحه محصول جدا).
  */
 export type PipeDimension = {
   /** سایز اسمی لوله (mm) */
@@ -33,17 +34,18 @@ export const CORRUGATED_PIPE_DIMENSIONS: readonly PipeDimension[] = [
   { size: 600, outerDiameter: 693, innerLayer: 3.5, totalLayers: 3.5, washer: EPDM },
   { size: 700, outerDiameter: 816, innerLayer: 4, totalLayers: 4, washer: EPDM },
   { size: 800, outerDiameter: 931, innerLayer: 4.5, totalLayers: 4.5, washer: EPDM },
-  { size: 900, outerDiameter: 1050, innerLayer: 4.8, totalLayers: 4.8, washer: EPDM },
   { size: 1000, outerDiameter: 1185, innerLayer: 5, totalLayers: 5, washer: EPDM },
   { size: 1200, outerDiameter: 1415, innerLayer: 5, totalLayers: 5, washer: EPDM },
-  // سایز ۱۴۰۰ در برگه کارخانه واشر ندارد
-  { size: 1400, outerDiameter: 1560, innerLayer: 6.6, totalLayers: 7, washer: '' },
 ];
+
+/** اسلاگ صفحه هر سایز — اسکریپت ساخت محصولات و ترتیب نمایش از همین می‌خوانند */
+export const corrugatedPipeSlug = (size: number) => `corrugated-pipe-${size}`;
 
 /**
  * جدول ابعاد یک محصول، یا خالی اگر برایش جدولی ثبت نشده.
- * فعلاً فقط لوله کاروگیت دوجداره؛ اسپیرال کاروگیت ابعاد خودش را دارد و اینجا نیست.
+ * هر سایز کاروگیت صفحه خودش را دارد، پس فقط ردیف همان سایز برمی‌گردد.
+ * اسپیرال کاروگیت ابعاد خودش را دارد و اینجا نیست.
  */
 export function pipeDimensionsFor(productSlug: string): readonly PipeDimension[] {
-  return productSlug === 'corrugated-pipe' ? CORRUGATED_PIPE_DIMENSIONS : [];
+  return CORRUGATED_PIPE_DIMENSIONS.filter((d) => corrugatedPipeSlug(d.size) === productSlug);
 }

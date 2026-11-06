@@ -8,7 +8,6 @@ import { CategoriesSection } from '@/widgets/home/CategoriesSection';
 import { LatestPrices } from '@/widgets/home/LatestPrices';
 import { FeaturedProducts } from '@/widgets/home/FeaturedProducts';
 import { ServicesSection } from '@/widgets/home/ServicesSection';
-import { BrandsSection } from '@/widgets/home/BrandsSection';
 import { FactorySection } from '@/widgets/home/FactorySection';
 import { BlogPreview } from '@/widgets/home/BlogPreview';
 import { SeoContent } from '@/widgets/home/SeoContent';
@@ -77,9 +76,6 @@ export default async function HomePage() {
       <CategoriesSection categories={categories} />
       <FeaturedProducts products={products} />
       <ServicesSection />
-      <Reveal>
-        <BrandsSection />
-      </Reveal>
       <Reveal>
         <BlogPreview posts={posts} />
       </Reveal>

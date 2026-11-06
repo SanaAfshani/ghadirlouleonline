@@ -89,9 +89,12 @@ export default async function ProductDetailPage({ params }: Props) {
   const showPrice = board.market.open && !comingSoon;
   // بیرون از ساعت کاری سرور قیمت نمی‌فرستد؛ پس schema هم فقط در ساعت کاری offer دارد
   const priceSummary = summarizeLine(board.lines.find((l) => l.productId === product.id)?.items ?? []);
-  const related = (await getPublishedProducts({ categorySlug: product.category.slug, limit: 5 }))
-    .filter((p) => p.id !== product.id)
-    .slice(0, 4);
+  // هر سایز یک محصول است: همه هم‌دسته‌ها دکمه‌های انتخاب سایزند و «مرتبط» سایزهای همسایه
+  const variants = await getPublishedProducts({ categorySlug: product.category.slug });
+  const others = variants.filter((p) => p.id !== product.id);
+  const index = variants.findIndex((p) => p.id === product.id);
+  const start = Math.min(Math.max(0, index - 2), Math.max(0, others.length - 4));
+  const related = others.slice(start, start + 4);
 
   // جدول قیمت ← AggregateOffer (بازه قیمت در نتایج گوگل)؛ در غیر این صورت قیمت تکی.
   // قیمت‌ها در پنل به تومان ثبت می‌شوند؛ schema.org واحد رسمی ریال را می‌خواهد (×۱۰)
@@ -175,7 +178,7 @@ export default async function ProductDetailPage({ params }: Props) {
           { name: product.name, path: `/products/${encodeURIComponent(category)}/${encodeURIComponent(slug)}` },
         ])}
       />
-      <ProductDetailView product={showPrice ? product : { ...product, price: undefined }} related={related} board={board} comingSoon={comingSoon} />
+      <ProductDetailView product={showPrice ? product : { ...product, price: undefined }} related={related} variants={variants} board={board} comingSoon={comingSoon} />
     </>
   );
 }

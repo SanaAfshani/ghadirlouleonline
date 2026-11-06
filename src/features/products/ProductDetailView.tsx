@@ -20,6 +20,7 @@ import { summarizeLine, type PriceBoard } from '@/shared/lib/price-board-types';
 import { ProductCard } from '@/features/products/ProductCard';
 import { CategoryThumb } from '@/widgets/header/Header';
 import { siteConfig } from '@/shared/config/site';
+import { SIZE_SPEC_KEY } from '@/shared/config/product-lines';
 import { IconTile } from '@/shared/ui/IconTile';
 import { SpecCards, specMeta, withDerivedSpecs } from '@/features/products/SpecCards';
 import { ProductCatalogs } from '@/features/products/ProductCatalogs';
@@ -114,12 +115,14 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
 type Props = {
   product: Product;
   related?: ProductListItem[];
+  /** همه محصولات همین دسته (سایزهای دیگر یا انواع دیگر) — مثل انتخاب تنوع در دیجی‌کالا */
+  variants?: ProductListItem[];
   board: PriceBoard;
   /** دسته فعلاً فروش ندارد — بدون قیمت، با برچسب «به زودی» */
   comingSoon?: boolean;
 };
 
-export function ProductDetailView({ product, related = [], board: initialBoard, comingSoon = false }: Props) {
+export function ProductDetailView({ product, related = [], variants = [], board: initialBoard, comingSoon = false }: Props) {
   const { phone, phoneHref, whatsappUrl, mobile, mobileHref, certificates } = useSiteSettings();
   const { open } = useConsult();
 
@@ -135,6 +138,8 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
   const cardSpecs = withDerivedSpecs(specs, line?.items ?? [], subject).slice(0, 4);
   const marketOpen = board.market.open;
   const legacyPrice = product.price ? formatProductPrice(product.price) : null;
+
+  const bySize = variants.length > 0 && variants.every((v) => v.specs[SIZE_SPEC_KEY]);
 
   const sections: Section[] = [
     ...(summary.count ? [{ id: 'price-table', label: 'جدول قیمت' }] : []),
@@ -207,6 +212,31 @@ export function ProductDetailView({ product, related = [], board: initialBoard, 
             <h1 className="mt-3 text-2xl sm:text-3xl lg:text-[2.1rem] font-black leading-[1.45]">{faDigits(product.name)}</h1>
             {product.shortDescription && (
               <p className="mt-3 text-[15px] leading-8 text-[var(--muted-foreground)]">{faDigits(product.shortDescription)}</p>
+            )}
+
+            {/* هر سایز صفحه خودش را دارد؛ جابه‌جایی بین سایزها یک کلیک است */}
+            {variants.length > 1 && (
+              <nav aria-label={`انتخاب از ${product.category.name}`} className="mt-5">
+                <p className="text-sm font-bold mb-2">
+                  {bySize ? 'انتخاب سایز (میلی‌متر)' : `انواع ${product.category.name}`}
+                </p>
+                <ul className="flex flex-wrap gap-2">
+                  {variants.map((v) => {
+                    // واحد در عنوان آمده؛ روی گوشی دوازده دکمه «… میلی‌متر» پنج ردیف می‌شد
+                    const label = faDigits(bySize ? v.specs[SIZE_SPEC_KEY].replace(/\s*میلی‌متر$/, '') : v.name);
+                    const cls = 'h-9 px-3.5 rounded-xl border text-sm font-bold flex items-center num transition-colors';
+                    return (
+                      <li key={v.id}>
+                        {v.slug === product.slug ? (
+                          <span aria-current="page" className={cn(cls, 'border-[var(--accent)] bg-[var(--accent)]/12 text-[var(--accent-text)]')}>{label}</span>
+                        ) : (
+                          <Link href={`/products/${v.category}/${v.slug}`} className={cn(cls, 'border-[var(--border)] hover:border-[var(--foreground)]/40')}>{label}</Link>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </nav>
             )}
 
             <SpecCards specs={cardSpecs} subject={subject} />

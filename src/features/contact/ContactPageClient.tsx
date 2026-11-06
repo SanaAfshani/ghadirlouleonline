@@ -138,7 +138,7 @@ export function ContactPageClient({ contactInfo, locations, whatsappUrl, intro }
                 <input className={`${fieldCls} ltr-field`} type="tel" inputMode="tel" value={form.phone} onChange={set('phone')} placeholder="شماره موبایل" autoComplete="tel" aria-label="شماره موبایل" />
               </div>
               <input className={`${fieldCls} ltr-field`} type="email" value={form.email} onChange={set('email')} placeholder="ایمیل (اختیاری)" autoComplete="email" aria-label="ایمیل" />
-              <input className={fieldCls} value={form.subject} onChange={set('subject')} placeholder="موضوع — مثلاً: استعلام لوله پلیکا ۱۶۰" aria-label="موضوع" />
+              <input className={fieldCls} value={form.subject} onChange={set('subject')} placeholder="موضوع — مثلاً: استعلام لوله کاروگیت ۱۶۰" aria-label="موضوع" />
               <textarea className={`${fieldCls} h-36 py-3 resize-none`} value={form.message} onChange={set('message')} placeholder="پیام یا سوال خود را بنویسید… *" aria-label="پیام" />
               <button type="submit" disabled={loading} className="w-full h-13 rounded-2xl bg-[var(--foreground)] text-[var(--background)] font-bold flex items-center justify-center gap-2 disabled:opacity-60">
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-4 h-4" />}

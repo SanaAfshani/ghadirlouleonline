@@ -31,8 +31,8 @@ export function ProductsPageClient({ categories, products: allProducts }: Produc
     <>
       <PageHero
         label="کاتالوگ محصولات"
-        title="لوله و اتصالات"
-        description="لوله کاروگیت، پلی اتیلن، پلیکا، منهول، سپتیک تانک، آبیاری قطره‌ای و اتصالات با قیمت روز"
+        title="لوله و اتصالات کاروگیت"
+        description="لوله کاروگیت دوجداره، لوله اسپیرال و اتصالات کاروگیت — هر سایز با صفحه، مشخصات و قیمت روز خودش"
       />
 
       <div className="container-main py-6 md:py-10">

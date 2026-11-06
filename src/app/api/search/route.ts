@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/shared/lib/prisma';
 import { serializeBlogPost, toProductListItem } from '@/shared/lib/serializers';
 import { getMarketNow } from '@/shared/lib/price-board';
-import { categoryRank } from '@/shared/lib/catalog';
+import { categoryRank, productRank } from '@/shared/lib/catalog';
+import { faDigits, latinDigits } from '@/shared/lib/utils';
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,16 +16,20 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // نام محصولات با رقم فارسی است («لوله کاروگیت ۴۰۰») ولی کاربر اغلب با رقم لاتین می‌نویسد
+    const terms = [...new Set([q, faDigits(q), latinDigits(q)])];
+    // «کاروگیت ۴۰۰» در توضیحات صفحه‌های ۳۱۵ و ۵۰۰ هم آمده (لینک سایز همسایه)؛ صفحه‌ای که نامش می‌خورد اول بیاید
+    const nameMiss = (name: string) => (terms.some((t) => name.includes(t)) ? 0 : 1);
     const market = await getMarketNow();
     const [products, posts, projects] = await Promise.all([
       prisma.product.findMany({
         where: {
           published: true,
-          OR: [
-            { name: { contains: q } },
-            { shortDescription: { contains: q } },
-            { description: { contains: q } },
-          ],
+          OR: terms.flatMap((t) => [
+            { name: { contains: t } },
+            { shortDescription: { contains: t } },
+            { description: { contains: t } },
+          ]),
         },
         include: { category: true },
         take: 12,
@@ -60,7 +65,12 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         products: products
-          .sort((a, b) => categoryRank(a.category.slug) - categoryRank(b.category.slug))
+          .sort(
+            (a, b) =>
+              nameMiss(a.name) - nameMiss(b.name) ||
+              categoryRank(a.category.slug) - categoryRank(b.category.slug) ||
+              productRank(a.slug) - productRank(b.slug),
+          )
           .map((p) => toProductListItem(p, { showPrices: market.open })),
         posts: posts.map(serializeBlogPost),
         projects: projects.map((p) => ({

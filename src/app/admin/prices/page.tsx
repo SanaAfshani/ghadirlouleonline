@@ -366,19 +366,19 @@ function PricePerKgPanel({ product, onApplied, onShowMissing }: { product: Produ
       next
         ? {
             title: `قیمت روز هر کیلو ${fmt(next)} تومان شود؟`,
-            message: `قیمت ${formatPersianNumber(weighted)} ردیف وزن‌دار با فرمول «وزن × قیمت روز» دوباره حساب می‌شود.${missing ? ` ${formatPersianNumber(missing)} ردیف بدون وزن دست نمی‌خورد.` : ''}`,
+            message: `قیمت ردیف‌های وزن‌دار این محصول و همه محصولات هم‌دسته‌ای که قیمت روز دارند (مثلاً همه سایزهای لوله) با فرمول «وزن × قیمت روز» دوباره حساب می‌شود.${missing ? ` ${formatPersianNumber(missing)} ردیف بدون وزن دست نمی‌خورد.` : ''}`,
             tone: 'default',
             confirmLabel: 'اعمال',
           }
-        : { title: 'فرمول قیمت روز خاموش شود؟', message: 'قیمت فعلی ردیف‌ها می‌ماند و از این به بعد هر قیمت دستی وارد می‌شود.', tone: 'default', confirmLabel: 'خاموش کردن' },
+        : { title: 'فرمول قیمت روز خاموش شود؟', message: 'برای این محصول و همه محصولات هم‌دسته‌اش؛ قیمت فعلی ردیف‌ها می‌ماند و از این به بعد هر قیمت دستی وارد می‌شود.', tone: 'default', confirmLabel: 'خاموش کردن' },
     );
     if (!ok) return;
     setBusy(true);
     try {
-      const r = await api<{ updated: number; missingWeight: number }>('/api/admin/prices/per-kg', { method: 'PUT', body: JSON.stringify({ productId: product.id, pricePerKg: next }) });
+      const r = await api<{ updated: number; missingWeight: number; products: number }>('/api/admin/prices/per-kg', { method: 'PUT', body: JSON.stringify({ productId: product.id, pricePerKg: next }) });
       await onApplied();
       if (!next) toast.success('قیمت‌گذاری دستی شد');
-      else if (r.updated) toast.success(`${formatPersianNumber(r.updated)} قیمت به‌روز شد`);
+      else if (r.updated) toast.success(`${formatPersianNumber(r.updated)} قیمت در ${formatPersianNumber(r.products)} محصول به‌روز شد`);
       else toast.success('قیمت روز ذخیره شد — قیمت ردیف‌ها از قبل با همین قیمت روز برابر بود');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'خطا');

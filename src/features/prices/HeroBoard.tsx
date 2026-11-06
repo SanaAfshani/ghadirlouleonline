@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ArrowDownLeft, ArrowUpLeft, Lock } from 'lucide-react';
 import { cn, faDigits } from '@/shared/lib/utils';
-import type { PriceBoard } from '@/shared/lib/price-board-types';
+import { groupLinesByCategory, type PriceBoard } from '@/shared/lib/price-board-types';
 import { GRADES } from '@/shared/lib/price-item';
 import { useLiveBoard } from './live-store';
 import { MarketStatus, marketDetail } from './MarketStatus';
@@ -19,11 +19,12 @@ const gradeTone: Record<string, string> = {
 /** کارت «قیمت لحظه‌ای» داخل هیرو — قیمت‌ها از همان اولین نگاه در صفحه اول */
 export function HeroBoard({ initial, rows = 5 }: { initial: PriceBoard; rows?: number }) {
   const { board, flashes } = useLiveBoard(initial);
-  const [active, setActive] = useState(board.lines[0]?.productId);
+  const groups = groupLinesByCategory(board.lines);
+  const [active, setActive] = useState(groups[0]?.categorySlug);
   const [grade, setGrade] = useState('');
-  if (!board.lines.length) return null;
+  if (!groups.length) return null;
 
-  const line = board.lines.find((l) => l.productId === active) ?? board.lines[0];
+  const line = groups.find((g) => g.categorySlug === active) ?? groups[0];
   const open = board.market.open;
   const grades = GRADES.filter((g) => line.items.some((i) => i.grade === g));
   const items = grade ? line.items.filter((i) => i.grade === grade) : line.items;
@@ -39,21 +40,21 @@ export function HeroBoard({ initial, rows = 5 }: { initial: PriceBoard; rows?: n
       </div>
 
       <div role="tablist" aria-label="خط محصول" className="snap-row gap-1.5 px-4 sm:px-5 mt-4">
-        {board.lines.map((l) => (
+        {groups.map((g) => (
           <button
-            key={l.productId}
+            key={g.categorySlug}
             role="tab"
-            aria-selected={l.productId === line.productId}
+            aria-selected={g.categorySlug === line.categorySlug}
             onClick={() => {
-              setActive(l.productId);
+              setActive(g.categorySlug);
               setGrade('');
             }}
             className={cn(
               'h-8 px-3 rounded-lg text-xs font-bold whitespace-nowrap transition-colors',
-              l.productId === line.productId ? 'bg-white text-[var(--ink)]' : 'text-slate-300 bg-white/5 hover:bg-white/10',
+              g.categorySlug === line.categorySlug ? 'bg-white text-[var(--ink)]' : 'text-slate-300 bg-white/5 hover:bg-white/10',
             )}
           >
-            {l.productName}
+            {g.categoryName}
           </button>
         ))}
       </div>
@@ -115,7 +116,7 @@ export function HeroBoard({ initial, rows = 5 }: { initial: PriceBoard; rows?: n
 
       <div className="px-4 sm:px-5 py-3.5 border-t border-white/[0.06] flex items-center justify-between gap-3 text-xs">
         <Link href={line.href} className="flex items-center gap-1 font-bold text-[var(--accent-text)]">
-          جدول کامل {line.productName} <span className="text-slate-500 num">({faDigits(line.items.length)})</span>
+          جدول کامل {line.categoryName} <span className="text-slate-500 num">({faDigits(line.items.length)})</span>
         </Link>
         <Link href="/prices" className="flex items-center gap-1 text-slate-300 hover:text-white">
           همه قیمت‌ها <ArrowLeft className="w-3.5 h-3.5" />

@@ -36,6 +36,36 @@ export type PriceBoard = {
   lines: PriceLine[];
 };
 
+/** خطوط قیمت یک دسته کنار هم — برای تب‌ها و جدول‌های تابلو */
+export type PriceGroup = {
+  categorySlug: string;
+  categoryName: string;
+  href: string;
+  productIds: string[];
+  items: LiveItem[];
+};
+
+/**
+ * هر سایز لوله محصول جداست، پس یک تب برای هر خط محصول یعنی ده‌ها تب دوردیفی. تابلو برای هر
+ * دسته یک جدول نشان می‌دهد. lines از قبل به ترتیب دسته مرتب است و Map همان ترتیب را نگه می‌دارد.
+ */
+export function groupLinesByCategory(lines: PriceLine[]): PriceGroup[] {
+  const groups = new Map<string, PriceGroup>();
+  for (const l of lines) {
+    const group = groups.get(l.categorySlug) ?? {
+      categorySlug: l.categorySlug,
+      categoryName: l.categoryName,
+      href: `/products/${l.categorySlug}`,
+      productIds: [],
+      items: [],
+    };
+    group.productIds.push(l.productId);
+    group.items.push(...l.items);
+    groups.set(l.categorySlug, group);
+  }
+  return [...groups.values()];
+}
+
 /** بازه‌های نمودار نوسان قیمت (روز) */
 export type HistoryRange = 7 | 30 | 90 | 365;
 
