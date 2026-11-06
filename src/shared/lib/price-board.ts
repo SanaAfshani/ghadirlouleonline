@@ -8,8 +8,12 @@ import { siteConfig } from '@/shared/config/site';
 
 export * from '@/shared/lib/price-board-types';
 
-/** قیمت قدیمی‌تر از این، دیگر نمایش داده نمی‌شود */
-const STALE_AFTER_DAYS = 7;
+/**
+ * قیمت قدیمی‌تر از این، دیگر نمایش داده نمی‌شود.
+ * تا این مدت، عدد با برچسب «آخرین قیمت ثبت‌شده» و تاریخش می‌آید (isPriceFresh در price-board-types)؛
+ * قبلاً ۷ روز بود و یک هفته به‌روز نشدن قیمت، کل تابلو را «استعلام» می‌کرد.
+ */
+const STALE_AFTER_DAYS = 30;
 const isFresh = (changedAt: Date, now: number) =>
   now - changedAt.getTime() < STALE_AFTER_DAYS * 24 * 60 * 60 * 1000;
 
@@ -74,8 +78,9 @@ export const getPriceBoard = cache(async (): Promise<PriceBoard> => {
         // نسخه‌ای که ایندکس می‌کرد بی‌قیمت بود. رقبا هم قیمت لحظه‌ای نمی‌دهند؛ قیمت تاریخ‌دار
         // می‌دهند («قیمت ۲ آبان» در عنوانشان).
         //
-        // قیمت کهنه اطلاعات نیست، گمراهی است: اگر از STALE_AFTER_DAYS قدیمی‌تر باشد پنهان می‌شود.
-        price: market.open || isFresh(i.priceChangedAt, now) ? i.price : null,
+        // قیمت کهنه اطلاعات نیست، گمراهی است: اگر از STALE_AFTER_DAYS قدیمی‌تر باشد پنهان می‌شود —
+        // در ساعت فروش هم؛ وگرنه عدد یک ماه پیش به‌عنوان قیمت امروز دیده می‌شد.
+        price: isFresh(i.priceChangedAt, now) ? i.price : null,
         // درصد تغییر فقط وقتی معنا دارد که قیمت زنده باشد
         previousPrice: market.open ? i.previousPrice : null,
         note: i.note,

@@ -29,10 +29,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: baseUrl, lastModified: pricesModified, changeFrequency: 'daily', priority: 1, images: imgs(['/images/site/hero-v3-wm.webp', '/images/site/factory-aerial-wm.webp', '/images/site/factory-entrance-wm.webp']) },
     { url: `${baseUrl}/products`, changeFrequency: 'daily', priority: 0.9 },
     { url: `${baseUrl}/prices`, lastModified: pricesModified, changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/categories`, changeFrequency: 'weekly', priority: 0.85 },
     { url: `${baseUrl}/about`, changeFrequency: 'monthly', priority: 0.7 },
     // جایگاه «نماینده رسمی» برای سئوی برند مهم است
     { url: `${baseUrl}/official-representative`, changeFrequency: 'yearly', priority: 0.8, images: imgs(['/images/site/representation-certificate.webp']) },
+    { url: `${baseUrl}/project-inquiry`, changeFrequency: 'yearly', priority: 0.7 },
     { url: `${baseUrl}/factory`, changeFrequency: 'monthly', priority: 0.75, images: imgs(FACTORY_PHOTO_GROUPS.flatMap((g) => g.photos.map((p) => p.src))) },
     { url: `${baseUrl}/contact`, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${baseUrl}/blog`, lastModified: latestPost, changeFrequency: 'weekly', priority: 0.8 },

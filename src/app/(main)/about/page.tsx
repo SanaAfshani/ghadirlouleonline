@@ -7,7 +7,7 @@ import { getSiteSettingsMap } from '@/shared/lib/data';
 import { mergeSiteSettings } from '@/shared/lib/site-settings';
 
 export const metadata: Metadata = {
-  title: 'درباره ما | ۲۰ سال تجربه در تامین لوله',
+  title: 'درباره ما | نماینده رسمی قدیر لوله پاسارگاد',
   description:
     'قدیر لوله آنلاین، نماینده انحصاری قدیر لوله پاسارگاد: فروش لوله کاروگیت دوجداره، لوله اسپیرال و اتصالات کاروگیت با ارسال به سراسر کشور.',
   alternates: { canonical: `${siteConfig.url}/about` },

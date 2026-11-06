@@ -4,8 +4,10 @@ import path from 'path';
 import { prisma } from '@/shared/lib/prisma';
 import { getMarketNow } from '@/shared/lib/price-board';
 import { categoryRank, isComingSoon, productRank } from '@/shared/lib/catalog';
+import { shortProductLabel } from '@/shared/config/product-lines';
 import {
   normalizeProjectImages,
+  parseJsonObject,
   serializeBlogPost,
   serializeProduct,
   serializeProject,
@@ -35,18 +37,61 @@ export function resolveCategoryImage(cat: { slug: string; image: string | null }
   return existsSync(path.join(process.cwd(), 'public', file)) ? file : null;
 }
 
-export type NavCategory = { slug: string; name: string; image: string | null; productCount: number; comingSoon: boolean };
+/** یک محصول در منو و دکمه‌های انتخاب: برچسب کوتاه (سایز «۴۰۰» یا «کوپلر») */
+export type NavItem = { slug: string; label: string };
 
-export async function getNavCategories(): Promise<NavCategory[]> {
-  const cats = await getPublishedCategories();
+export type NavCategory = {
+  slug: string;
+  name: string;
+  description: string | null;
+  image: string | null;
+  productCount: number;
+  comingSoon: boolean;
+  /** محصولات دسته به ترتیب نمایش — مگامنو و صفحه اول سایزها را مستقیم نشان می‌دهند */
+  items: NavItem[];
+};
+
+/** cache: layout (هدر و فوتر) و صفحه اول در یک درخواست فقط یک بار می‌خوانند */
+export const getNavCategories = cache(async (): Promise<NavCategory[]> => {
+  const [cats, products] = await Promise.all([
+    getPublishedCategories(),
+    prisma.product.findMany({
+      where: { published: true, category: { published: true } },
+      select: { slug: true, name: true, specifications: true, category: { select: { slug: true } } },
+    }),
+  ]);
+  const sorted = products.sort((a, b) => productRank(a.slug) - productRank(b.slug) || a.name.localeCompare(b.name, 'fa'));
   return cats.map((c) => ({
     slug: c.slug,
     name: c.name,
+    description: c.description,
     image: resolveCategoryImage(c),
     productCount: c._count?.products ?? 0,
     comingSoon: isComingSoon(c.slug),
+    items: sorted
+      .filter((p) => p.category.slug === c.slug)
+      .map((p) => ({ slug: p.slug, label: shortProductLabel({ name: p.name, specs: parseJsonObject(p.specifications) }) })),
   }));
-}
+});
+
+/**
+ * اتصالات کاروگیتی که در یک سایز موجودند — صفحه هر سایز لوله به اتصالات همان سایز لینک می‌دهد.
+ * ردیف تبدیل («تبدیل × 400» با سایز 315) هر دو سایز را دارد، پس عنوان ردیف هم بررسی می‌شود.
+ */
+export const getFittingsForSize = cache(async (size: number): Promise<NavItem[]> => {
+  const s = String(size);
+  const products = await prisma.product.findMany({
+    where: {
+      published: true,
+      category: { slug: 'corrugated-fittings', published: true },
+      priceItems: { some: { OR: [{ size: s }, { title: { contains: s } }] } },
+    },
+    select: { slug: true, name: true, specifications: true },
+  });
+  return products
+    .sort((a, b) => productRank(a.slug) - productRank(b.slug))
+    .map((p) => ({ slug: p.slug, label: shortProductLabel({ name: p.name, specs: parseJsonObject(p.specifications) }) }));
+});
 
 // cache: layout (بررسی وجود/ریدایرکت)، متادیتا و صفحه در یک درخواست فقط یک بار به دیتابیس می‌روند
 export const getCategoryBySlug = cache(async (slug: string) => {

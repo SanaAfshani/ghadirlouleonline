@@ -5,10 +5,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { m as motion } from 'framer-motion';
 import {
-  BookOpen, Check, ChevronLeft, Clock, Download, FileText, Headphones, ListChecks, MessageCircle, Phone, Table2, X,
+  BookOpen, Check, ChevronLeft, Clock, Download, FileText, Headphones, ListChecks, MessageCircle, Phone, Table2,
 } from 'lucide-react';
 import type { Product } from '@/shared/types';
 import type { ProductListItem } from '@/shared/lib/serializers';
+import type { NavItem } from '@/shared/lib/data';
 import { formatProductPrice } from '@/shared/lib/serializers';
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
 import { useConsult } from '@/features/consult/ConsultProvider';
@@ -16,12 +17,14 @@ import { FaqAccordion } from '@/shared/ui/FaqAccordion';
 import { LivePriceTable } from '@/features/prices/LivePriceTable';
 import { MarketStatus } from '@/features/prices/MarketStatus';
 import { useLiveBoard } from '@/features/prices/live-store';
-import { summarizeLine, type PriceBoard } from '@/shared/lib/price-board-types';
+import { isPriceFresh, summarizeLine, type PriceBoard } from '@/shared/lib/price-board-types';
 import { ProductCard } from '@/features/products/ProductCard';
 import { CategoryThumb } from '@/widgets/header/Header';
 import { siteConfig } from '@/shared/config/site';
 import { SIZE_SPEC_KEY } from '@/shared/config/product-lines';
+import { SUPPLY_STATUS_LABEL, type SupplyStatus } from '@/shared/lib/supply-status';
 import { IconTile } from '@/shared/ui/IconTile';
+import { LtrCodes } from '@/shared/ui/LtrCodes';
 import { RubikaIcon } from '@/shared/ui/RubikaIcon';
 import { RubikaButton, rubikaMessage } from '@/shared/ui/RubikaButton';
 import { SpecCards, specMeta, withDerivedSpecs } from '@/features/products/SpecCards';
@@ -31,9 +34,15 @@ import { pipeDimensionsFor } from '@/shared/lib/pipe-dimensions';
 import { subjectFor } from '@/features/products/SpecIllustration';
 import { CertificateStrip } from '@/features/certificates/Certificates';
 import { ImageLightbox } from '@/shared/ui/ImageLightbox';
-import { cn, faDigits } from '@/shared/lib/utils';
+import { cn, faDigits, formatDate } from '@/shared/lib/utils';
 
 type Section = { id: string; label: string };
+
+const SUPPLY_TONE: Record<SupplyStatus, string> = {
+  ready: 'bg-emerald-500/12 text-emerald-600 dark:text-emerald-400',
+  inquiry: 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
+  pending: 'bg-[var(--muted)] text-[var(--muted-foreground)]',
+};
 
 function Gallery({ images, name }: { images: string[]; name: string }) {
   const [active, setActive] = useState(0);
@@ -119,12 +128,14 @@ type Props = {
   related?: ProductListItem[];
   /** همه محصولات همین دسته (سایزهای دیگر یا انواع دیگر) — مثل انتخاب تنوع در دیجی‌کالا */
   variants?: ProductListItem[];
+  /** اتصالات کاروگیت موجود در سایز همین لوله */
+  fittings?: NavItem[];
   board: PriceBoard;
   /** دسته فعلاً فروش ندارد — بدون قیمت، با برچسب «به زودی» */
   comingSoon?: boolean;
 };
 
-export function ProductDetailView({ product, related = [], variants = [], board: initialBoard, comingSoon = false }: Props) {
+export function ProductDetailView({ product, related = [], variants = [], fittings = [], board: initialBoard, comingSoon = false }: Props) {
   const { phone, phoneHref, whatsappUrl, mobile, mobileHref, certificates } = useSiteSettings();
   const { open } = useConsult();
 
@@ -139,6 +150,7 @@ export function ProductDetailView({ product, related = [], variants = [], board:
   const subject = subjectFor(product.category.slug, product.slug);
   const cardSpecs = withDerivedSpecs(specs, line?.items ?? [], subject).slice(0, 4);
   const marketOpen = board.market.open;
+  const liveSummary = marketOpen && isPriceFresh(summary.updatedAt);
   const legacyPrice = product.price ? formatProductPrice(product.price) : null;
 
   const bySize = variants.length > 0 && variants.every((v) => v.specs[SIZE_SPEC_KEY]);
@@ -204,9 +216,9 @@ export function ProductDetailView({ product, related = [], variants = [], board:
               {comingSoon ? (
                 <span className="h-7 px-3 rounded-lg text-xs font-bold flex items-center bg-[var(--accent)] text-[var(--accent-foreground)]">به زودی</span>
               ) : (
-                <span className={cn('h-7 px-3 rounded-lg text-xs font-bold flex items-center gap-1', product.inStock ? 'bg-emerald-500/12 text-emerald-600 dark:text-emerald-400' : 'bg-[var(--muted)] text-[var(--muted-foreground)]')}>
-                  {product.inStock ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
-                  {product.inStock ? 'موجود' : 'ناموجود'}
+                <span className={cn('h-7 px-3 rounded-lg text-xs font-bold flex items-center gap-1', SUPPLY_TONE[product.supplyStatus])}>
+                  {product.supplyStatus === 'ready' ? <Check className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5" />}
+                  {SUPPLY_STATUS_LABEL[product.supplyStatus]}
                 </span>
               )}
             </div>
@@ -237,6 +249,24 @@ export function ProductDetailView({ product, related = [], variants = [], board:
                       </li>
                     );
                   })}
+                </ul>
+              </nav>
+            )}
+
+            {fittings.length > 0 && (
+              <nav aria-label="اتصالات هم‌سایز" className="mt-4">
+                <p className="text-sm font-bold mb-2">اتصالات همین سایز</p>
+                <ul className="flex flex-wrap gap-2">
+                  {fittings.map((f) => (
+                    <li key={f.slug}>
+                      <Link
+                        href={`/products/corrugated-fittings/${f.slug}`}
+                        className="h-9 px-3.5 rounded-xl border border-dashed border-[var(--border)] text-sm font-bold flex items-center hover:border-[var(--accent)] hover:text-[var(--accent-text)] transition-colors"
+                      >
+                        {f.label}
+                      </Link>
+                    </li>
+                  ))}
                 </ul>
               </nav>
             )}
@@ -272,9 +302,12 @@ export function ProductDetailView({ product, related = [], variants = [], board:
                 <>
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-xs text-[var(--muted-foreground)]">{marketOpen ? 'محدوده قیمت امروز' : 'قیمت'}</p>
+                      {/* قیمت امروز فقط در ساعت فروش و با قیمت تازه؛ وگرنه آخرین قیمت با تاریخش — نه «استعلام» خالی */}
+                      <p className="text-xs text-[var(--muted-foreground)]">
+                        {liveSummary ? 'محدوده قیمت امروز' : summary.minPrice != null && summary.updatedAt ? `آخرین قیمت ثبت‌شده · ${formatDate(summary.updatedAt)}` : 'قیمت'}
+                      </p>
                       <p className="mt-1 text-lg sm:text-xl font-black num">
-                        {marketOpen && summary.minPrice != null ? (
+                        {summary.minPrice != null ? (
                           <>
                             {summary.minPrice.toLocaleString('fa-IR')}
                             {summary.maxPrice !== summary.minPrice && summary.maxPrice != null && <> تا {summary.maxPrice.toLocaleString('fa-IR')}</>}
@@ -293,9 +326,14 @@ export function ProductDetailView({ product, related = [], variants = [], board:
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <MarketStatus market={board.market} />
                   </div>
-                  <button onClick={() => scrollTo('price-table')} className="mt-3 text-sm font-bold text-[var(--accent-text)] hover:underline">
-                    مشاهده جدول کامل قیمت ←
-                  </button>
+                  <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1">
+                    <button onClick={() => scrollTo('price-table')} className="text-sm font-bold text-[var(--accent-text)] hover:underline">
+                      مشاهده جدول کامل قیمت ←
+                    </button>
+                    <Link href={`/project-inquiry?product=${product.slug}`} className="text-sm font-bold text-[var(--accent-text)] hover:underline">
+                      استعلام پروژه‌ای (متراژ و چند سایز) ←
+                    </Link>
+                  </div>
                 </>
               ) : comingSoon ? (
                 <div>
@@ -389,6 +427,12 @@ export function ProductDetailView({ product, related = [], variants = [], board:
                 <MarketStatus market={board.market} />
               </div>
               <LivePriceTable initial={initialBoard} productIds={[product.id]} caption={`قیمت ${product.name}`} toolbar />
+              {/* «SN4 (۱۶ کیلونیوتن)» در ردیف‌ها دو استاندارد را کنار هم دارد و بدون توضیح متناقض به نظر می‌رسید */}
+              {line?.items.some((i) => /کیلونیوتن/.test(i.spec)) && (
+                <p className="mt-3 text-xs leading-6 text-[var(--muted-foreground)] num">
+                  <LtrCodes text="SN4 و SN8 کلاس سختی حلقوی طبق ISO 9969 است (۴ و ۸ کیلونیوتن بر مترمربع). عدد داخل پرانتز، مقدار همان کلاس با روش DIN 16961-2 است که کارخانه برای کنترل کیفیت به کار می‌برد؛ دو روش برای یک کلاس، نه کلاس جدا." />
+                </p>
+              )}
             </section>
           )}
 

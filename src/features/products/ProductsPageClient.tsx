@@ -1,78 +1,80 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { m as motion } from 'framer-motion';
-import { Search } from 'lucide-react';
+import { ChevronLeft, Search } from 'lucide-react';
 import { PageHero } from '@/shared/ui/PageHero';
 import { SearchInput } from '@/shared/ui/SearchInput';
 import { ProductCard } from '@/features/products/ProductCard';
+import { groupCategories } from '@/shared/config/product-lines';
 import type { ProductListItem } from '@/shared/lib/serializers';
-import { cn, faDigits, latinDigits } from '@/shared/lib/utils';
+import { faDigits, latinDigits } from '@/shared/lib/utils';
 
-type CategoryTab = { slug: string; name: string };
+type CategoryInfo = { slug: string; name: string; description: string | null };
 
 type ProductsPageClientProps = {
-  categories: CategoryTab[];
+  categories: CategoryInfo[];
   products: ProductListItem[];
 };
 
-export function ProductsPageClient({ categories, products: allProducts }: ProductsPageClientProps) {
-  const [activeCategory, setActiveCategory] = useState<string>('all');
+/**
+ * تنها صفحه جامع محصولات (/categories هم به همین‌جا می‌آید): به‌جای شبکه تخت همه محصولات با تب دسته،
+ * هر گروه یک بخش است — «لوله و اتصالات کاروگیت» و «لوله اسپیرال» — و هر دسته کارت‌های سایزهایش را دارد.
+ */
+export function ProductsPageClient({ categories, products }: ProductsPageClientProps) {
   const [search, setSearch] = useState('');
-
   const term = latinDigits(search.trim());
-  const displayed = allProducts.filter((p) => {
-    const matchCategory = activeCategory === 'all' || p.category === activeCategory;
-    const matchSearch = !term || latinDigits(p.name).includes(term) || p.categoryName.includes(term);
-    return matchCategory && matchSearch;
-  });
+  const matches = (p: ProductListItem) => !term || latinDigits(p.name).includes(term) || p.categoryName.includes(term);
+  const groups = groupCategories(categories);
+  const total = products.filter(matches).length;
 
   return (
     <>
       <PageHero
-        label="کاتالوگ محصولات"
-        title="لوله و اتصالات کاروگیت"
-        description="لوله کاروگیت دوجداره، لوله اسپیرال و اتصالات کاروگیت — هر سایز با صفحه، مشخصات و قیمت روز خودش"
+        label="محصولات"
+        title="لوله کاروگیت، اسپیرال و اتصالات"
+        description="هر سایز صفحه، مشخصات فنی و قیمت روز خودش را دارد. سایز را انتخاب کنید یا جستجو کنید."
       />
 
       <div className="container-main py-6 md:py-10">
-        <SearchInput value={search} onValueChange={setSearch} placeholder="جستجو در محصولات…" wrapperClassName="mb-4 max-w-xl" className="h-12" />
+        <SearchInput value={search} onValueChange={setSearch} placeholder="جستجو: مثلاً ۴۰۰ یا کوپلر…" wrapperClassName="mb-8 max-w-xl" className="h-12" />
 
-        <div role="tablist" aria-label="دسته‌بندی" className="snap-row -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap mb-5">
-          {categories.map((cat) => (
-            <button
-              key={cat.slug}
-              type="button"
-              role="tab"
-              aria-selected={activeCategory === cat.slug}
-              onClick={() => setActiveCategory(cat.slug)}
-              className={cn(
-                'relative h-10 px-4 rounded-lg text-sm font-bold whitespace-nowrap transition-colors',
-                activeCategory === cat.slug ? 'text-[var(--accent-foreground)]' : 'border border-[var(--border)] hover:border-[var(--accent)]',
-              )}
-            >
-              {activeCategory === cat.slug && (
-                <motion.span layoutId="products-tab" className="absolute inset-0 rounded-lg bg-[var(--accent)]" transition={{ type: 'spring', damping: 28, stiffness: 380 }} />
-              )}
-              <span className="relative">{cat.name}</span>
-            </button>
-          ))}
-        </div>
+        {groups.map((g) => {
+          const sections = g.categories
+            .map((c) => ({ category: c, items: products.filter((p) => p.category === c.slug && matches(p)) }))
+            .filter((s) => s.items.length);
+          if (!sections.length) return null;
+          return (
+            <section key={g.title} className="mb-14 last:mb-0" aria-labelledby={`group-${g.categories[0].slug}`}>
+              <h2 id={`group-${g.categories[0].slug}`} className="text-2xl sm:text-3xl font-black mb-6">{g.title}</h2>
+              {sections.map(({ category, items }) => (
+                <div key={category.slug} className="mb-10 last:mb-0">
+                  <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
+                    <div className="max-w-2xl">
+                      <h3 className="text-lg sm:text-xl font-black">{category.name}</h3>
+                      {category.description && (
+                        <p className="mt-1 text-sm leading-7 text-[var(--muted-foreground)]">{faDigits(category.description)}</p>
+                      )}
+                    </div>
+                    <Link href={`/products/${category.slug}`} className="text-sm font-bold text-[var(--accent-text)] flex items-center gap-1 shrink-0">
+                      جدول قیمت و راهنمای {category.name} <ChevronLeft className="w-4 h-4" />
+                    </Link>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
+                    {items.map((product) => (
+                      <motion.div key={product.id}>
+                        <ProductCard product={product} />
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </section>
+          );
+        })}
 
-        <p className="mb-5 text-sm text-[var(--muted-foreground)] num">
-          <span className="font-bold text-[var(--foreground)]">{faDigits(displayed.length)}</span> محصول
-          {activeCategory !== 'all' && <> در دسته «{categories.find((c) => c.slug === activeCategory)?.name}»</>}
-        </p>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
-          {displayed.map((product, i) => (
-            <motion.div key={product.id}>
-              <ProductCard product={product} />
-            </motion.div>
-          ))}
-        </div>
-
-        {displayed.length === 0 && (
+        {total === 0 && (
           <div className="text-center py-20 text-[var(--muted-foreground)]">
             <Search className="w-8 h-8 mx-auto mb-3 opacity-50" />
             <p className="font-semibold text-[var(--foreground)]">محصولی یافت نشد</p>

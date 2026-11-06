@@ -25,7 +25,12 @@ export const siteConfig = {
    * اعتبار روی یک دامنه جمع شود. next.config.ts از همین فهرست ریدایرکت می‌سازد.
    */
   altDomains: ['www.ghadirlouleonline.ir', 'ghadirlouleonline.com', 'www.ghadirlouleonline.com'],
-  phone: '09121184970',
+  /**
+   * یک شماره همراه برای فروش، سفارش عمده، واتس‌اپ و روبیکا (آقای امیر یوسفی) + تلفن ثابت دفتر (companyPhones).
+   * phone و mobile عمداً یکی‌اند؛ هر جا هر دو نمایش داده می‌شوند تکراری حذف می‌شود.
+   * شماره‌های 021-8603xxxx مال دفتر کارخانه (ghadirlouleh.com) است و نباید در این سایت بیاید.
+   */
+  phone: '09123837505',
   mobile: '09123837505',
   email: 'info@ghadirlouleonline.ir',
   /** تلفن‌های ثابت دفتر مرکزی شرکت */

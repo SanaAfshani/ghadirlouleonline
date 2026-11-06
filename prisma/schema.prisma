@@ -30,6 +30,8 @@ model Category {
   name        String
   slug        String     @unique
   description String?
+  /// متن بلند صفحه دسته (HTML)، زیر محصولات و جدول قیمت — مثل راهنمای جامع «لوله کاروگیت»
+  content     String?
   image       String?
   icon        String?
   order       Int        @default(0)
@@ -52,6 +54,9 @@ model Product {
   images           String   @default("[]")
   specifications   String   @default("{}")
   inStock          Boolean  @default(true)
+  /// وضعیت تأمین: ready (آماده تأمین) | inquiry (استعلام موجودی) | pending (در انتظار تأیید مشخصات)؛
+  /// خالی یعنی از inStock ساخته می‌شود — src/shared/lib/supply-status.ts
+  supplyStatus     String   @default("")
   featured         Boolean  @default(false)
   published        Boolean  @default(true)
   /// محصول بدون قیمت عمومی: هیچ قیمتی (تکی یا جدول) بیرون نمی‌رود و همه‌جا «استعلام قیمت» دیده می‌شود

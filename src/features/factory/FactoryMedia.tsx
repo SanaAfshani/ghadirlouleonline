@@ -2,16 +2,21 @@
 
 import { useCallback, useState } from 'react';
 import Image from 'next/image';
-import { Expand, Play } from 'lucide-react';
+import { ChevronDown, Expand, Play } from 'lucide-react';
 import { ImageLightbox } from '@/shared/ui/ImageLightbox';
 import { cn, faDigits } from '@/shared/lib/utils';
 import type { FactoryPhotoGroup, FactoryVideo } from '@/shared/config/factory-media';
 
 const duration = (s: number) => faDigits(`${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`);
 
+/** تعداد فیلم‌های پیش از «نمایش همه» — یک ردیف دسکتاپ؛ ۱۱ کارت عمودی صفحه را بیش از حد بلند می‌کرد */
+const VIDEOS_PREVIEW = 4;
+
 /** فیلم‌های خط تولید — پخش در همان کارت؛ با شروع یکی، بقیه متوقف می‌شوند */
 export function FactoryVideos({ videos }: { videos: FactoryVideo[] }) {
   const [started, setStarted] = useState<Set<string>>(new Set());
+  const [showAll, setShowAll] = useState(false);
+  const visible = showAll ? videos : videos.slice(0, VIDEOS_PREVIEW);
 
   const onPlay = (e: React.SyntheticEvent<HTMLVideoElement>, src: string) => {
     const current = e.currentTarget;
@@ -20,8 +25,9 @@ export function FactoryVideos({ videos }: { videos: FactoryVideo[] }) {
   };
 
   return (
-    <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
-      {videos.map((v) => (
+    <>
+    <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+      {visible.map((v) => (
         <li key={v.src} className="group">
           <div className="relative aspect-[9/16] overflow-hidden rounded-[var(--radius-panel)] bg-[var(--ink)]">
             <video
@@ -56,7 +62,37 @@ export function FactoryVideos({ videos }: { videos: FactoryVideo[] }) {
         </li>
       ))}
     </ul>
+    {videos.length > VIDEOS_PREVIEW && (
+      <button
+        type="button"
+        onClick={() => setShowAll((v) => !v)}
+        aria-expanded={showAll}
+        className="mt-5 mx-auto flex items-center gap-1.5 h-11 px-5 rounded-[var(--radius-control)] border border-[var(--border)] text-sm font-bold hover:border-[var(--accent)] hover:text-[var(--accent-text)] transition-colors"
+      >
+        {showAll ? 'نمایش کمتر' : `نمایش همه ${faDigits(videos.length)} فیلم`}
+        <ChevronDown className={cn('w-4 h-4 transition-transform', showAll && 'rotate-180')} />
+      </button>
+    )}
+    </>
   );
+}
+
+const LG_SPAN = ['', 'lg:col-span-1', 'lg:col-span-2', 'lg:col-span-3', 'lg:col-span-4'];
+
+/**
+ * چیدمان شبکه بدون خانه خالی: عکس اول ۲×۲، بقیه یک خانه؛ آخرین عکس بقیه ردیفش را پر می‌کند.
+ * موبایل ۲ ستون است؛ دسکتاپ ۴ ستون که ۴ عکس اول کنار عکس بزرگ و بقیه در ردیف‌های ۴تایی می‌نشینند.
+ * گروه کمتر از ۳ عکس عکس بزرگ ندارد و در دسکتاپ نیمه‌نیمه است.
+ */
+function tileClass(i: number, n: number) {
+  if (n < 3) return 'lg:col-span-2';
+  if (i === 0) return 'col-span-2 row-span-2';
+  if (i !== n - 1) return '';
+  const smalls = n - 1;
+  const mobile = smalls % 2 === 1 ? 'col-span-2' : '';
+  const leftover = smalls <= 4 ? smalls % 2 : (smalls - 4) % 4;
+  const lg = smalls <= 4 ? (leftover ? 2 : 1) : leftover ? 5 - leftover : 1;
+  return cn(mobile, LG_SPAN[lg]);
 }
 
 /** یک گروه عکس — شبکه با عکس اول بزرگ‌تر، و نمایش تمام‌صفحه با کلیک */
@@ -68,11 +104,7 @@ export function FactoryPhotos({ group }: { group: FactoryPhotoGroup }) {
     <>
       <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {group.photos.map((p, i) => (
-          // عکس اول بزرگ؛ اگر تعداد عکس‌های کوچک فرد باشد آخری دو ستون می‌گیرد تا جای خالی نماند
-          <li
-            key={p.src}
-            className={cn(i === 0 && 'col-span-2 row-span-2', i > 0 && i === group.photos.length - 1 && (group.photos.length - 1) % 2 === 1 && 'col-span-2')}
-          >
+          <li key={p.src} className={tileClass(i, group.photos.length)}>
             <button
               type="button"
               onClick={() => setIndex(i)}
@@ -94,6 +126,48 @@ export function FactoryPhotos({ group }: { group: FactoryPhotoGroup }) {
         ))}
       </ul>
       <ImageLightbox images={group.photos.map((p) => p.src)} name={group.title} index={index} onIndex={setIndex} onClose={close} />
+    </>
+  );
+}
+
+/**
+ * گالری عکس کارخانه با تب گروه‌ها — به‌جای پنج بخش پشت سر هم با عنوان تکراری.
+ * همه گروه‌ها در HTML هستند (فقط پنهان)، پس متن جایگزین عکس‌ها برای گوگل خوانده می‌شود.
+ */
+export function FactoryGallery({ groups }: { groups: FactoryPhotoGroup[] }) {
+  const [active, setActive] = useState(groups[0]?.id);
+
+  return (
+    <>
+      <div role="tablist" aria-label="گروه عکس‌ها" className="snap-row mb-5">
+        {groups.map((g) => (
+          <button
+            key={g.id}
+            type="button"
+            role="tab"
+            id={`tab-${g.id}`}
+            aria-controls={`panel-${g.id}`}
+            aria-selected={active === g.id}
+            onClick={() => setActive(g.id)}
+            className={cn(
+              'h-10 px-4 rounded-[var(--radius-control)] border text-sm font-bold whitespace-nowrap flex items-center gap-1.5 transition-colors',
+              active === g.id
+                ? 'border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]'
+                : 'border-[var(--border)] hover:border-[var(--foreground)]/40',
+            )}
+          >
+            {g.title}
+            <span className="text-xs opacity-70 num">{faDigits(g.photos.length)}</span>
+          </button>
+        ))}
+      </div>
+      {groups.map((g) => (
+        <div key={g.id} role="tabpanel" id={`panel-${g.id}`} aria-labelledby={`tab-${g.id}`} hidden={active !== g.id}>
+          <h3 className="sr-only">{g.title}</h3>
+          <p className="mb-4 text-sm leading-7 text-[var(--muted-foreground)]">{g.description}</p>
+          <FactoryPhotos group={g} />
+        </div>
+      ))}
     </>
   );
 }

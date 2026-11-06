@@ -50,11 +50,12 @@ function useViewer() {
 }
 
 /** شبکه کامل گواهی‌ها برای صفحه /certificates */
-export function CertificatesGrid({ certificates }: { certificates: Certificate[] }) {
+/** columns="single": یک سند تنها (مثل گواهی نمایندگی کنار توضیحش) تمام عرض ستون خودش را می‌گیرد */
+export function CertificatesGrid({ certificates, columns = 'grid' }: { certificates: Certificate[]; columns?: 'grid' | 'single' }) {
   const { open, setOpen, close } = useViewer();
   return (
     <>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className={columns === 'single' ? 'grid gap-4' : 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6'}>
         {certificates.map((c) => (
           <button key={c.image} onClick={() => setOpen(c)} className="group text-right rounded-3xl border border-[var(--border)] bg-[var(--card)] p-3 transition-all hover:-translate-y-1 hover:shadow-xl hover:border-[var(--accent)]/40">
             <span className="relative block aspect-[3/4] rounded-2xl overflow-hidden bg-white">

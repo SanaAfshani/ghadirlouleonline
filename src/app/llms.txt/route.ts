@@ -88,7 +88,8 @@ ${faqLines}
 ` : ''}
 ## تماس
 
-- تلفن: ${siteConfig.phone} / ${siteConfig.mobile}
+- فروش و سفارش عمده (تماس، واتس‌اپ، روبیکا): ${siteConfig.phone}
+- تلفن دفتر مرکزی: ${siteConfig.companyPhones.join('، ')}
 - دفتر مرکزی: ${siteConfig.address}
 - کارخانه و انبار: ${siteConfig.factoryAddress}
 

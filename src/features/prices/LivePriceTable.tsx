@@ -11,7 +11,7 @@ import { GRADES, compareItems, itemLabel, type SortDir, type SortKey } from '@/s
 import { Select } from '@/shared/ui/Select';
 import { useConsult } from '@/features/consult/ConsultProvider';
 import { useQuoteCart } from '@/features/quotes/QuoteCartProvider';
-import type { PriceBoard } from '@/shared/lib/price-board-types';
+import { isPriceFresh, type PriceBoard } from '@/shared/lib/price-board-types';
 import { findItems, useLiveBoard, type Flash } from './live-store';
 import { PriceChartDialog, type ChartTarget } from './PriceChartDialog';
 
@@ -57,7 +57,8 @@ function Change({ price, previous }: { price: number | null; previous: number | 
  * «قطعی نبودن» با برچسب تاریخ و دکمه استعلام منتقل می‌شود، نه با خالی‌گذاشتن ستون.
  */
 function Price({ price, open, changedAt }: { price: number | null; open: boolean; changedAt?: string }) {
-  if (!open) {
+  // قیمت چندروزه در ساعت فروش هم «قیمت امروز» نیست؛ مثل بیرون ساعت فروش، با تاریخش نشان داده می‌شود
+  if (!open || (changedAt && !isPriceFresh(changedAt))) {
     if (price == null) {
       return (
         <span className="inline-flex items-center gap-1 text-sm text-[var(--muted-foreground)]">

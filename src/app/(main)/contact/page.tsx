@@ -26,7 +26,7 @@ export default async function ContactPage() {
     },
     {
       icon: 'phone',
-      title: `${siteConfig.salesExpert.role}: ${siteConfig.salesExpert.name} (تماس و واتس‌اپ)`,
+      title: `فروش و سفارش عمده — ${siteConfig.salesExpert.name} (تماس، واتس‌اپ و روبیکا)`,
       items: [settings.phone, settings.mobile]
         .filter((p, i, all) => p && all.indexOf(p) === i)
         .map((p) => ({ text: p, href: phoneHref(p), ltr: true })),

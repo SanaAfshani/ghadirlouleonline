@@ -7,6 +7,7 @@ import { Plus, Search, Pencil, Trash2, Package, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatPersianNumber } from '@/shared/lib/utils';
 import type { Product } from '@/shared/types';
+import { SUPPLY_STATUS_LABEL } from '@/shared/lib/supply-status';
 import { useConfirm } from '@/shared/ui/ConfirmDialog';
 
 export default function AdminProductsPage() {
@@ -145,10 +146,14 @@ export default function AdminProductsPage() {
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                          product.inStock ? 'bg-green-500/10 text-green-700 dark:text-green-400' : 'bg-red-500/10 text-red-700 dark:text-red-400'
+                          product.supplyStatus === 'ready'
+                            ? 'bg-green-500/10 text-green-700 dark:text-green-400'
+                            : product.supplyStatus === 'inquiry'
+                              ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300'
+                              : 'bg-[var(--muted)] text-[var(--muted-foreground)]'
                         }`}
                       >
-                        {product.inStock ? 'موجود' : 'ناموجود'}
+                        {SUPPLY_STATUS_LABEL[product.supplyStatus]}
                       </span>
                     </td>
                     <td className="px-6 py-4">

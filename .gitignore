@@ -50,3 +50,4 @@ yarn-error.log*
 next-env.d.ts
 .backups/
 public/_hero-preview/
+public/_hero2/

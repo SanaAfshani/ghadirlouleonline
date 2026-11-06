@@ -10,7 +10,7 @@ import { useConsult } from '@/features/consult/ConsultProvider';
 
 const ITEMS = [
   { href: '/', label: 'خانه', icon: Home },
-  { href: '/categories', label: 'دسته‌ها', icon: LayoutGrid },
+  { href: '/products', label: 'محصولات', icon: LayoutGrid },
   null, // جای دکمه تماس وسط
   { href: '/prices', label: 'قیمت روز', icon: Tag },
 ] as const;

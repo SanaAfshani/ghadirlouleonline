@@ -9,6 +9,7 @@ import { slugify } from '@/shared/lib/utils';
 import type { Category } from '@/shared/types';
 import { useConfirm } from '@/shared/ui/ConfirmDialog';
 import { ImageUploader } from '@/shared/ui/ImageUploader';
+import { HtmlContentEditor } from '@/features/admin/editor/HtmlContentEditor';
 
 type CategoryRow = Category & { _count?: { products: number } };
 
@@ -18,6 +19,7 @@ const fieldCls = 'w-full bg-[var(--muted)] border border-[var(--border)] rounded
 function CategoryEditor({ cat, onSaved, onCancel }: { cat: CategoryRow; onSaved: (c: CategoryRow) => void; onCancel: () => void }) {
   const [name, setName] = useState(cat.name);
   const [description, setDescription] = useState(cat.description ?? '');
+  const [content, setContent] = useState(cat.content ?? '');
   const [image, setImage] = useState(cat.image ?? '');
   const [saving, setSaving] = useState(false);
 
@@ -28,7 +30,7 @@ function CategoryEditor({ cat, onSaved, onCancel }: { cat: CategoryRow; onSaved:
       const res = await fetch(`/api/categories/${cat.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), description, image }),
+        body: JSON.stringify({ name: name.trim(), description, content, image }),
       });
       const json = await res.json();
       if (!res.ok || !json.success) {
@@ -60,6 +62,13 @@ function CategoryEditor({ cat, onSaved, onCancel }: { cat: CategoryRow; onSaved:
           <span className="block text-sm font-medium text-[var(--foreground)] mb-1.5">توضیح کوتاه</span>
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className={`${fieldCls} py-2.5 leading-7`} />
         </label>
+        <HtmlContentEditor
+          label="متن بلند صفحه دسته (زیر محصولات و جدول قیمت)"
+          value={content}
+          onChange={setContent}
+          rows={8}
+          placeholder="راهنمای جامع این دسته — خالی بماند تا فقط محصولات نمایش داده شوند"
+        />
         <div className="flex gap-2">
           <button type="button" onClick={save} disabled={saving} className="h-11 px-6 rounded-xl bg-[var(--accent)] text-[var(--accent-foreground)] font-semibold text-sm disabled:opacity-50 flex items-center gap-2">
             {saving && <Loader2 className="w-4 h-4 animate-spin" />}

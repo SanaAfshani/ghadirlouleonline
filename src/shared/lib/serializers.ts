@@ -2,6 +2,7 @@ import type { FaqItem, BlogPost, Category, Product, Project, ProjectImage } from
 import { formatPersianNumber } from '@/shared/lib/utils';
 import { isComingSoon } from '@/shared/lib/catalog';
 import { parseCatalogs } from '@/shared/lib/catalog-files';
+import { supplyStatusOf, type SupplyStatus } from '@/shared/lib/supply-status';
 
 export function parseJsonArray(value: string): string[] {
   try {
@@ -38,6 +39,7 @@ type DbProduct = {
   images: string;
   specifications: string;
   inStock: boolean;
+  supplyStatus?: string;
   featured: boolean;
   published: boolean;
   quoteOnly?: boolean;
@@ -65,6 +67,7 @@ export function serializeProduct(p: DbProduct): Product {
     specifications: parseJsonObject(p.specifications),
     faqs: parseFaqs(p.faqs),
     catalogs: parseCatalogs(p.catalogs),
+    supplyStatus: supplyStatusOf(p),
   } as Product;
 }
 
@@ -76,6 +79,7 @@ export type ProductListItem = {
   categoryName: string;
   price: string;
   inStock: boolean;
+  supplyStatus: SupplyStatus;
   featured: boolean;
   specs: Record<string, string>;
   image?: string;
@@ -108,6 +112,7 @@ export function toProductListItem(
     // بیرون از ساعت کاری قیمت تکی هم مثل جدول قیمت پنهان است
     price: withPrices ? formatProductPrice(p.price) : '۰',
     inStock: p.inStock,
+    supplyStatus: supplyStatusOf(p),
     featured: p.featured,
     comingSoon,
     quoteOnly,

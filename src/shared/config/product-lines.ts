@@ -28,3 +28,30 @@ export const CORRUGATED_FITTINGS = [
   { slug: 'corrugated-reducer', name: 'تبدیل لوله کاروگیت' },
   { slug: 'corrugated-end-cap', name: 'درپوش لوله کاروگیت' },
 ] as const;
+
+/**
+ * گروه‌بندی نمایش در منو، صفحه محصولات و صفحه اول: اتصالات زیر کاروگیت می‌آیند چون هم‌سایز لوله
+ * کاروگیت‌اند؛ اسپیرال جداست (با جوش اکستروژن وصل می‌شود و اتصالات جدا ندارد).
+ * فقط نمایش است — دسته‌ها و آدرس صفحه‌ها همان می‌مانند تا سئو و لینک‌ها دست نخورند.
+ */
+export const PRODUCT_GROUPS = [
+  { title: 'لوله و اتصالات کاروگیت', categories: ['corrugated-pipes', 'corrugated-fittings'] },
+  { title: 'لوله اسپیرال', categories: ['spiral-pipes'] },
+] as const;
+
+/** دسته‌ها به ترتیب PRODUCT_GROUPS؛ دسته‌ای که در هیچ گروهی نیست گروه خودش را می‌گیرد تا گم نشود */
+export function groupCategories<T extends { slug: string; name: string }>(categories: T[]) {
+  const grouped = PRODUCT_GROUPS.map((g) => ({
+    title: g.title,
+    categories: g.categories.map((slug) => categories.find((c) => c.slug === slug)).filter((c): c is T => !!c),
+  })).filter((g) => g.categories.length);
+  const used = new Set(grouped.flatMap((g) => g.categories.map((c) => c.slug)));
+  return [...grouped, ...categories.filter((c) => !used.has(c.slug)).map((c) => ({ title: c.name, categories: [c] }))];
+}
+
+/** برچسب کوتاه محصول برای منو و دکمه‌ها: سایز لوله («۴۰۰») یا نام کوتاه اتصال («کوپلر») */
+export function shortProductLabel(p: { name: string; specs: Record<string, string> }) {
+  const size = p.specs[SIZE_SPEC_KEY];
+  if (size) return size.replace(/\s*میلی‌متر$/, '');
+  return p.name.replace(/\s+(لوله\s+)?کاروگیت$/, '');
+}

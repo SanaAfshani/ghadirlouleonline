@@ -23,6 +23,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
         ...(body.name != null && { name: String(body.name) }),
         ...(body.slug != null && { slug: slugify(String(body.slug)) }),
         ...(body.description != null && { description: body.description }),
+        ...(body.content != null && { content: String(body.content) }),
         ...(body.image != null && { image: body.image }),
         ...(body.icon != null && { icon: body.icon }),
         ...(body.order != null && { order: Number(body.order) }),

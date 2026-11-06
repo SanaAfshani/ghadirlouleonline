@@ -7,7 +7,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, m as motion } from 'framer-motion';
 import {
   ArrowLeft, Building2, ChartLine, ChevronDown, ChevronLeft, CircleHelp, Clock, Factory, Headphones, House, LayoutGrid, Menu, MessageCircle,
-  Moon, Newspaper, PackageSearch, Phone, Search, Sun, Truck, Wrench, X, type LucideIcon,
+  Moon, Newspaper, PackageSearch, Phone, Search, Sun, Truck, ClipboardList, X, type LucideIcon,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { cn, faDigits } from '@/shared/lib/utils';
@@ -16,6 +16,7 @@ import { useConsult } from '@/features/consult/ConsultProvider';
 import { siteConfig } from '@/shared/config/site';
 import { phoneHref as toTel } from '@/shared/lib/site-settings';
 import type { NavCategory } from '@/shared/lib/data';
+import { groupCategories } from '@/shared/config/product-lines';
 import { RubikaButton } from '@/shared/ui/RubikaButton';
 import { RubikaIcon } from '@/shared/ui/RubikaIcon';
 
@@ -24,7 +25,7 @@ const NAV = [
   { href: '/products', label: 'محصولات', mega: true },
   { href: '/prices', label: 'لیست قیمت' },
   { href: '/factory', label: 'کارخانه' },
-  { href: '/services', label: 'خدمات' },
+  { href: '/project-inquiry', label: 'استعلام پروژه‌ای' },
   { href: '/blog', label: 'مجله' },
   { href: '/contact', label: 'تماس با ما' },
 ] as const;
@@ -34,7 +35,7 @@ const DRAWER_LINKS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: '/', label: 'خانه', icon: House },
   { href: '/products', label: 'محصولات', icon: LayoutGrid },
   { href: '/factory', label: 'کارخانه و تأمین', icon: Factory },
-  { href: '/services', label: 'خدمات', icon: Wrench },
+  { href: '/project-inquiry', label: 'استعلام پروژه‌ای', icon: ClipboardList },
   { href: '/blog', label: 'مجله', icon: Newspaper },
   { href: '/projects', label: 'پروژه‌های اجراشده', icon: Building2 },
   { href: '/track', label: 'پیگیری سفارش', icon: PackageSearch },
@@ -242,24 +243,38 @@ export function Header({ categories }: { categories: NavCategory[] }) {
               >
                 <div className="container-main">
                   <div className="mt-2 rounded-3xl border border-[var(--border)] bg-[var(--background)] shadow-2xl p-6 grid grid-cols-[1fr_280px] gap-6">
-                    <div className="grid grid-cols-3 gap-2">
-                      {categories.map((c) => (
-                        <Link
-                          key={c.slug}
-                          href={`/products/${c.slug}`}
-                          onClick={closeAll}
-                          className="group flex items-center gap-3 p-2.5 rounded-2xl hover:bg-[var(--muted)] transition-colors"
-                        >
-                          <CategoryThumb category={c} className="w-12 h-12 rounded-xl" />
-                          <span className="min-w-0">
-                            <span className="block font-bold text-sm truncate group-hover:text-[var(--accent-text)]">{c.name}</span>
-                            {c.comingSoon ? (
-                              <span className="block text-xs font-bold text-[var(--accent-text)]">به زودی</span>
-                            ) : (
-                              <span className="block text-xs text-[var(--muted-foreground)] num">{faDigits(c.productCount)} محصول</span>
-                            )}
-                          </span>
-                        </Link>
+                    {/* هر گروه یک ستون؛ زیر هر دسته، سایزها و انواعش مستقیم — هر سایز یک کلیک */}
+                    <div className="grid grid-cols-2 gap-6">
+                      {groupCategories(categories).map((g) => (
+                        <div key={g.title}>
+                          <p className="tech-label mb-3">{g.title}</p>
+                          <div className="space-y-4">
+                            {g.categories.map((c) => (
+                              <div key={c.slug}>
+                                <Link href={`/products/${c.slug}`} onClick={closeAll} className="group flex items-center gap-3 rounded-2xl p-1.5 -m-1.5 hover:bg-[var(--muted)] transition-colors">
+                                  <CategoryThumb category={c} className="w-11 h-11 rounded-xl" />
+                                  <span className="min-w-0">
+                                    <span className="block font-black text-sm group-hover:text-[var(--accent-text)]">{c.name}</span>
+                                    <span className="block text-xs text-[var(--muted-foreground)] num">{faDigits(c.productCount)} محصول · قیمت روز</span>
+                                  </span>
+                                </Link>
+                                <ul className="mt-2 flex flex-wrap gap-1.5">
+                                  {c.items.map((it) => (
+                                    <li key={it.slug}>
+                                      <Link
+                                        href={`/products/${c.slug}/${it.slug}`}
+                                        onClick={closeAll}
+                                        className="h-8 px-2.5 rounded-lg border border-[var(--border)] text-xs font-bold flex items-center num hover:border-[var(--accent)] hover:text-[var(--accent-text)]"
+                                      >
+                                        {it.label}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       ))}
                     </div>
                     <Link
@@ -269,7 +284,7 @@ export function Header({ categories }: { categories: NavCategory[] }) {
                     >
                       <span className="relative">
                         <span className="eyebrow">به‌روز</span>
-                        <span className="block mt-2 text-xl font-black leading-snug">لیست قیمت روز لوله و اتصالات</span>
+                        <span className="block mt-2 text-xl font-black leading-snug">لیست قیمت روز لوله کاروگیت و اسپیرال</span>
                       </span>
                       <span className="relative flex items-center gap-1.5 text-sm font-bold text-[var(--accent-text)]">
                         مشاهده قیمت‌ها <ArrowLeft className="w-4 h-4" />
@@ -351,32 +366,45 @@ export function Header({ categories }: { categories: NavCategory[] }) {
                   ))}
                 </nav>
 
-                <div className="mt-6 px-4 flex items-center justify-between">
-                  <p className="tech-label">دسته‌بندی محصولات</p>
-                  <span className="text-[11px] text-[var(--muted-foreground)] num">{faDigits(categories.length)} دسته</span>
-                </div>
-                <ul className="mt-2 mb-4 px-4">
-                  {categories.map((c) => (
-                    <li key={c.slug} className="border-b border-[var(--border)] last:border-b-0">
-                      <Link
-                        href={`/products/${c.slug}`}
-                        onClick={closeAll}
-                        className={cn('flex items-center gap-3 py-2.5 active:bg-[var(--muted)]', pathname.startsWith(`/products/${c.slug}`) && 'text-[var(--accent-text)]')}
-                      >
-                        <CategoryThumb category={c} className="w-11 h-11 rounded-lg" />
-                        <span className="flex-1 min-w-0">
-                          <span className="block text-[14px] font-bold truncate">{c.name}</span>
-                          {c.comingSoon ? (
-                            <span className="block text-[11px] font-bold text-[var(--accent-text)]">به زودی</span>
-                          ) : (
-                            <span className="block text-[11px] text-[var(--muted-foreground)] num">{faDigits(c.productCount)} محصول</span>
-                          )}
-                        </span>
-                        <ChevronLeft className="w-4 h-4 text-[var(--muted-foreground)]" />
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                {groupCategories(categories).map((g) => (
+                  <div key={g.title} className="mt-6 px-4">
+                    <p className="tech-label">{g.title}</p>
+                    <ul className="mt-2">
+                      {g.categories.map((c) => (
+                        <li key={c.slug} className="border-b border-[var(--border)] last:border-b-0 pb-3">
+                          <Link
+                            href={`/products/${c.slug}`}
+                            onClick={closeAll}
+                            className={cn('flex items-center gap-3 py-2.5 active:bg-[var(--muted)]', pathname.startsWith(`/products/${c.slug}`) && 'text-[var(--accent-text)]')}
+                          >
+                            <CategoryThumb category={c} className="w-11 h-11 rounded-lg" />
+                            <span className="flex-1 min-w-0">
+                              <span className="block text-[14px] font-bold truncate">{c.name}</span>
+                              <span className="block text-[11px] text-[var(--muted-foreground)] num">{faDigits(c.productCount)} محصول</span>
+                            </span>
+                            <ChevronLeft className="w-4 h-4 text-[var(--muted-foreground)]" />
+                          </Link>
+                          <div className="flex flex-wrap gap-1.5">
+                            {c.items.map((it) => (
+                              <Link
+                                key={it.slug}
+                                href={`/products/${c.slug}/${it.slug}`}
+                                onClick={closeAll}
+                                className={cn(
+                                  'h-8 px-2.5 rounded-lg border text-xs font-bold flex items-center num',
+                                  pathname.endsWith(`/${it.slug}`) ? 'border-[var(--accent)] text-[var(--accent-text)]' : 'border-[var(--border)]',
+                                )}
+                              >
+                                {it.label}
+                              </Link>
+                            ))}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+                <div className="mb-4" />
               </div>
 
               <div className="p-4 border-t border-[var(--border)] grid grid-cols-[1fr_auto_auto_auto] gap-2">

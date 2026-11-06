@@ -61,7 +61,7 @@ export async function GET(_request: NextRequest, { params }: Props) {
     }
     await ensureFonts();
     const settings = mergeSiteSettings(await getSiteSettingsMap());
-    const phones = [settings.companyPhones[0], settings.mobile, settings.phone].filter(Boolean).join(' · ');
+    const phones = [...new Set([settings.companyPhones[0], settings.phone, settings.mobile].filter(Boolean))].join(' · ');
     const col = { idx: 28, title: 220, qty: 70, price: 80, total: 80 };
     const issued = quote.status === 'ISSUED';
     const docTitle = issued ? 'فاکتور فروش' : 'پیش‌فاکتور فروش';

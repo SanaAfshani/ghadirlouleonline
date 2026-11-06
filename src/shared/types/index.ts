@@ -1,3 +1,5 @@
+import type { SupplyStatus } from '@/shared/lib/supply-status';
+
 export interface Product {
   id: string;
   name: string;
@@ -10,6 +12,8 @@ export interface Product {
   categoryId: string;
   specifications: Record<string, string>;
   inStock: boolean;
+  /** وضعیت تأمین مؤثر (خالی در دیتابیس → از inStock) */
+  supplyStatus: SupplyStatus;
   featured: boolean;
   published: boolean;
   /** فیلدهای سئو — اختیاری؛ در صورت خالی بودن از name/shortDescription استفاده می‌شود */
@@ -33,6 +37,8 @@ export interface Category {
   name: string;
   slug: string;
   description: string;
+  /** متن بلند صفحه دسته (HTML) */
+  content?: string | null;
   image: string;
   icon?: string;
   parentId?: string;

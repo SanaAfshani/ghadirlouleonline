@@ -5,8 +5,8 @@ import { safeDecode } from '@/shared/lib/utils';
 import { ensureProduct } from '@/shared/lib/route-guards';
 import type { Metadata } from 'next';
 import { ProductDetailView } from '@/features/products/ProductDetailView';
-import { getProductBySlug, getPublishedProducts, getSitemapData } from '@/shared/lib/data';
-import { getPriceBoard, summarizeLine } from '@/shared/lib/price-board';
+import { getFittingsForSize, getProductBySlug, getPublishedProducts, getSitemapData } from '@/shared/lib/data';
+import { getPriceBoard, isPriceFresh, summarizeLine } from '@/shared/lib/price-board';
 import { siteConfig } from '@/shared/config/site';
 import { JsonLd } from '@/shared/ui/JsonLd';
 import { absoluteUrl, breadcrumbSchema, faqPageSchema, toMetaDescription } from '@/shared/lib/seo';
@@ -91,6 +91,9 @@ export default async function ProductDetailPage({ params }: Props) {
   const priceSummary = summarizeLine(board.lines.find((l) => l.productId === product.id)?.items ?? []);
   // هر سایز یک محصول است: همه هم‌دسته‌ها دکمه‌های انتخاب سایزند و «مرتبط» سایزهای همسایه
   const variants = await getPublishedProducts({ categorySlug: product.category.slug });
+  // اتصالات کاروگیت هم‌سایز همین لوله (کوپلر، واشر، زانو…) — اتصالات زیرمجموعه سیستم کاروگیت‌اند
+  const pipeSize = product.slug.match(/^corrugated-pipe-(\d+)$/)?.[1];
+  const fittings = pipeSize ? await getFittingsForSize(Number(pipeSize)) : [];
   const others = variants.filter((p) => p.id !== product.id);
   const index = variants.findIndex((p) => p.id === product.id);
   const start = Math.min(Math.max(0, index - 2), Math.max(0, others.length - 4));
@@ -99,15 +102,17 @@ export default async function ProductDetailPage({ params }: Props) {
   // جدول قیمت ← AggregateOffer (بازه قیمت در نتایج گوگل)؛ در غیر این صورت قیمت تکی.
   // قیمت‌ها در پنل به تومان ثبت می‌شوند؛ schema.org واحد رسمی ریال را می‌خواهد (×۱۰)
   const seller = { '@type': 'Organization', name: siteConfig.name, url: siteConfig.url };
-  const availability = product.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
+  // «استعلام موجودی» و «در انتظار تأیید» ناموجود نیستند؛ فقط آماده‌بودنشان تأیید نشده
+  const availability = product.supplyStatus === 'ready' ? 'https://schema.org/InStock' : 'https://schema.org/LimitedAvailability';
   // offers فقط در ساعت فروش.
   //
   // بیرون از آن، جدول «آخرین قیمت ثبت‌شده» را با تاریخش نشان می‌دهد و همین برای خزنده‌ها و
   // دستیارهای هوش مصنوعی که متن صفحه را می‌خوانند کافی است. ولی offers در schema یعنی «قیمت
   // فروش همین حالا» و گوگل آن را در نتایج به‌عنوان قیمت روز نشان می‌دهد — گذاشتن قیمت دیروز
   // در آن، هم با صفحه نمی‌خواند و هم کاربر را پای یک عدد قطعی‌نما می‌نشاند.
+  // قیمت چندروزه هم «قیمت فروش همین حالا» نیست؛ فقط قیمت تازه به گوگل می‌رود
   const offers =
-    showPrice && priceSummary.minPrice != null
+    showPrice && priceSummary.minPrice != null && isPriceFresh(priceSummary.updatedAt)
       ? {
           '@type': 'AggregateOffer',
           url: canonical,
@@ -178,7 +183,7 @@ export default async function ProductDetailPage({ params }: Props) {
           { name: product.name, path: `/products/${encodeURIComponent(category)}/${encodeURIComponent(slug)}` },
         ])}
       />
-      <ProductDetailView product={showPrice ? product : { ...product, price: undefined }} related={related} variants={variants} board={board} comingSoon={comingSoon} />
+      <ProductDetailView product={showPrice ? product : { ...product, price: undefined }} related={related} variants={variants} fittings={fittings} board={board} comingSoon={comingSoon} />
     </>
   );
 }

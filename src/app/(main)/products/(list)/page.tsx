@@ -21,10 +21,7 @@ export default async function ProductsPage() {
     getPublishedProducts(),
   ]);
 
-  const categories = [
-    { slug: 'all', name: 'همه محصولات' },
-    ...dbCategories.map((c) => ({ slug: c.slug, name: c.name })),
-  ];
+  const categories = dbCategories.map((c) => ({ slug: c.slug, name: c.name, description: c.description }));
 
   return (
     <>

@@ -7,6 +7,7 @@ import { serializeCatalogs } from '@/shared/lib/catalog-files';
 import { slugify } from '@/shared/lib/utils';
 import { recordRedirect } from '@/shared/lib/redirects';
 import { pingIndexNow } from '@/shared/lib/indexnow';
+import { isSupplyStatus } from '@/shared/lib/supply-status';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -55,6 +56,11 @@ export async function PUT(request: NextRequest, { params }: Props) {
     if (body.shortDescription != null) data.shortDescription = body.shortDescription;
     if (body.categoryId != null) data.categoryId = body.categoryId;
     if (body.inStock != null) data.inStock = Boolean(body.inStock);
+    // وضعیت تأمین معتبر، inStock را هم هم‌سو نگه می‌دارد (schema و کدهای قدیمی‌تر inStock را می‌خوانند)
+    if (isSupplyStatus(body.supplyStatus)) {
+      data.supplyStatus = body.supplyStatus;
+      data.inStock = body.supplyStatus === 'ready';
+    }
     if (body.featured != null) data.featured = Boolean(body.featured);
     if (body.published != null) data.published = Boolean(body.published);
     if (body.quoteOnly != null) data.quoteOnly = Boolean(body.quoteOnly);

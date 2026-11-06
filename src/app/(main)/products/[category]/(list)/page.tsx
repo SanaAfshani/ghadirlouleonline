@@ -12,6 +12,7 @@ import { siteConfig } from '@/shared/config/site';
 import { JsonLd } from '@/shared/ui/JsonLd';
 import { absoluteUrl, breadcrumbSchema, toMetaDescription } from '@/shared/lib/seo';
 import { isComingSoon } from '@/shared/lib/catalog';
+import { withImageDimensions } from '@/shared/lib/media';
 
 type Props = { params: Promise<{ category: string }> };
 
@@ -71,6 +72,8 @@ export default async function CategoryPage({ params }: Props) {
     getRelatedBlogPosts(category.name).catch(() => []),
   ]);
   const priceProductIds = board.lines.filter((l) => l.categorySlug === slug).map((l) => l.productId);
+  // متن بلند دسته از پنل (HTML مدیر)؛ ابعاد عکس‌ها مثل توضیحات محصول اضافه می‌شود تا جابه‌جایی صفحه نداشته باشیم
+  const content = category.content ? await withImageDimensions(category.content) : null;
 
   const canonical = `${siteConfig.url}/products/${encodeURIComponent(slug)}`;
 
@@ -116,6 +119,11 @@ export default async function CategoryPage({ params }: Props) {
       board={board}
       priceProductIds={priceProductIds}
     />
+      {content && (
+        <section className="container-main pb-10" aria-label={`راهنمای ${category.name}`}>
+          <div className="article-content max-w-4xl" dangerouslySetInnerHTML={{ __html: content }} />
+        </section>
+      )}
       <CategoryGuides categoryName={category.name} guides={guides} />
     </>
   );

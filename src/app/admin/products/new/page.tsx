@@ -15,6 +15,7 @@ import { CatalogEditor } from '@/features/admin/catalogs/CatalogEditor';
 import type { SeoFields } from '@/features/admin/seo/seo';
 import type { CatalogFile, FaqItem } from '@/shared/types';
 import { Select } from '@/shared/ui/Select';
+import { SUPPLY_STATUSES, SUPPLY_STATUS_LABEL, isSupplyStatus, type SupplyStatus } from '@/shared/lib/supply-status';
 
 type Spec = { key: string; value: string };
 
@@ -25,7 +26,7 @@ interface FormState {
   description: string;
   price: string;
   images: string[];
-  inStock: boolean;
+  supplyStatus: SupplyStatus;
   featured: boolean;
   published: boolean;
   specs: Spec[];
@@ -52,7 +53,7 @@ export default function NewProductPage() {
     description: '',
     price: '',
     images: [],
-    inStock: true,
+    supplyStatus: 'inquiry',
     featured: false,
     published: true,
     specs: [{ key: '', value: '' }],
@@ -113,7 +114,7 @@ export default function NewProductPage() {
           price: form.price || null,
           images: form.images,
           specifications,
-          inStock: form.inStock,
+          supplyStatus: form.supplyStatus,
           featured: form.featured,
           published: form.published,
           metaTitle: form.metaTitle,
@@ -144,7 +145,7 @@ export default function NewProductPage() {
     setForm((f) => ({ ...f, specs }));
   };
   const removeSpec = (i: number) => setForm((f) => ({ ...f, specs: f.specs.filter((_, idx) => idx !== i) }));
-  const toggleField = (key: 'inStock' | 'featured' | 'published') =>
+  const toggleField = (key: 'featured' | 'published') =>
     setForm((f) => ({ ...f, [key]: !f[key] }));
 
   const inputCls =
@@ -303,11 +304,23 @@ export default function NewProductPage() {
                   className={inputCls} />
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">وضعیت تأمین</label>
+                <Select
+                  value={form.supplyStatus}
+                  onChange={(v) => isSupplyStatus(v) && setForm({ ...form, supplyStatus: v })}
+                  options={SUPPLY_STATUSES.map((s) => ({ value: s, label: SUPPLY_STATUS_LABEL[s] }))}
+                  aria-label="وضعیت تأمین"
+                  className={inputCls}
+                />
+                <p className="text-xs text-[var(--muted-foreground)] mt-1.5 leading-relaxed">
+                  به‌جای «موجود/ناموجود» روی کارت و صفحه محصول دیده می‌شود. «آماده تأمین» را فقط وقتی بزنید که کارخانه موجودی این سایز را تأیید کرده.
+                </p>
+              </div>
               {([
-                { key: 'inStock', label: 'موجود در انبار' },
                 { key: 'featured', label: 'محصول ویژه' },
                 { key: 'published', label: 'منتشر شده' },
-              ] as { key: 'inStock' | 'featured' | 'published'; label: string }[]).map(({ key, label }) => (
+              ] as { key: 'featured' | 'published'; label: string }[]).map(({ key, label }) => (
                 <label key={key} className="flex items-center gap-3 cursor-pointer">
                   <button type="button" onClick={() => toggleField(key)}
                     className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${form[key] ? 'bg-[var(--accent)]' : 'bg-[var(--border)]'}`}>

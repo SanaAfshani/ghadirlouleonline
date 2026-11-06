@@ -96,7 +96,12 @@ export function CategoryProductsClient({ category, products, board, priceProduct
           <section className="mt-14" aria-labelledby="category-prices">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <h2 id="category-prices" className="text-xl sm:text-2xl font-black">قیمت روز {category.name}</h2>
-              <MarketStatus market={board.market} />
+              <div className="flex flex-wrap items-center gap-3">
+                <Link href="/project-inquiry" className="h-10 px-4 rounded-xl border border-[var(--accent)] text-[var(--accent-text)] text-sm font-bold flex items-center">
+                  استعلام خرید پروژه‌ای
+                </Link>
+                <MarketStatus market={board.market} />
+              </div>
             </div>
             <LivePriceTable initial={board} productIds={priceProductIds} showProduct={priceProductIds.length > 1} caption={`قیمت ${category.name}`} toolbar />
           </section>

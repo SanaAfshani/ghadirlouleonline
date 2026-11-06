@@ -6,6 +6,14 @@ import { ArrowLeft, Table2 } from 'lucide-react';
 import { CategoryThumb } from '@/widgets/header/Header';
 import { cn, faDigits } from '@/shared/lib/utils';
 import type { ProductListItem } from '@/shared/lib/serializers';
+import { SUPPLY_STATUS_LABEL, type SupplyStatus } from '@/shared/lib/supply-status';
+
+/** روی عکس کارت — پس‌زمینه پررنگ تا روی هر عکسی خوانا بماند */
+const CARD_TONE: Record<SupplyStatus, string> = {
+  ready: 'bg-emerald-700/90 text-white',
+  inquiry: 'bg-amber-500/95 text-slate-950',
+  pending: 'bg-slate-900/75 text-slate-100',
+};
 
 function priceLabel(p: ProductListItem) {
   if (p.priceFrom != null) return { prefix: 'از', value: p.priceFrom.toLocaleString('fa-IR') };
@@ -44,8 +52,8 @@ export function ProductCard({ product, className }: { product: ProductListItem; 
                 به زودی
               </span>
             ) : (
-              <span className={cn('h-7 px-2.5 rounded-lg text-[11px] font-bold flex items-center backdrop-blur', product.inStock ? 'bg-emerald-700/90 text-white' : 'bg-slate-900/70 text-slate-200')}>
-                {product.inStock ? 'موجود در انبار' : 'ناموجود'}
+              <span className={cn('h-7 px-2.5 rounded-lg text-[11px] font-bold flex items-center backdrop-blur', CARD_TONE[product.supplyStatus])}>
+                {SUPPLY_STATUS_LABEL[product.supplyStatus]}
               </span>
             )}
             {product.priceRows > 0 && (

@@ -139,7 +139,7 @@ export function QuoteView({ quote, settings }: { quote: PublicQuote; settings: S
                   <p className="flex items-center gap-1.5" dir="ltr">
                     <Phone className="w-3.5 h-3.5 shrink-0" />
                     <span className="num">
-                      {[settings.companyPhones[0], settings.mobile, settings.phone].filter(Boolean).map((p) => faDigits(p!)).join(' · ')}
+                      {[...new Set([settings.companyPhones[0], settings.phone, settings.mobile].filter(Boolean))].map((p) => faDigits(p!)).join(' · ')}
                     </span>
                   </p>
                   <p className="flex items-center gap-1.5" dir="ltr">
@@ -272,7 +272,7 @@ export function QuoteView({ quote, settings }: { quote: PublicQuote; settings: S
               <p>{siteConfig.salesExpert.role}: {siteConfig.salesExpert.name}</p>
               <p>{settings.address || siteConfig.address}</p>
               <p className="num" dir="ltr">
-                {[settings.companyPhones[0], settings.mobile, settings.phone].filter(Boolean).map((p) => faDigits(p!)).join(' · ')}
+                {[...new Set([settings.companyPhones[0], settings.phone, settings.mobile].filter(Boolean))].map((p) => faDigits(p!)).join(' · ')}
               </p>
               <p className="num" dir="ltr">{settings.email}</p>
             </div>

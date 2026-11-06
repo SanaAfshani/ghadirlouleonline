@@ -7,34 +7,39 @@ import { PageHero } from '@/shared/ui/PageHero';
 import { siteConfig } from '@/shared/config/site';
 import { IconTile, type IconTone } from '@/shared/ui/IconTile';
 
+/**
+ * فقط واقعیت‌های قابل بررسی — آمار قبلی (۵۰۰۰ نوع محصول، ۵۰۰ مشتری، ۲۰۰ پروژه) مستند نبود و حذف شد.
+ * منبع: سایت رسمی کارخانه، گواهینامه‌ها و فهرست سایزهای همین سایت.
+ */
 const stats = [
-  { value: 20, label: 'سال تجربه' },
-  { value: 500, label: 'مشتری فعال' },
-  { value: 5000, label: 'نوع محصول' },
-  { value: 200, label: 'پروژه موفق' },
+  { value: '۱۳۹۱', label: 'آغاز تولید کارخانه در گرمسار' },
+  { value: '۱۲', label: 'سایز لوله کاروگیت؛ ۱۱۰ تا ۱۲۰۰' },
+  { value: '۵', label: 'سایز لوله اسپیرال؛ ۹۰۰ تا ۲۰۰۰' },
+  { value: 'ISO 9001', label: 'و پروانه استاندارد ISIRI 9116-3' },
 ];
 
 const values = [
   { icon: Target, title: 'ماموریت ما', desc: 'تامین با کیفیت‌ترین لوله فاضلاب و آب‌های سطحی — لوله کاروگیت دوجداره، لوله اسپیرال و اتصالات کاروگیت — با قیمت رقابتی و خدمات حرفه‌ای.' },
-  { icon: Eye, title: 'چشم‌انداز ما', desc: 'تبدیل شدن به بزرگ‌ترین و معتمدترین تامین‌کننده لوله آب و فاضلاب در خراسان رضوی و سراسر ایران.' },
+  { icon: Eye, title: 'چشم‌انداز ما', desc: 'مرجع تخصصی خرید و تأمین لوله کاروگیت و اسپیرال برای پیمانکاران، مهندسان مشاور و پروژه‌های عمرانی ایران.' },
   { icon: Heart, title: 'ارزش‌های ما', desc: 'صداقت، کیفیت تضمین‌شده، تحویل به‌موقع و رضایت مشتری اصول اساسی ما هستند.' },
 ];
 
 const TONES: IconTone[] = ['accent', 'sky', 'emerald', 'violet', 'rose', 'slate'];
 
+/** مدیر مجموعه طبق پیام رسمی کارخانه؛ مدیران کارخانه طبق سایت رسمی قدیر لوله پاسارگاد */
 const team = [
-  { name: 'مهندس الهی', role: 'مدیرعامل', desc: '۲۰ سال تجربه در صنعت لوله آب و فاضلاب' },
-  { name: 'مهندس کاظمی', role: 'مدیر فنی', desc: 'متخصص در انواع لوله‌های PVC، PE و چدن' },
-  { name: siteConfig.salesExpert.name, role: siteConfig.salesExpert.role, desc: 'مشاوره خرید، اعلام قیمت روز و صدور پیش‌فاکتور' },
+  { name: siteConfig.salesExpert.name, role: `مدیر ${siteConfig.name}`, desc: 'فروش و تأمین، اعلام قیمت روز، صدور پیش‌فاکتور و پیگیری سفارش' },
+  { name: 'دکتر جمشید شاطری', role: `مدیرعامل ${siteConfig.legalName}`, desc: 'امضاکننده پیام رسمی معرفی نمایندگی' },
+  { name: 'دکتر نادر شاطری', role: `مدیر فروش ${siteConfig.legalName}`, desc: 'واحد فروش کارخانه' },
 ];
 
 const advantages = [
-  'تامین مستقیم از کارخانه‌های معتبر ایران و اروپا',
-  'ارائه گواهینامه کیفیت (Mill Certificate) برای تمام محصولات',
-  'انبار با موجودی بالا برای تحویل فوری',
-  'تیم مشاوره فنی متخصص',
-  'ارسال به سراسر ایران با حمل‌ونقل اختصاصی',
-  'قیمت‌گذاری شفاف و رقابتی',
+  `تأمین مستقیم از کارخانه ${siteConfig.legalName}، بدون واسطه`,
+  'نماینده رسمی و اختصاصی با گواهی نمایندگی کارخانه',
+  'مدارک کیفیت: ISO 9001، پروانه ISIRI 9116-3 و گزارش آزمون',
+  'بارگیری از انبار کارخانه در گرمسار',
+  'مشاوره انتخاب سایز و کلاس SN برای پروژه',
+  'ارسال به سراسر ایران',
 ];
 
 const reveal = {
@@ -50,7 +55,7 @@ export function AboutContent() {
       <PageHero
         label="درباره ما"
         title="قدیر لوله آنلاین"
-        description="بیش از ۲۰ سال تجربه در تامین انواع لوله آب و فاضلاب و اتصالات صنعتی برای پروژه‌های عمرانی و ساختمانی"
+        description={`نماینده رسمی و اختصاصی فروش و عرضه آنلاین محصولات ${siteConfig.legalName}: لوله کاروگیت دوجداره، لوله اسپیرال و اتصالات کاروگیت`}
       />
 
       {/* آمار — یک ردیف آرام با جداکننده، نه کارت‌های رنگی */}
@@ -59,9 +64,7 @@ export function AboutContent() {
           <dl className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-[var(--border)] border-x border-[var(--border)]">
             {stats.map((s, i) => (
               <motion.div key={s.label} {...reveal} transition={{ ...reveal.transition, delay: i * 0.06 }} className="py-8 sm:py-10 px-4 text-center bg-[var(--background)]">
-                <dd className="text-3xl sm:text-4xl font-black num tracking-tight">
-                  {s.value.toLocaleString('fa-IR')}<span className="text-[var(--accent-text)]">+</span>
-                </dd>
+                <dd className="text-3xl sm:text-4xl font-black num tracking-tight">{s.value}</dd>
                 <dt className="mt-1 text-sm text-[var(--muted-foreground)]">{s.label}</dt>
               </motion.div>
             ))}
@@ -74,12 +77,17 @@ export function AboutContent() {
         <div className="container-main grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-12 lg:gap-16 items-start">
           <motion.div {...reveal}>
             <span className="eyebrow">داستان ما</span>
-            <h2 className="mt-3 text-2xl sm:text-[2rem] font-black leading-snug">از انبار کوچک تا تامین‌کننده بزرگ خراسان</h2>
+            <h2 className="mt-3 text-2xl sm:text-[2rem] font-black leading-snug">نماینده رسمی کارخانه‌ای که از ۱۳۹۱ لوله دوجداره می‌سازد</h2>
             <p className="mt-5 text-[15px] leading-8 text-[var(--muted-foreground)]">
-              قدیر لوله آنلاین در سال ۱۳۸۳ با هدف تامین لوله‌های با کیفیت برای پروژه‌های عمرانی تاسیس شد. در ابتدا با تمرکز بر لوله‌های PVC (پلیکا) فعالیت آغاز کردیم.
+              شرکت تولیدی و بازرگانی {siteConfig.legalName} در اوایل سال ۱۳۹۱ در شهرک صنعتی گرمسار با یک خط تولید ۲۰۰ تا ۴۰۰ میلیمتر شروع به کار کرد و
+              امروز لوله دوجداره کاروگیت و لوله اسپیرال تولید می‌کند. کارخانه گواهینامه ISO 9001 و پروانه استاندارد اجباری ISIRI 9116-3 دارد و در دی ۱۴۰۲
+              تفاهم‌نامه همکاری فنی با شرکتی از تاجیکستان امضا کرده است.
             </p>
             <p className="mt-4 text-[15px] leading-8 text-[var(--muted-foreground)]">
-              امروز تمرکز ما روی سه محصول است: لوله کاروگیت دوجداره، لوله اسپیرال و اتصالات کاروگیت؛ همه مستقیم از کارخانه {siteConfig.legalName} و با قیمت روز.
+              {siteConfig.name} به مدیریت {siteConfig.salesExpert.name}، طبق{' '}
+              <Link href="/official-representative" className="font-bold text-[var(--accent-text)] hover:underline">پیام رسمی کارخانه</Link>، نماینده رسمی و
+              اختصاصی فروش و عرضه آنلاین محصولات {siteConfig.legalName} است. تمرکز ما روی سه محصول است: لوله کاروگیت دوجداره، لوله اسپیرال و اتصالات
+              کاروگیت؛ همه مستقیم از کارخانه و با قیمت روز.
             </p>
             <ul className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
               {advantages.map((adv) => (
@@ -111,14 +119,14 @@ export function AboutContent() {
       <section className="section-padding bg-[var(--card)] border-y border-[var(--border)]">
         <div className="container-main">
           <div className="mb-8">
-            <span className="eyebrow">تیم ما</span>
-            <h2 className="mt-2 text-2xl sm:text-3xl font-black">متخصصان ما</h2>
+            <span className="eyebrow">مدیریت</span>
+            <h2 className="mt-2 text-2xl sm:text-3xl font-black">مدیریت مجموعه و کارخانه</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5">
             {team.map((m, i) => (
               <motion.div key={m.name} {...reveal} transition={{ ...reveal.transition, delay: i * 0.08 }} className="p-6 rounded-3xl bg-[var(--background)] border border-[var(--border)]">
                 <span className="grid place-items-center w-12 h-12 rounded-full bg-[var(--ink)] text-white font-black">
-                  {m.name.replace(/^(مهندس|خانم|آقای)\s+/, '').charAt(0)}
+                  {m.name.replace(/^(مهندس|خانم|آقای|دکتر)\s+/, '').charAt(0)}
                 </span>
                 <p className="mt-4 font-bold">{m.name}</p>
                 <p className="text-sm text-[var(--accent-text)] font-semibold">{m.role}</p>

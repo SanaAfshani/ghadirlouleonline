@@ -7,6 +7,7 @@ import { serializeFaqs } from '@/shared/lib/page-faqs';
 import { serializeCatalogs } from '@/shared/lib/catalog-files';
 import { getMarketNow } from '@/shared/lib/price-board';
 import { pingIndexNow } from '@/shared/lib/indexnow';
+import { isSupplyStatus } from '@/shared/lib/supply-status';
 
 /** فیلد متنی اختیاری: رشته خالی را به null تبدیل می‌کند تا fallback سئو درست کار کند */
 function optionalText(value: unknown): string | null {
@@ -83,7 +84,10 @@ export async function POST(request: NextRequest) {
         price: body.price != null && body.price !== '' ? parseFloat(String(body.price)) : null,
         images: JSON.stringify(body.images || []),
         specifications: JSON.stringify(body.specifications || {}),
-        inStock: body.inStock ?? true,
+        // وضعیت تأمین معتبر، inStock را هم هم‌سو نگه می‌دارد (schema و کدهای قدیمی‌تر inStock را می‌خوانند)
+        ...(isSupplyStatus(body.supplyStatus)
+          ? { supplyStatus: body.supplyStatus, inStock: body.supplyStatus === 'ready' }
+          : { inStock: body.inStock ?? true }),
         featured: body.featured ?? false,
         published: body.published ?? true,
         quoteOnly: body.quoteOnly ?? false,

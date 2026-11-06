@@ -72,6 +72,16 @@ export type HistoryRange = 7 | 30 | 90 | 365;
 /** یک نقطه نمودار: day به صورت YYYY-MM-DD به وقت تهران */
 export type HistoryPoint = { day: string; price: number };
 
+/**
+ * قیمتی که از این تازه‌تر است «قیمت امروز» حساب می‌شود؛ قدیمی‌تر، با برچسب «آخرین قیمت ثبت‌شده» و تاریخش
+ * نمایش داده می‌شود تا عدد چند روز پیش به‌جای قیمت روز دیده نشود (حتی در ساعت فروش).
+ */
+export const PRICE_FRESH_DAYS = 2;
+
+export function isPriceFresh(changedAt: string | null | undefined, now = Date.now()) {
+  return !!changedAt && now - Date.parse(changedAt) < PRICE_FRESH_DAYS * 24 * 60 * 60 * 1000;
+}
+
 /** خلاصه یک خط قیمت برای کارت و schema */
 export function summarizeLine(items: LiveItem[]) {
   const prices = items.map((i) => i.price).filter((p): p is number => p != null);

@@ -34,7 +34,7 @@ export function ServicesSection() {
             <div className="flex flex-col min-w-0">
               <span className="eyebrow">چرا ما</span>
               <h2 id="why-title" className="mt-3 text-2xl sm:text-3xl lg:text-4xl font-black leading-snug text-white">
-                خرید مطمئن لوله و اتصالات، از مشاوره تا تحویل
+                خرید مطمئن لوله کاروگیت و اسپیرال، از مشاوره تا تحویل
               </h2>
               <p className="mt-4 text-slate-300 leading-8">
                 فرم مشاوره را پر کنید تا کارشناسان ما برای انتخاب محصول، استعلام قیمت روز و زمان ارسال با شما تماس بگیرند.

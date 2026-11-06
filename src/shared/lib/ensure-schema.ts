@@ -30,6 +30,10 @@ const STATEMENTS = [
   // 20261105000000_blog_youtix_id
   `ALTER TABLE "BlogPost" ADD COLUMN IF NOT EXISTS "youtixId" TEXT`,
   `CREATE UNIQUE INDEX IF NOT EXISTS "BlogPost_youtixId_key" ON "BlogPost"("youtixId")`,
+  // 20261106000000_product_supply_status
+  `ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "supplyStatus" TEXT NOT NULL DEFAULT ''`,
+  // 20261106010000_category_content
+  `ALTER TABLE "Category" ADD COLUMN IF NOT EXISTS "content" TEXT`,
 ];
 
 export async function ensureSchema() {

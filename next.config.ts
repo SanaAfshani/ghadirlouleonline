@@ -34,12 +34,16 @@ const nextConfig: NextConfig = {
   // فهرست در siteConfig.altDomains است: www و دامنه .com هر دو با ۳۰۱ به دامنه اصلی می‌روند تا
   // اعتبار و لینک‌ها بین چند آدرس تقسیم نشود.
   async redirects() {
-    return siteConfig.altDomains.map((host) => ({
-      source: '/:path*',
-      has: [{ type: 'host' as const, value: host }],
-      destination: `${siteConfig.url}/:path*`,
-      permanent: true,
-    }));
+    return [
+      ...siteConfig.altDomains.map((host) => ({
+        source: '/:path*',
+        has: [{ type: 'host' as const, value: host }],
+        destination: `${siteConfig.url}/:path*`,
+        permanent: true,
+      })),
+      // دو صفحه جامع برای سه دسته تکراری بود؛ /products تنها صفحه جامع است و اعتبار /categories به آن می‌رود
+      { source: '/categories', destination: '/products', permanent: true },
+    ];
   },
 };
 

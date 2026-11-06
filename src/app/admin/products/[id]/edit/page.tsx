@@ -14,6 +14,7 @@ import { CatalogEditor } from '@/features/admin/catalogs/CatalogEditor';
 import type { SeoFields } from '@/features/admin/seo/seo';
 import type { CatalogFile, FaqItem } from '@/shared/types';
 import { Select } from '@/shared/ui/Select';
+import { SUPPLY_STATUSES, SUPPLY_STATUS_LABEL, isSupplyStatus, type SupplyStatus } from '@/shared/lib/supply-status';
 
 type Spec = { key: string; value: string };
 
@@ -24,8 +25,8 @@ interface FormState {
   description: string;
   price: string;
   quoteOnly: boolean;
+  supplyStatus: SupplyStatus;
   images: string[];
-  inStock: boolean;
   featured: boolean;
   published: boolean;
   specs: Spec[];
@@ -48,7 +49,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState<FormState>({
     name: '', categoryId: '', shortDescription: '', description: '',
-    price: '', images: [], inStock: true, featured: false, published: true, quoteOnly: false,
+    price: '', images: [], supplyStatus: 'inquiry', featured: false, published: true, quoteOnly: false,
     specs: [{ key: '', value: '' }],
     slug: '',
     metaTitle: '',
@@ -93,7 +94,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           price: product.price != null ? String(product.price) : '',
           quoteOnly: Boolean(product.quoteOnly),
           images: product.images || [],
-          inStock: product.inStock,
+          supplyStatus: product.supplyStatus,
           featured: product.featured,
           published: product.published,
           specs: specEntries.length > 0
@@ -138,7 +139,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           quoteOnly: form.quoteOnly,
           images: form.images,
           specifications,
-          inStock: form.inStock,
+          supplyStatus: form.supplyStatus,
           featured: form.featured,
           published: form.published,
           slug: form.slug || undefined,
@@ -170,7 +171,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     setForm((f) => ({ ...f, specs }));
   };
   const removeSpec = (i: number) => setForm((f) => ({ ...f, specs: f.specs.filter((_, idx) => idx !== i) }));
-  const toggleField = (key: 'quoteOnly' | 'inStock' | 'featured' | 'published') =>
+  const toggleField = (key: 'quoteOnly' | 'featured' | 'published') =>
     setForm((f) => ({ ...f, [key]: !f[key] }));
 
   const inputCls =
@@ -339,12 +340,24 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 )}
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">وضعیت تأمین</label>
+                <Select
+                  value={form.supplyStatus}
+                  onChange={(v) => isSupplyStatus(v) && setForm({ ...form, supplyStatus: v })}
+                  options={SUPPLY_STATUSES.map((s) => ({ value: s, label: SUPPLY_STATUS_LABEL[s] }))}
+                  aria-label="وضعیت تأمین"
+                  className={inputCls}
+                />
+                <p className="text-xs text-[var(--muted-foreground)] mt-1.5 leading-relaxed">
+                  به‌جای «موجود/ناموجود» روی کارت و صفحه محصول دیده می‌شود. «آماده تأمین» را فقط وقتی بزنید که کارخانه موجودی این سایز را تأیید کرده.
+                </p>
+              </div>
               {([
                 { key: 'quoteOnly', label: 'فقط استعلام قیمت' },
-                { key: 'inStock', label: 'موجود در انبار' },
                 { key: 'featured', label: 'محصول ویژه' },
                 { key: 'published', label: 'منتشر شده' },
-              ] as { key: 'quoteOnly' | 'inStock' | 'featured' | 'published'; label: string }[]).map(({ key, label }) => (
+              ] as { key: 'quoteOnly' | 'featured' | 'published'; label: string }[]).map(({ key, label }) => (
                 <label key={key} className="flex items-center gap-3 cursor-pointer">
                   <button type="button" onClick={() => toggleField(key)}
                     className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${form[key] ? 'bg-[var(--accent)]' : 'bg-[var(--border)]'}`}>

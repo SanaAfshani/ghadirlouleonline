@@ -15,7 +15,9 @@ import { RubikaButton } from '@/shared/ui/RubikaButton';
 
 const QUICK_LINKS = [
   { href: '/prices', label: 'لیست قیمت روز' },
+  { href: '/project-inquiry', label: 'استعلام خرید پروژه‌ای' },
   { href: '/official-representative', label: 'نمایندگی رسمی قدیر لوله پاسارگاد' },
+  { href: '/certificates', label: 'مدارک نمایندگی و تأییدیه‌های فنی' },
   { href: '/factory', label: 'کارخانه و توانمندی تأمین' },
   { href: '/services', label: 'خدمات ما' },
   { href: '/blog', label: 'مجله تخصصی' },
@@ -115,7 +117,10 @@ export function Footer({ categories }: { categories: NavCategory[] }) {
               <li>
                 <a href={phoneHref} className="flex items-center gap-3 hover:text-white">
                   <span className="grid place-items-center w-9 h-9 rounded-xl bg-white/5"><Phone className="w-4 h-4 text-[var(--accent-text)]" /></span>
-                  <span dir="ltr" className="num font-bold">{faDigits(phone)}</span>
+                  <span>
+                    <span className="block text-[11px] text-slate-400">فروش و سفارش عمده</span>
+                    <span dir="ltr" className="num font-bold">{faDigits(phone)}</span>
+                  </span>
                 </a>
               </li>
               {mobile && mobile !== phone && (

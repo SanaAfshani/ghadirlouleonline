@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { WEEK_ORDER, WEEKDAY_LABEL, type MarketMode, type MarketSchedule, type MarketStatus } from '@/shared/lib/market';
 import { cn, formatPersianNumber, latinDigits } from '@/shared/lib/utils';
+import { isPriceFresh } from '@/shared/lib/price-board-types';
 import { toWeight } from '@/shared/lib/price-admin';
 import { GRADES, compareItems, itemLabel, type SortDir, type SortKey } from '@/shared/lib/price-item';
 import { useConfirm } from '@/shared/ui/ConfirmDialog';
@@ -1020,6 +1021,8 @@ function PriceBoardPage() {
   const params = useSearchParams();
   const [products, setProducts] = useState<ProductRow[] | null>(null);
   const [market, setMarket] = useState<Market | null>(null);
+  /** زمان خواندن قیمت‌ها — مبنای «چند روز است به‌روز نشده» (Date.now در رندر مجاز نیست) */
+  const [loadedAt, setLoadedAt] = useState(0);
   const [filter, setFilter] = useState('');
   const selectedId = params.get('product');
 
@@ -1030,6 +1033,7 @@ function PriceBoardPage() {
         if (!alive) return;
         setProducts(p);
         setMarket(m);
+        setLoadedAt(Date.now());
       })
       .catch((e) => toast.error(e instanceof Error ? e.message : 'بارگذاری ناموفق بود'));
     return () => {
@@ -1057,6 +1061,12 @@ function PriceBoardPage() {
 
   const priced = products.filter((p) => p.priceItems.length);
   const totalRows = priced.reduce((n, p) => n + p.priceItems.length, 0);
+  // تازه‌ترین قیمت محصولات منتشرشده؛ وقتی کهنه شود سایت آن را «آخرین قیمت ثبت‌شده» نشان می‌دهد نه قیمت امروز
+  const lastChange = products
+    .filter((p) => p.published)
+    .flatMap((p) => p.priceItems.map((i) => i.priceChangedAt))
+    .reduce<string | null>((a, d) => (!a || d > a ? d : a), null);
+  const staleDays = lastChange && !isPriceFresh(lastChange, loadedAt) ? Math.floor((loadedAt - Date.parse(lastChange)) / 86400000) : 0;
   const perKgProducts = products.filter((p) => p.pricePerKg).length;
   const missingWeight = products.filter((p) => p.pricePerKg).reduce((n, p) => n + p.priceItems.filter((i) => toWeight(i.weight) == null).length, 0);
   const stats = [
@@ -1075,6 +1085,19 @@ function PriceBoardPage() {
           <p className="text-[var(--muted-foreground)] text-sm leading-7">هر قیمت با Enter یا خروج از فیلد ذخیره می‌شود و در کمتر از ۱۰ ثانیه روی سایت نمایش داده می‌شود. Enter به قیمت ردیف بعد می‌رود.</p>
         </div>
       </div>
+
+      {staleDays > 0 && (
+        <div role="alert" className="flex items-start gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3">
+          <AlertTriangle className="w-5 h-5 mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
+          <p className="text-sm leading-7 text-[var(--foreground)]">
+            <strong>قیمت‌ها {formatPersianNumber(staleDays)} روز است به‌روز نشده‌اند.</strong>{' '}
+            <span className="text-[var(--muted-foreground)]">
+              سایت آن‌ها را «آخرین قیمت ثبت‌شده» با تاریخ نشان می‌دهد، نه قیمت امروز؛ بعد از ۳۰ روز هم پنهان می‌شوند. قیمت روز هر کیلو را
+              در یکی از محصولات هر دسته وارد کنید تا همه سایزهای آن دسته به‌روز شوند.
+            </span>
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
         {stats.map((st) => (

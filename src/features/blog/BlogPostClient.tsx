@@ -123,6 +123,27 @@ export function BlogPostClient({ slug }: Props) {
             />
           </motion.div>
 
+          {/*
+            بیشتر بازدید وبلاگ از مقاله‌های محصولات دیگر (پلیکا، آبیاری، منهول…) است؛ این باکس آن بازدیدکننده‌ها را به
+            محصولی می‌برد که واقعاً عرضه می‌شود. مقاله‌های کاروگیت مستقیم به سایزها و قیمت روز لینک می‌گیرند.
+          */}
+          <aside className="mt-10 rounded-[var(--radius-panel)] border border-[var(--accent)]/40 bg-[var(--accent)]/[0.06] p-5 sm:p-6">
+            <p className="font-black text-lg leading-8">
+              {/کاروگیت/.test(post.title) ? 'لوله کاروگیت دوجداره؛ سایزها و قیمت روز' : 'برای شبکه فاضلاب و آب‌های سطحی: لوله کاروگیت دوجداره'}
+            </p>
+            <p className="mt-1 text-sm leading-7 text-[var(--muted-foreground)]">
+              {siteConfig.name}، نماینده رسمی {siteConfig.legalName}: لوله کاروگیت ۱۱۰ تا ۱۲۰۰، لوله اسپیرال ۹۰۰ تا ۲۰۰۰ و اتصالات کاروگیت، با قیمت روز کارخانه.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link href="/products/corrugated-pipes" className="h-11 px-5 rounded-[var(--radius-control)] bg-[var(--accent)] text-[var(--accent-foreground)] text-sm font-bold flex items-center">
+                سایزها و قیمت لوله کاروگیت
+              </Link>
+              <Link href="/project-inquiry" className="h-11 px-5 rounded-[var(--radius-control)] border border-[var(--border)] text-sm font-bold flex items-center hover:border-[var(--accent)]">
+                استعلام خرید پروژه‌ای
+              </Link>
+            </div>
+          </aside>
+
           {/* Share */}
           <div className="mt-10 pt-8 border-t border-[var(--border)]">
             <div className="flex items-center gap-4">
