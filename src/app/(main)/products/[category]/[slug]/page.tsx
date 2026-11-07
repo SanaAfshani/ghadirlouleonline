@@ -142,14 +142,13 @@ export default async function ProductDetailPage({ params }: Props) {
     .filter(([name, value]) => name && value)
     .map(([name, value]) => ({ '@type': 'PropertyValue', name, value }));
 
-  // Product همیشه منتشر می‌شود، حتی بدون قیمت.
+  // Product فقط همراه offers منتشر می‌شود.
   //
-  // قبلاً فقط وقتی offers داشت منتشر می‌شد، چون گوگل برای *رفتن به نتیجه غنی* offers می‌خواهد.
-  // ولی بیرون از ساعت فروش و روی محصول‌های «فقط استعلام» اصلاً offer وجود ندارد، یعنی عملاً هیچ‌وقت
-  // منتشر نمی‌شد. Product بدون offer خطا نیست؛ فقط نتیجه غنیِ قیمت نمی‌گیرد — در عوض نام، مشخصات
-  // فنی و دسته محصول برای خزنده‌ها و دستیارهای هوش مصنوعی خوانا می‌ماند. offers همچنان فقط وقتی
-  // می‌آید که واقعاً قیمتی در صفحه باشد، تا schema و صفحه هیچ‌وقت دو حرف نزنند.
-  const productSchema = {
+  // گوگل Product بدون offers/review/aggregateRating را در گزارش «Product snippets» خطای بحرانی
+  // (Invalid item) حساب می‌کند. بیرون از ساعت فروش، با قیمت کهنه و روی دسته «به زودی» offer نداریم؛
+  // پس آن موقع Product نمی‌آید — مشخصات فنی همچنان در متن صفحه هست. قیمت ساختگی/قدیمی هم به
+  // offers نمی‌رود تا schema و صفحه هیچ‌وقت دو حرف نزنند.
+  const productSchema = offers && {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
@@ -165,12 +164,12 @@ export default async function ProductDetailPage({ params }: Props) {
     ...(images.length ? { image: images } : {}),
     ...(specs.length ? { additionalProperty: specs } : {}),
     url: canonical,
-    ...(offers ? { offers } : {}),
+    offers,
   };
 
   return (
     <>
-      <JsonLd data={productSchema} />
+      {productSchema && <JsonLd data={productSchema} />}
       {/* سوالات متداول اختصاصی محصول — واجد شرایط rich result آکاردئونی */}
       {product.faqs.length > 0 && <JsonLd data={faqPageSchema(product.faqs)} />}
       <JsonLd
