@@ -17,7 +17,7 @@ const PATH = '/official-representative';
 const TITLE = `نماینده رسمی و اختصاصی ${siteConfig.legalName}`;
 const HEADLINE = `${siteConfig.name}؛ درگاه رسمی و اختصاصی عرضه محصولات ${siteConfig.legalName}`;
 const DESCRIPTION = `پیام رسمی ${siteConfig.legalName}: معرفی ${siteConfig.name} به مدیریت امیر یوسفی به‌عنوان نماینده رسمی و اختصاصی فروش و عرضه آنلاین لوله کاروگیت، اسپیرال و پلی‌اتیلن.`;
-const CERTIFICATE = { src: '/images/site/representation-certificate.webp', width: 720, height: 1080 };
+const CERTIFICATE = { src: '/images/site/representation-certificate.webp', width: 1000, height: 1410 };
 const SIGNER = { name: 'جمشید شاطری', role: `مدیریت ${siteConfig.legalName}` };
 /** تاریخ انتشار این پیام روی سایت */
 const PUBLISHED = '2026-11-06';
