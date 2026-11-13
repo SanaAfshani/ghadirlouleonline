@@ -24,10 +24,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // lastmod فقط وقتی تاریخ واقعی داریم؛ صفحات ثابت بدون lastmod (تاریخ ساختگی بدتر از نبودنش است)
   const pricesModified = pricesUpdatedAt ?? undefined;
   const latestPost = posts.reduce<Date | undefined>((a, p) => (!a || p.updatedAt > a ? p.updatedAt : a), undefined);
+  // صفحه /products فهرست همین محصولات است؛ تازه‌ترین تغییر محصول تاریخ واقعی آن است
+  const latestProduct = products.reduce<Date | undefined>((a, p) => (!a || p.lastModified > a ? p.lastModified : a), undefined);
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: pricesModified, changeFrequency: 'daily', priority: 1, images: imgs(['/images/site/hero-v3-wm.webp', '/images/site/factory-aerial-wm.webp', '/images/site/factory-entrance-wm.webp']) },
-    { url: `${baseUrl}/products`, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${baseUrl}/products`, lastModified: latestProduct, changeFrequency: 'daily', priority: 0.9 },
     { url: `${baseUrl}/prices`, lastModified: pricesModified, changeFrequency: 'daily', priority: 0.9 },
     { url: `${baseUrl}/about`, changeFrequency: 'monthly', priority: 0.7 },
     // جایگاه «نماینده رسمی» برای سئوی برند مهم است

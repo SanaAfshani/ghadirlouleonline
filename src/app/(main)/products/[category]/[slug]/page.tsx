@@ -5,7 +5,8 @@ import { safeDecode } from '@/shared/lib/utils';
 import { ensureProduct } from '@/shared/lib/route-guards';
 import type { Metadata } from 'next';
 import { ProductDetailView } from '@/features/products/ProductDetailView';
-import { getFittingsForSize, getProductBySlug, getPublishedProducts, getSitemapData } from '@/shared/lib/data';
+import { getFittingsForSize, getProductBySlug, getPublishedProducts, getRelatedBlogPosts, getSitemapData } from '@/shared/lib/data';
+import { CategoryGuides } from '@/features/products/CategoryGuides';
 import { getPriceBoard, isPriceFresh, summarizeLine } from '@/shared/lib/price-board';
 import { siteConfig } from '@/shared/config/site';
 import { JsonLd } from '@/shared/ui/JsonLd';
@@ -98,6 +99,8 @@ export default async function ProductDetailPage({ params }: Props) {
   const index = variants.findIndex((p) => p.id === product.id);
   const start = Math.min(Math.max(0, index - 2), Math.max(0, others.length - 4));
   const related = others.slice(start, start + 4);
+  // همان راهنماهای صفحه دسته: مقاله‌ها به محصول لینک می‌دهند و حالا محصول هم به آن‌ها؛ خطا صفحه را نمی‌اندازد
+  const guides = await getRelatedBlogPosts(product.category.name).catch(() => []);
 
   // جدول قیمت ← AggregateOffer (بازه قیمت در نتایج گوگل)؛ در غیر این صورت قیمت تکی.
   // قیمت‌ها در پنل به تومان ثبت می‌شوند؛ schema.org واحد رسمی ریال را می‌خواهد (×۱۰)
@@ -183,6 +186,7 @@ export default async function ProductDetailPage({ params }: Props) {
         ])}
       />
       <ProductDetailView product={showPrice ? product : { ...product, price: undefined }} related={related} variants={variants} fittings={fittings} board={board} comingSoon={comingSoon} />
+      <CategoryGuides categoryName={product.category.name} guides={guides} />
     </>
   );
 }
