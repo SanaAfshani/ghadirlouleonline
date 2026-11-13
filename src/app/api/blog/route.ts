@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { requireAdmin, isAdmin } from '@/shared/lib/admin-auth';
 import { prisma } from '@/shared/lib/prisma';
 import { parseFaqs } from '@/shared/lib/serializers';
@@ -109,6 +110,10 @@ export async function POST(request: NextRequest) {
       },
       include: { author: { select: { id: true, name: true, email: true } } },
     });
+
+    // اگر این آدرس پیش از انتشار باز شده باشد، ۴۰۴ آن تا revalidate صفحه (۳۰ دقیقه) در cache می‌ماند
+    revalidatePath(`/blog/${post.slug}`);
+    revalidatePath('/blog');
 
     // مقاله تازه همان روز به Bing (و از آن به ChatGPT و Copilot) می‌رسد، نه هفته‌ها بعد
     if (post.published) pingIndexNow([`/blog/${post.slug}`, '/blog']);

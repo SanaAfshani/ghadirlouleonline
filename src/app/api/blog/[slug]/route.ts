@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { requireAdmin, isAdmin } from '@/shared/lib/admin-auth';
 import { prisma } from '@/shared/lib/prisma';
 import { slugify } from '@/shared/lib/utils';
@@ -102,6 +103,11 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       await recordRedirect(`/blog/${existing.slug}`, `/blog/${post.slug}`);
     }
 
+    // نسخه cache‌شده صفحه (یا ۴۰۴ پیش از انتشار) همین حالا کنار می‌رود، نه بعد از ۳۰ دقیقه
+    revalidatePath(`/blog/${existing.slug}`);
+    revalidatePath(`/blog/${post.slug}`);
+    revalidatePath('/blog');
+
     // منتشر یا از انتشار خارج شد یا ویرایش شد — آدرس قدیم و جدید هر دو خبر داده می‌شوند
     if (post.published || existing.published) {
       pingIndexNow(['/blog', `/blog/${existing.slug}`, `/blog/${post.slug}`]);
@@ -134,6 +140,9 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     }
 
     await prisma.blogPost.delete({ where: { id: existing.id } });
+
+    revalidatePath(`/blog/${existing.slug}`);
+    revalidatePath('/blog');
 
     // آدرس حالا ۴۰۴ می‌دهد — خبر دادن باعث می‌شود Bing (و ChatGPT و Copilot) زودتر از نتایج برش دارند
     if (existing.published) pingIndexNow(['/blog', `/blog/${existing.slug}`]);
