@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdmin } from '@/shared/lib/admin-auth';
+import { requireSuperAdmin } from '@/shared/lib/admin-auth';
 import { prisma } from '@/shared/lib/prisma';
 import { hashPassword } from '@/shared/lib/auth';
 
@@ -14,10 +14,9 @@ const userSelect = {
 } as const;
 
 export async function GET(request: NextRequest) {
-  const auth = requireAdmin(request);
+  const auth = requireSuperAdmin(request);
   if (auth instanceof NextResponse) return auth;
   // مدیریت کاربران فقط با نقش ADMIN — وگرنه ویرایشگر می‌توانست برای خودش حساب مدیر بسازد
-  if (auth.role !== 'ADMIN') return NextResponse.json({ success: false, error: 'فقط مدیر کل به این بخش دسترسی دارد' }, { status: 403 });
   try {
     const admin = new URL(request.url).searchParams.get('admin') === 'true';
     if (!admin) {
@@ -37,10 +36,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = requireAdmin(request);
+  const auth = requireSuperAdmin(request);
   if (auth instanceof NextResponse) return auth;
   // مدیریت کاربران فقط با نقش ADMIN — وگرنه ویرایشگر می‌توانست برای خودش حساب مدیر بسازد
-  if (auth.role !== 'ADMIN') return NextResponse.json({ success: false, error: 'فقط مدیر کل به این بخش دسترسی دارد' }, { status: 403 });
   try {
     const body = await request.json();
     const name = String(body.name || '').trim();

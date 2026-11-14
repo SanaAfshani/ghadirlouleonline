@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/shared/lib/prisma';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'lule-mashhad-jwt-secret-2024';
+import { comparePassword, signToken } from '@/shared/lib/auth';
+import { ADMIN_COOKIE } from '@/shared/lib/admin-auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,7 +24,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const isValid = await bcrypt.compare(password, user.password);
+    const isValid = await comparePassword(password, user.password);
     if (!isValid) {
       return NextResponse.json(
         { success: false, error: 'اطلاعات ورود نادرست است' },
@@ -41,21 +39,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const token = signToken({ userId: user.id, email: user.email, role: user.role });
 
+    // توکن فقط در کوکی httpOnly — جاوااسکریپت صفحه (و هر XSS احتمالی) به آن دسترسی ندارد
     const response = NextResponse.json({
       success: true,
-      token,
       user: { id: user.id, name: user.name, email: user.email, role: user.role },
     });
 
-    // Set HTTP-only cookie on server as well
-    response.cookies.set('admin_token', token, {
-      httpOnly: false, // readable by JS for middleware check
+    response.cookies.set(ADMIN_COOKIE, token, {
+      httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60,

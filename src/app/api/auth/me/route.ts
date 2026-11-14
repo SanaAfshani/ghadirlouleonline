@@ -1,22 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/shared/lib/prisma';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'lule-mashhad-jwt-secret-2024';
+import { requireAdmin } from '@/shared/lib/admin-auth';
 
 export async function GET(request: NextRequest) {
+  const auth = requireAdmin(request);
+  if (auth instanceof NextResponse) return auth;
   try {
-    const token =
-      request.cookies.get('admin_token')?.value ||
-      request.headers.get('authorization')?.replace('Bearer ', '');
-
-    if (!token) {
-      return NextResponse.json({ success: false, error: 'توکن یافت نشد' }, { status: 401 });
-    }
-
-    const payload = jwt.verify(token, JWT_SECRET) as { userId: string };
     const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
+      where: { id: auth.userId },
       select: { id: true, name: true, email: true, role: true, createdAt: true },
     });
 
@@ -25,7 +16,8 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data: user });
-  } catch {
-    return NextResponse.json({ success: false, error: 'توکن نامعتبر' }, { status: 401 });
+  } catch (error) {
+    console.error('Me GET error:', error);
+    return NextResponse.json({ success: false, error: 'خطای سرور' }, { status: 500 });
   }
 }

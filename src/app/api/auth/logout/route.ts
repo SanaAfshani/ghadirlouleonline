@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
+import { ADMIN_COOKIE } from '@/shared/lib/admin-auth';
 
 export async function POST() {
   const response = NextResponse.json({ success: true });
-  response.cookies.set('admin_token', '', {
-    httpOnly: false,
+  response.cookies.set(ADMIN_COOKIE, '', {
+    httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     maxAge: 0,

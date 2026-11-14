@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdmin } from '@/shared/lib/admin-auth';
+import { requireAdmin, isAdmin } from '@/shared/lib/admin-auth';
 import { prisma } from '@/shared/lib/prisma';
 import { normalizeProjectImages, serializeProject } from '@/shared/lib/serializers';
 import { slugify } from '@/shared/lib/utils';
@@ -7,11 +7,12 @@ import { recordRedirect } from '@/shared/lib/redirects';
 
 type Props = { params: Promise<{ id: string }> };
 
-export async function GET(_request: NextRequest, { params }: Props) {
+export async function GET(request: NextRequest, { params }: Props) {
   try {
     const { id } = await params;
+    // پروژه منتشرنشده فقط برای ادمین — مثل محصول و مقاله
     const project = await prisma.project.findFirst({
-      where: { OR: [{ id }, { slug: id }] },
+      where: { OR: [{ id }, { slug: id }], ...(isAdmin(request) ? {} : { published: true }) },
     });
 
     if (!project) {

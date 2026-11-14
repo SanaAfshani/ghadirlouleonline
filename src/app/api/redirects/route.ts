@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/shared/lib/prisma';
-import { requireAdmin } from '@/shared/lib/admin-auth';
+import { requireSuperAdmin } from '@/shared/lib/admin-auth';
 import { recordRedirect } from '@/shared/lib/redirects';
 import { serverErrorResponse } from '@/shared/lib/api-errors';
 
@@ -17,14 +17,14 @@ function cleanPath(value: unknown): string | null {
 }
 
 export async function GET(request: NextRequest) {
-  const auth = requireAdmin(request);
+  const auth = requireSuperAdmin(request);
   if (auth instanceof NextResponse) return auth;
   const data = await prisma.redirect.findMany({ orderBy: { createdAt: 'desc' } });
   return NextResponse.json({ success: true, data });
 }
 
 export async function POST(request: NextRequest) {
-  const auth = requireAdmin(request);
+  const auth = requireSuperAdmin(request);
   if (auth instanceof NextResponse) return auth;
   try {
     const body = await request.json();
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const auth = requireAdmin(request);
+  const auth = requireSuperAdmin(request);
   if (auth instanceof NextResponse) return auth;
   const id = new URL(request.url).searchParams.get('id');
   if (!id) return NextResponse.json({ success: false, error: 'شناسه لازم است' }, { status: 400 });

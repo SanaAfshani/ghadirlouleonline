@@ -36,11 +36,11 @@ function LoginForm() {
       });
       const data = await res.json();
 
-      if (data.success && data.token) {
-        document.cookie = `admin_token=${data.token}; path=/; max-age=${7 * 24 * 3600}; SameSite=Lax`;
+      if (data.success) {
         toast.success(`خوش آمدید، ${data.user?.name || 'مدیر'} 👋`);
-        const redirect = searchParams.get('redirect') || '/admin';
-        router.push(redirect);
+        // فقط مسیرهای داخلی پنل — وگرنه ?redirect=//evil.com کاربر را بعد از ورود به سایت دیگری می‌برد
+        const redirect = searchParams.get('redirect') ?? '';
+        router.push(/^\/admin(\/|$)/.test(redirect) ? redirect : '/admin');
         router.refresh();
       } else {
         setError(data.error || 'اطلاعات ورود نادرست است');

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/shared/lib/prisma';
-import { requireAdmin } from '@/shared/lib/admin-auth';
+import { requireSuperAdmin } from '@/shared/lib/admin-auth';
 import { serverErrorResponse } from '@/shared/lib/api-errors';
 import { defaultSiteSettings } from '@/shared/lib/site-settings';
 
@@ -9,7 +9,7 @@ import { defaultSiteSettings } from '@/shared/lib/site-settings';
 const KEYS = ['google_site_verification', 'home_seo_content'] as const;
 
 export async function GET(request: NextRequest) {
-  const auth = requireAdmin(request);
+  const auth = requireSuperAdmin(request);
   if (auth instanceof NextResponse) return auth;
   const rows = await prisma.siteSettings.findMany({ where: { key: { in: [...KEYS] } } });
   const data: Record<string, string> = Object.fromEntries(rows.map((r) => [r.key, r.value]));
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const auth = requireAdmin(request);
+  const auth = requireSuperAdmin(request);
   if (auth instanceof NextResponse) return auth;
   try {
     const body = (await request.json()) as Record<string, unknown>;

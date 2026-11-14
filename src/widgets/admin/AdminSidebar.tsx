@@ -12,6 +12,7 @@ import {
 import { cn } from '@/shared/lib/utils';
 import toast from 'react-hot-toast';
 import { useAdminNotifications } from '@/widgets/admin/AdminNotifications';
+import { logoutAdmin } from '@/widgets/admin/logout';
 import { faDigits } from '@/shared/lib/utils';
 
 const navGroups = [
@@ -208,8 +209,8 @@ export function AdminSidebar({ collapsed, onToggleCollapse, mobileOpen, onMobile
     onMobileClose();
   }, [pathname, onMobileClose]);
 
-  const handleLogout = () => {
-    document.cookie = 'admin_token=; path=/; max-age=0';
+  const handleLogout = async () => {
+    await logoutAdmin();
     toast.success('با موفقیت خارج شدید');
     router.push('/admin/login');
   };

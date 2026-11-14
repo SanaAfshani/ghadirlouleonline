@@ -7,6 +7,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { useTheme } from 'next-themes';
 import { useAdminNotifications } from '@/widgets/admin/AdminNotifications';
+import { logoutAdmin } from '@/widgets/admin/logout';
 import { phoneHref } from '@/shared/lib/site-settings';
 import { faDigits, safeDecode } from '@/shared/lib/utils';
 
@@ -98,8 +99,8 @@ export function AdminHeader({ onMenu }: { onMenu: () => void }) {
   // next-themes فقط سمت کلاینت تم واقعی را می‌داند؛ آیکن تم فقط در مرورگر رندر می‌شود (بدون hydration mismatch)
   const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
 
-  const handleLogout = () => {
-    document.cookie = 'admin_token=; path=/; max-age=0';
+  const handleLogout = async () => {
+    await logoutAdmin();
     toast.success('با موفقیت خارج شدید');
     router.push('/admin/login');
     router.refresh();

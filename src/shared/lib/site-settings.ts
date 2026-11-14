@@ -145,6 +145,18 @@ function parsePhones(raw: string | undefined): string[] {
     .filter(Boolean);
 }
 
+/**
+ * کلیدهایی که از /api/settings قابل نوشتن‌اند. بقیه کلیدها (بازار، سئو، ...) API و اعتبارسنجی خودشان را دارند؛
+ * بدون این فهرست هر کلید دلخواهی (با هر حجمی) در جدول تنظیمات — که به همه صفحات می‌رود — ذخیره می‌شد.
+ */
+export const EDITABLE_SETTING_KEYS = new Set([
+  'site_title', 'site_description',
+  'contact_phone', 'contact_mobile', 'contact_email', 'contact_address', 'company_phones',
+  'factory_address', 'map_url',
+  'hero_title', 'hero_subtitle', 'hero_slides',
+  'certificates', 'theme_color',
+]);
+
 export function mergeSiteSettings(raw: Record<string, string>): SiteSettings {
   const phone = raw.contact_phone || defaultSiteSettings.phone;
   const mobile = raw.contact_mobile || defaultSiteSettings.mobile;
