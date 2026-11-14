@@ -60,9 +60,11 @@ async function poll() {
   inflight = true;
   try {
     const v = state.board?.version ?? '';
-    const res = await fetch(`/api/prices/live?v=${encodeURIComponent(v)}`, { cache: 'no-store' });
+    const locale = state.board?.locale ?? 'fa';
+    const res = await fetch(`/api/prices/live?v=${encodeURIComponent(v)}&locale=${locale}`, { cache: 'no-store' });
     const json = await res.json();
-    if (json?.success && !json.unchanged && json.data) apply(json.data as PriceBoard);
+    // پاسخ دیرِ زبان قبلی (کاربر وسط درخواست زبان را عوض کرده) تابلوی زبان جدید را بازنویسی نکند
+    if (json?.success && !json.unchanged && json.data && json.data.locale === locale) apply(json.data as PriceBoard);
   } catch {
     // قطعی موقت شبکه — دور بعد دوباره
   } finally {
@@ -119,10 +121,13 @@ const serverSnapshot = (initial: PriceBoard) => {
   return snap;
 };
 
-/** داده سرور فقط وقتی store هنوز خالی است جایگزین می‌شود (فقط در مرورگر؛ روی سرور متغیر ماژول بین کاربران مشترک است) */
+/**
+ * داده سرور فقط وقتی store هنوز خالی است جایگزین می‌شود (فقط در مرورگر؛ روی سرور متغیر ماژول بین کاربران مشترک است).
+ * با عوض شدن زبان صفحه (ناوبری کلاینتی فارسی ↔ انگلیسی) تابلوی زبان قبلی کنار گذاشته می‌شود.
+ */
 function seed(initial: PriceBoard) {
-  if (state.board) return;
-  state = { ...state, board: initial };
+  if (state.board && state.board.locale === initial.locale) return;
+  state = { board: initial, flashes: new Map() };
   scheduleEdge();
 }
 
@@ -130,7 +135,7 @@ export function useLiveBoard(initial: PriceBoard) {
   useEffect(() => seed(initial), [initial]);
   const snap = useSyncExternalStore(
     subscribe,
-    () => (state.board ? state : serverSnapshot(initial)),
+    () => (state.board && state.board.locale === initial.locale ? state : serverSnapshot(initial)),
     () => serverSnapshot(initial),
   );
   return { board: snap.board ?? initial, flashes: snap.flashes };

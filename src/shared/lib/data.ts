@@ -13,6 +13,8 @@ import {
   serializeProject,
   toProductListItem,
 } from '@/shared/lib/serializers';
+import { localizeRecord } from '@/shared/lib/translations';
+import { defaultLocale, type Locale } from '@/shared/i18n/config';
 
 /**
  * دسته‌های اولویت‌دار (siteConfig.priorityCategorySlugs) همیشه اول؛ بقیه به ترتیب پنل ادمین.
@@ -51,34 +53,41 @@ export type NavCategory = {
   items: NavItem[];
 };
 
-/** cache: layout (هدر و فوتر) و صفحه اول در یک درخواست فقط یک بار می‌خوانند */
-export const getNavCategories = cache(async (): Promise<NavCategory[]> => {
+/** cache: layout (هدر و فوتر) و صفحه اول در یک درخواست فقط یک بار می‌خوانند؛ نام‌ها به زبان صفحه */
+export const getNavCategories = cache(async (locale: Locale = defaultLocale): Promise<NavCategory[]> => {
   const [cats, products] = await Promise.all([
     getPublishedCategories(),
     prisma.product.findMany({
       where: { published: true, category: { published: true } },
-      select: { slug: true, name: true, specifications: true, category: { select: { slug: true } } },
+      select: { slug: true, name: true, specifications: true, translations: true, category: { select: { slug: true } } },
     }),
   ]);
   const sorted = products.sort((a, b) => productRank(a.slug) - productRank(b.slug) || a.name.localeCompare(b.name, 'fa'));
-  return cats.map((c) => ({
-    slug: c.slug,
-    name: c.name,
-    description: c.description,
-    image: resolveCategoryImage(c),
-    productCount: c._count?.products ?? 0,
-    comingSoon: isComingSoon(c.slug),
-    items: sorted
-      .filter((p) => p.category.slug === c.slug)
-      .map((p) => ({ slug: p.slug, label: shortProductLabel({ name: p.name, specs: parseJsonObject(p.specifications) }) })),
-  }));
+  return cats.map((category) => {
+    const c = localizeRecord(category, locale, 'name');
+    return {
+      slug: c.slug,
+      name: c.name,
+      description: c.description,
+      image: resolveCategoryImage(c),
+      productCount: c._count?.products ?? 0,
+      comingSoon: isComingSoon(c.slug),
+      items: sorted
+        .filter((p) => p.category.slug === c.slug)
+        .map((p) => ({ slug: p.slug, label: navLabel(p, locale) })),
+    };
+  });
 });
+
+function navLabel(p: { name: string; specifications: string; translations: string }, locale: Locale) {
+  return shortProductLabel({ name: localizeRecord(p, locale, 'name').name, specs: parseJsonObject(p.specifications) }, locale);
+}
 
 /**
  * اتصالات کاروگیتی که در یک سایز موجودند — صفحه هر سایز لوله به اتصالات همان سایز لینک می‌دهد.
  * ردیف تبدیل («تبدیل × 400» با سایز 315) هر دو سایز را دارد، پس عنوان ردیف هم بررسی می‌شود.
  */
-export const getFittingsForSize = cache(async (size: number): Promise<NavItem[]> => {
+export const getFittingsForSize = cache(async (size: number, locale: Locale = defaultLocale): Promise<NavItem[]> => {
   const s = String(size);
   const products = await prisma.product.findMany({
     where: {
@@ -86,11 +95,11 @@ export const getFittingsForSize = cache(async (size: number): Promise<NavItem[]>
       category: { slug: 'corrugated-fittings', published: true },
       priceItems: { some: { OR: [{ size: s }, { title: { contains: s } }] } },
     },
-    select: { slug: true, name: true, specifications: true },
+    select: { slug: true, name: true, specifications: true, translations: true },
   });
   return products
     .sort((a, b) => productRank(a.slug) - productRank(b.slug))
-    .map((p) => ({ slug: p.slug, label: shortProductLabel({ name: p.name, specs: parseJsonObject(p.specifications) }) }));
+    .map((p) => ({ slug: p.slug, label: navLabel(p, locale) }));
 });
 
 // cache: layout (بررسی وجود/ریدایرکت)، متادیتا و صفحه در یک درخواست فقط یک بار به دیتابیس می‌روند
@@ -108,6 +117,8 @@ export async function getPublishedProducts(options?: {
   limit?: number;
   /** فقط محصولاتی که عکس خودشان را دارند */
   withImage?: boolean;
+  /** زبان نام محصول و دسته در کارت‌ها */
+  locale?: Locale;
 }) {
   const where: {
     published: boolean;
@@ -144,7 +155,7 @@ export async function getPublishedProducts(options?: {
     (a, b) => categoryRank(a.category.slug) - categoryRank(b.category.slug) || productRank(a.slug) - productRank(b.slug),
   );
   // بیرون از ساعت کاری قیمت در کارت‌ها هم نمایش داده نمی‌شود
-  return sorted.slice(0, options?.limit).map((p) => toProductListItem(p, { showPrices: market.open }));
+  return sorted.slice(0, options?.limit).map((p) => toProductListItem(p, { showPrices: market.open, locale: options?.locale }));
 }
 
 // cache: layout (بررسی وجود/ریدایرکت)، متادیتا و صفحه در یک درخواست فقط یک بار به دیتابیس می‌روند
@@ -192,7 +203,7 @@ export async function getRelatedBlogPosts(term: string, limit = 3) {
           { focusKeyword: { contains: value, mode: 'insensitive' } },
         ],
       },
-      select: { slug: true, title: true, excerpt: true },
+      select: { slug: true, title: true, excerpt: true, translations: true },
       orderBy: [{ featured: 'desc' }, { createdAt: 'desc' }],
       take: limit,
     });
@@ -316,11 +327,12 @@ export async function getSitemapData() {
         slug: true,
         updatedAt: true,
         images: true,
+        translations: true,
         category: { select: { slug: true } },
         priceItems: { select: { updatedAt: true }, orderBy: { updatedAt: 'desc' }, take: 1 },
       },
     }),
-    prisma.project.findMany({ where: { published: true }, select: { slug: true, updatedAt: true, images: true } }),
+    prisma.project.findMany({ where: { published: true }, select: { slug: true, updatedAt: true, images: true, translations: true } }),
     prisma.priceItem.aggregate({ _max: { updatedAt: true } }),
   ]);
 
@@ -333,6 +345,7 @@ export async function getSitemapData() {
         categorySlug: p.category.slug,
         lastModified: priced && priced > p.updatedAt ? priced : p.updatedAt,
         images: parseImageList(p.images),
+        translations: p.translations,
       };
     }),
     // تصاویر پروژه {url, alt} هستند (ردیف قدیمی: رشته) — سایت‌مپ فقط آدرس می‌خواهد
@@ -340,6 +353,7 @@ export async function getSitemapData() {
       slug: p.slug,
       updatedAt: p.updatedAt,
       images: normalizeProjectImages(p.images).map((img) => img.url).slice(0, 10),
+      translations: p.translations,
     })),
     pricesUpdatedAt: prices._max.updatedAt,
   };

@@ -1,25 +1,36 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { ChevronDown, ChevronLeft, Factory, Headphones, Search, ShieldCheck, Truck } from 'lucide-react';
-import { siteConfig } from '@/shared/config/site';
+import { ChevronDown, ChevronLeft, Factory, Headphones, Search, ShieldCheck, Truck, type LucideIcon } from 'lucide-react';
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
+import { Link } from '@/shared/i18n/Link';
+import { useLocalizedRouter, useMessages } from '@/shared/i18n/LocaleProvider';
+import { defineMessages } from '@/shared/i18n/messages';
+import type { ContentOf } from '@/shared/content/types';
+import type { homeHero } from '@/shared/content/pages/home';
 import { useConsult } from '@/features/consult/ConsultProvider';
 import { HeroBoard } from '@/features/prices/HeroBoard';
 import { HeroSlides } from '@/widgets/home/HeroSlides';
 import type { NavCategory } from '@/shared/lib/data';
 import type { PriceBoard } from '@/shared/lib/price-board-types';
 
+const messages = defineMessages({
+  fa: { searchLabel: 'جستجوی محصول', toPrices: 'رفتن به قیمت روز' },
+  en: { searchLabel: 'Search products', toPrices: 'Go to today’s prices' },
+});
+
+/** آیکن هر مزیت بر اساس شناسه آن؛ مزیت تازه پنل آیکن پیش‌فرض می‌گیرد */
+const HIGHLIGHT_ICONS: Record<string, LucideIcon> = { warehouse: Factory, direct: ShieldCheck, delivery: Truck };
+
 /**
  * بخش اول صفحه بدون انیمیشن ورود: قبلاً متن، جستجو و تابلوی قیمت با opacity صفر رندر می‌شدند و تا اجرای
  * جاوااسکریپت دیده نمی‌شدند — روی موبایل با اینترنت کند چند ثانیه صفحه خالی (Speed Index و LCP بد).
  */
-export function HeroSection({ categories, board }: { categories: NavCategory[]; board: PriceBoard }) {
-  const { heroTitle, heroSubtitle, heroSlides } = useSiteSettings();
+export function HeroSection({ categories, board, content }: { categories: NavCategory[]; board: PriceBoard; content: ContentOf<typeof homeHero> }) {
+  const { heroTitle, heroSubtitle, heroSlides, legalName } = useSiteSettings();
   const { open } = useConsult();
-  const router = useRouter();
+  const router = useLocalizedRouter();
+  const t = useMessages(messages);
   const [q, setQ] = useState('');
 
   const submit = (e: React.FormEvent) => {
@@ -35,8 +46,8 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
         قاب هرو در هر عرضی جور دیگری بریده می‌شود. تا وقتی چیزی تنظیم نشده، همان عکس ثابت فعلی می‌ماند.
       */}
       <HeroSlides slides={heroSlides} />
-      {/* پوشش فقط پشت متن: موبایل یکنواخت (متن کل عرض را می‌گیرد)، دسکتاپ از راست تیره به چپ تقریباً شفاف */}
-      <div className="absolute inset-0 -z-10 max-lg:bg-[rgba(15,23,42,0.5)] lg:bg-[linear-gradient(270deg,rgba(15,23,42,0.84)_0%,rgba(15,23,42,0.7)_35%,rgba(15,23,42,0.45)_58%,rgba(15,23,42,0.15)_80%,rgba(15,23,42,0.05)_100%)]" />
+      {/* پوشش فقط پشت متن: موبایل یکنواخت (متن کل عرض را می‌گیرد)، دسکتاپ از سمت متن (شروع خط) تیره به سمت دیگر تقریباً شفاف */}
+      <div className="absolute inset-0 -z-10 max-lg:bg-[rgba(15,23,42,0.5)] lg:ltr:bg-[linear-gradient(90deg,rgba(15,23,42,0.84)_0%,rgba(15,23,42,0.7)_35%,rgba(15,23,42,0.45)_58%,rgba(15,23,42,0.15)_80%,rgba(15,23,42,0.05)_100%)] lg:rtl:bg-[linear-gradient(270deg,rgba(15,23,42,0.84)_0%,rgba(15,23,42,0.7)_35%,rgba(15,23,42,0.45)_58%,rgba(15,23,42,0.15)_80%,rgba(15,23,42,0.05)_100%)]" />
       <div className="absolute inset-x-0 bottom-0 h-28 -z-10 bg-gradient-to-t from-[var(--ink)]/80 to-transparent" />
 
       <div className="container-main grid grid-cols-1 lg:grid-cols-[1fr_470px] items-center gap-8 lg:gap-14 pt-8 pb-16 sm:pt-12 sm:pb-20 lg:pt-20 lg:pb-28">
@@ -50,14 +61,15 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
               <ShieldCheck className="w-6 h-6" aria-hidden />
               <span aria-hidden className="absolute -inset-1 rounded-[0.9rem] border border-[var(--accent)]/50 animate-pulse" />
             </span>
-            <strong className="leading-tight text-right">
-              <span className="block text-[11px] sm:text-xs font-bold text-[var(--accent-text)]">تنها نماینده انحصاری</span>
-              <span className="block mt-0.5 text-base sm:text-lg font-black text-white">{siteConfig.legalName}</span>
+            <strong className="leading-tight text-start">
+              <span className="block text-[11px] sm:text-xs font-bold text-[var(--accent-text)]">{content.badgeLabel}</span>
+              <span className="block mt-0.5 text-base sm:text-lg font-black text-white">{legalName}</span>
             </strong>
             <span className="hidden sm:flex items-center gap-1.5 ms-1 ps-3 border-s border-white/15 text-[11px] font-bold text-slate-200">
-              <span className="h-6 px-2 rounded-md bg-white/10 grid place-items-center">ISO 9001</span>
-              <span className="h-6 px-2 rounded-md bg-white/10 grid place-items-center">ISIRI 9116</span>
-              <ChevronLeft className="w-4 h-4 text-[var(--accent-text)] transition-transform group-hover:-translate-x-0.5" aria-hidden />
+              {content.badgeCodes.map((code) => (
+                <span key={code.id} dir="ltr" className="h-6 px-2 rounded-md bg-white/10 grid place-items-center">{code.text}</span>
+              ))}
+              <ChevronLeft className="w-4 h-4 text-[var(--accent-text)] transition-transform ltr:rotate-180 group-hover:-translate-x-0.5 ltr:group-hover:translate-x-0.5" aria-hidden />
             </span>
           </Link>
           <h1
@@ -70,23 +82,26 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
           </p>
 
           <form onSubmit={submit} className="mt-7 relative max-w-xl">
-            <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Search className="absolute start-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="نام محصول یا سایز…"
+              placeholder={content.searchPlaceholder}
               enterKeyHint="search"
-              aria-label="جستجوی محصول"
-              className="w-full h-14 rounded-2xl bg-white text-[var(--ink)] placeholder:text-slate-400 pr-12 pl-28 shadow-2xl"
+              aria-label={t.searchLabel}
+              className="w-full h-14 rounded-2xl bg-white text-[var(--ink)] placeholder:text-slate-400 ps-12 pe-28 shadow-2xl"
             />
-            <button type="submit" className="absolute left-2 top-2 bottom-2 px-5 rounded-xl bg-[var(--ink)] text-white font-bold text-sm">
-              جستجو
+            <button type="submit" className="absolute end-2 top-2 bottom-2 px-5 rounded-xl bg-[var(--ink)] text-white font-bold text-sm">
+              {content.searchButton}
             </button>
           </form>
 
-          {/* موبایل: نوار گردشی بی‌پایان (لیست دوبار تکرار شده و نصف عرضش جابه‌جا می‌شود) */}
+          {/*
+            موبایل: نوار گردشی بی‌پایان (لیست دوبار تکرار شده و نصف عرضش جابه‌جا می‌شود).
+            keyframe به سمت راست حرکت می‌کند و فقط وقتی ردیف از راست شروع شود جای خالی نمی‌ماند؛ پس در انگلیسی هم ردیف rtl چیده می‌شود.
+          */}
           <div className="sm:hidden mt-4 -mx-4 overflow-hidden motion-reduce:overflow-x-auto [mask-image:linear-gradient(to_left,transparent,black_6%,black_94%,transparent)]">
-            <div className="flex w-max animate-[hero-marquee_28s_linear_infinite] motion-reduce:animate-none active:[animation-play-state:paused]">
+            <div className="flex w-max ltr:[direction:rtl] animate-[hero-marquee_28s_linear_infinite] motion-reduce:animate-none active:[animation-play-state:paused]">
               {[...categories, ...categories].map((c, i) => {
                 const copy = i >= categories.length;
                 return (
@@ -112,9 +127,12 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
           </div>
 
           <ul className="mt-8 hidden sm:flex flex-wrap gap-x-7 gap-y-3 text-sm text-white/90">
-            <li className="flex items-center gap-2"><Factory className="w-4.5 h-4.5 text-[var(--accent-text)]" />بارگیری از انبار کارخانه گرمسار</li>
-            <li className="flex items-center gap-2"><ShieldCheck className="w-4.5 h-4.5 text-[var(--accent-text)]" />خرید بدون واسطه از تولیدکننده</li>
-            <li className="flex items-center gap-2"><Truck className="w-4.5 h-4.5 text-[var(--accent-text)]" />ارسال به سراسر کشور</li>
+            {content.highlights.map(({ id, text }) => {
+              const Icon = HIGHLIGHT_ICONS[id] ?? ShieldCheck;
+              return (
+                <li key={id} className="flex items-center gap-2"><Icon className="w-4.5 h-4.5 text-[var(--accent-text)]" />{text}</li>
+              );
+            })}
           </ul>
         </div>
 
@@ -122,7 +140,7 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
           <HeroBoard initial={board} />
           <button onClick={() => open()} className="mt-3 w-full h-12 rounded-2xl border border-white/15 bg-white/5 backdrop-blur text-sm font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors">
             <Headphones className="w-4.5 h-4.5 text-[var(--accent-text)]" />
-            مشاوره رایگان و استعلام قیمت عمده
+            {content.consultButton}
           </button>
         </div>
       </div>
@@ -138,7 +156,7 @@ export function HeroSection({ categories, board }: { categories: NavCategory[]; 
       </div>
       <a
         href="#prices"
-        aria-label="رفتن به قیمت روز"
+        aria-label={t.toPrices}
         className="absolute bottom-1 lg:bottom-2 left-1/2 -translate-x-1/2 grid place-items-center w-8 h-8 text-[var(--accent)] motion-safe:animate-bounce"
       >
         <ChevronDown className="w-5 h-5" strokeWidth={3} />

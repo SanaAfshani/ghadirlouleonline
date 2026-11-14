@@ -3,6 +3,8 @@ import { prisma } from '@/shared/lib/prisma';
 import { requireAdmin } from '@/shared/lib/admin-auth';
 import { serverErrorResponse } from '@/shared/lib/api-errors';
 import { priceFromWeight, specFields, text, toPrice } from '@/shared/lib/price-admin';
+import { sanitizeTranslations } from '@/shared/lib/translations';
+import { stripDangerousHtml } from '@/shared/content/sanitize';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -22,6 +24,7 @@ export async function PATCH(request: NextRequest, { params }: Props) {
     if (body.weight !== undefined) data.weight = weight;
     if (body.note !== undefined) data.note = text(body.note);
     if (body.sortOrder !== undefined) data.sortOrder = Number(body.sortOrder) || 0;
+    if (body.translations !== undefined) data.translations = sanitizeTranslations('priceItem', body.translations, stripDangerousHtml);
     // با قیمت روز هر کیلو، قیمت ردیف وزن‌دار فقط از فرمول می‌آید و قیمت دستی نادیده گرفته می‌شود
     const formula = priceFromWeight(weight, current.product.pricePerKg);
     if (formula !== undefined || body.price !== undefined) {

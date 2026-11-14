@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { revalidateLocalized } from '@/shared/i18n/server';
 import { requireAdmin, isAdmin } from '@/shared/lib/admin-auth';
 import { prisma } from '@/shared/lib/prisma';
 import { parseFaqs } from '@/shared/lib/serializers';
 import { estimateReadTimeMinutes, slugify } from '@/shared/lib/utils';
 import { serializeFaqs } from '@/shared/lib/page-faqs';
 import { pingIndexNow } from '@/shared/lib/indexnow';
+import { sanitizeTranslations } from '@/shared/lib/translations';
+import { stripDangerousHtml } from '@/shared/content/sanitize';
 
 /** فیلد متنی اختیاری: رشته خالی را به null تبدیل می‌کند تا fallback سئو درست کار کند */
 function optionalText(value: unknown): string | null {
@@ -106,14 +108,15 @@ export async function POST(request: NextRequest) {
         ogTitle: optionalText(body.ogTitle),
         ogDescription: optionalText(body.ogDescription),
         faqs: serializeFaqs(body.faqs),
+        ...(body.translations !== undefined && { translations: sanitizeTranslations('blogPost', body.translations, stripDangerousHtml) }),
         authorId,
       },
       include: { author: { select: { id: true, name: true, email: true } } },
     });
 
     // اگر این آدرس پیش از انتشار باز شده باشد، ۴۰۴ آن تا revalidate صفحه (۳۰ دقیقه) در cache می‌ماند
-    revalidatePath(`/blog/${post.slug}`);
-    revalidatePath('/blog');
+    revalidateLocalized(`/blog/${post.slug}`);
+    revalidateLocalized('/blog');
 
     // مقاله تازه همان روز به Bing (و از آن به ChatGPT و Copilot) می‌رسد، نه هفته‌ها بعد
     if (post.published) pingIndexNow([`/blog/${post.slug}`, '/blog']);

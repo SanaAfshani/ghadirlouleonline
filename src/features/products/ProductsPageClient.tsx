@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/shared/i18n/Link';
 import { m as motion } from 'framer-motion';
 import { ChevronLeft, Search } from 'lucide-react';
 import { PageHero } from '@/shared/ui/PageHero';
@@ -9,11 +9,30 @@ import { SearchInput } from '@/shared/ui/SearchInput';
 import { ProductCard } from '@/features/products/ProductCard';
 import { groupCategories } from '@/shared/config/product-lines';
 import type { ProductListItem } from '@/shared/lib/serializers';
-import { faDigits, latinDigits } from '@/shared/lib/utils';
+import { latinDigits } from '@/shared/lib/utils';
+import { useLocale, useMessages } from '@/shared/i18n/LocaleProvider';
+import { defineMessages, fill } from '@/shared/i18n/messages';
+import { digits } from '@/shared/i18n/format';
+import type { ContentOf } from '@/shared/content/types';
+import type { productsHero } from '@/shared/content/pages/products';
+
+const messages = defineMessages({
+  fa: {
+    searchPlaceholder: 'جستجو: مثلاً ۴۰۰ یا کوپلر…',
+    categoryLink: 'جدول قیمت و راهنمای {name}',
+    empty: 'محصولی یافت نشد',
+  },
+  en: {
+    searchPlaceholder: 'Search, e.g. 400 or coupler…',
+    categoryLink: '{name}: price table and guide',
+    empty: 'No products found',
+  },
+});
 
 type CategoryInfo = { slug: string; name: string; description: string | null };
 
 type ProductsPageClientProps = {
+  hero: ContentOf<typeof productsHero>;
   categories: CategoryInfo[];
   products: ProductListItem[];
 };
@@ -22,23 +41,22 @@ type ProductsPageClientProps = {
  * تنها صفحه جامع محصولات (/categories هم به همین‌جا می‌آید): به‌جای شبکه تخت همه محصولات با تب دسته،
  * هر گروه یک بخش است — «لوله و اتصالات کاروگیت» و «لوله اسپیرال» — و هر دسته کارت‌های سایزهایش را دارد.
  */
-export function ProductsPageClient({ categories, products }: ProductsPageClientProps) {
+export function ProductsPageClient({ hero, categories, products }: ProductsPageClientProps) {
+  const locale = useLocale();
+  const t = useMessages(messages);
   const [search, setSearch] = useState('');
-  const term = latinDigits(search.trim());
-  const matches = (p: ProductListItem) => !term || latinDigits(p.name).includes(term) || p.categoryName.includes(term);
-  const groups = groupCategories(categories);
+  const term = latinDigits(search.trim()).toLowerCase();
+  const matches = (p: ProductListItem) =>
+    !term || latinDigits(p.name).toLowerCase().includes(term) || p.categoryName.toLowerCase().includes(term);
+  const groups = groupCategories(categories, locale);
   const total = products.filter(matches).length;
 
   return (
     <>
-      <PageHero
-        label="محصولات"
-        title="لوله کاروگیت، اسپیرال و اتصالات"
-        description="هر سایز صفحه، مشخصات فنی و قیمت روز خودش را دارد. سایز را انتخاب کنید یا جستجو کنید."
-      />
+      <PageHero label={hero.label} title={hero.title} description={hero.description} />
 
       <div className="container-main py-6 md:py-10">
-        <SearchInput value={search} onValueChange={setSearch} placeholder="جستجو: مثلاً ۴۰۰ یا کوپلر…" wrapperClassName="mb-8 max-w-xl" className="h-12" />
+        <SearchInput value={search} onValueChange={setSearch} placeholder={t.searchPlaceholder} wrapperClassName="mb-8 max-w-xl" className="h-12" />
 
         {groups.map((g) => {
           const sections = g.categories
@@ -54,11 +72,11 @@ export function ProductsPageClient({ categories, products }: ProductsPageClientP
                     <div className="max-w-2xl">
                       <h3 className="text-lg sm:text-xl font-black">{category.name}</h3>
                       {category.description && (
-                        <p className="mt-1 text-sm leading-7 text-[var(--muted-foreground)]">{faDigits(category.description)}</p>
+                        <p className="mt-1 text-sm leading-7 text-[var(--muted-foreground)]">{digits(category.description, locale)}</p>
                       )}
                     </div>
                     <Link href={`/products/${category.slug}`} className="text-sm font-bold text-[var(--accent-text)] flex items-center gap-1 shrink-0">
-                      جدول قیمت و راهنمای {category.name} <ChevronLeft className="w-4 h-4" />
+                      {fill(t.categoryLink, { name: category.name })} <ChevronLeft className="w-4 h-4 ltr:rotate-180" />
                     </Link>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
@@ -77,7 +95,7 @@ export function ProductsPageClient({ categories, products }: ProductsPageClientP
         {total === 0 && (
           <div className="text-center py-20 text-[var(--muted-foreground)]">
             <Search className="w-8 h-8 mx-auto mb-3 opacity-50" />
-            <p className="font-semibold text-[var(--foreground)]">محصولی یافت نشد</p>
+            <p className="font-semibold text-[var(--foreground)]">{t.empty}</p>
           </div>
         )}
       </div>

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin, isAdmin } from '@/shared/lib/admin-auth';
 import { prisma } from '@/shared/lib/prisma';
+import { sanitizeTranslations } from '@/shared/lib/translations';
+import { stripDangerousHtml } from '@/shared/content/sanitize';
+import { revalidateLocalized } from '@/shared/i18n/server';
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,8 +33,11 @@ export async function POST(request: NextRequest) {
         rating: body.rating ? Number(body.rating) : 5,
         avatar: body.avatar || null,
         published: body.published ?? true,
+        ...(body.translations !== undefined && { translations: sanitizeTranslations('testimonial', body.translations, stripDangerousHtml) }),
       },
     });
+    // نظرها فقط در صفحه اصلی نمایش داده می‌شوند
+    revalidateLocalized('/');
     return NextResponse.json({ success: true, data: testimonial }, { status: 201 });
   } catch (error) {
     console.error('Testimonials POST error:', error);

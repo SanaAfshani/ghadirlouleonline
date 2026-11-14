@@ -8,14 +8,16 @@ import { m as motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Package, Layers, FileText, FileSpreadsheet, HelpCircle,
   Star, Building2, MessageSquare, Settings, Users, LogOut,
-  Menu, Palette, ChevronLeft, SearchCheck, CandlestickChart, PhoneCall, BadgeCheck, GalleryHorizontal, Sparkles } from 'lucide-react';
+  Menu, Palette, ChevronLeft, SearchCheck, CandlestickChart, PhoneCall, BadgeCheck, GalleryHorizontal, Sparkles, LayoutTemplate } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import toast from 'react-hot-toast';
 import { useAdminNotifications } from '@/widgets/admin/AdminNotifications';
 import { logoutAdmin } from '@/widgets/admin/logout';
+import { useAdminUser } from '@/widgets/admin/AdminUser';
 import { faDigits } from '@/shared/lib/utils';
 
-const navGroups = [
+/** adminOnly: فقط مدیر کل (API همین بخش‌ها برای ویرایشگر ۴۰۳ می‌دهد؛ این‌جا فقط از منو پنهان می‌شوند) */
+const navGroups: { label: string; items: { href: string; label: string; icon: React.ElementType; exact?: boolean; adminOnly?: boolean }[] }[] = [
   {
     label: 'داشبورد',
     items: [
@@ -24,34 +26,40 @@ const navGroups = [
     ],
   },
   {
-    label: 'محتوا',
+    label: 'فروش',
     items: [
       { href: '/admin/prices', label: 'تابلوی قیمت', icon: CandlestickChart },
       { href: '/admin/quotes', label: 'پیش‌فاکتورها', icon: FileSpreadsheet },
-      { href: '/admin/products', label: 'محصولات', icon: Package },
-      { href: '/admin/categories', label: 'دسته‌بندی‌ها', icon: Layers },
-      { href: '/admin/blog', label: 'وبلاگ', icon: FileText },
-      { href: '/admin/youtix', label: 'یوتیکس (تولید مقاله)', icon: Sparkles },
-      { href: '/admin/projects', label: 'پروژه‌ها', icon: Building2 },
-      { href: '/admin/certificates', label: 'گواهینامه‌ها', icon: BadgeCheck },
-      { href: '/admin/hero', label: 'اسلایدر هرو', icon: GalleryHorizontal },
+      { href: '/admin/messages', label: 'پیام‌ها', icon: MessageSquare },
     ],
   },
   {
-    label: 'مدیریت',
+    label: 'کاتالوگ',
     items: [
-      { href: '/admin/messages', label: 'پیام‌ها', icon: MessageSquare },
-      { href: '/admin/testimonials', label: 'نظرات', icon: Star },
+      { href: '/admin/products', label: 'محصولات', icon: Package },
+      { href: '/admin/categories', label: 'دسته‌بندی‌ها', icon: Layers },
+    ],
+  },
+  {
+    label: 'محتوای سایت',
+    items: [
+      { href: '/admin/content', label: 'محتوای صفحات', icon: LayoutTemplate },
+      { href: '/admin/hero', label: 'اسلایدر هرو', icon: GalleryHorizontal },
+      { href: '/admin/certificates', label: 'گواهینامه‌ها', icon: BadgeCheck },
+      { href: '/admin/blog', label: 'وبلاگ', icon: FileText },
+      { href: '/admin/youtix', label: 'یوتیکس (تولید مقاله)', icon: Sparkles },
+      { href: '/admin/projects', label: 'پروژه‌ها', icon: Building2 },
       { href: '/admin/faq', label: 'سوالات متداول', icon: HelpCircle },
-      { href: '/admin/users', label: 'کاربران', icon: Users },
+      { href: '/admin/testimonials', label: 'نظرات', icon: Star },
     ],
   },
   {
     label: 'تنظیمات',
     items: [
-      { href: '/admin/seo', label: 'مرکز سئو', icon: SearchCheck },
-      { href: '/admin/theme', label: 'رنگ‌بندی سایت', icon: Palette },
-      { href: '/admin/settings', label: 'تنظیمات عمومی', icon: Settings },
+      { href: '/admin/settings', label: 'تنظیمات عمومی', icon: Settings, adminOnly: true },
+      { href: '/admin/seo', label: 'مرکز سئو', icon: SearchCheck, adminOnly: true },
+      { href: '/admin/theme', label: 'رنگ‌بندی سایت', icon: Palette, adminOnly: true },
+      { href: '/admin/users', label: 'کاربران', icon: Users, adminOnly: true },
     ],
   },
 ];
@@ -130,6 +138,11 @@ type SidebarProps = {
 };
 
 function SidebarContent({ collapsed, onToggleCollapse, onLogout }: { collapsed: boolean; onToggleCollapse?: () => void; onLogout: () => void }) {
+  const user = useAdminUser();
+  // تا نقش معلوم نشده، بخش‌های مدیر کل پنهان می‌مانند (بعد از رسیدن نقش ظاهر می‌شوند، نه برعکس)
+  const groups = navGroups
+    .map((group) => ({ ...group, items: group.items.filter((item) => !item.adminOnly || user?.role === 'ADMIN') }))
+    .filter((group) => group.items.length);
   return (
     <div className="flex flex-col h-full bg-[var(--background)] border-l border-[var(--border)]/80">
       {/* Logo + Toggle */}
@@ -161,7 +174,7 @@ function SidebarContent({ collapsed, onToggleCollapse, onLogout }: { collapsed: 
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
-        {navGroups.map((group) => (
+        {groups.map((group) => (
           <div key={group.label}>
             {!collapsed && (
               <div className="text-[var(--muted-foreground)] text-[10px] font-semibold uppercase tracking-widest px-3 mb-2">
@@ -170,7 +183,7 @@ function SidebarContent({ collapsed, onToggleCollapse, onLogout }: { collapsed: 
             )}
             <div className="space-y-0.5">
               {group.items.map((item) => (
-                <NavItem key={item.href} {...item} collapsed={collapsed} />
+                <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} exact={item.exact} collapsed={collapsed} />
               ))}
             </div>
           </div>

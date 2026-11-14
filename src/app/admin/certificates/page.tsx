@@ -3,12 +3,13 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { BadgeCheck, ChevronDown, ChevronUp, ExternalLink, Loader2, Plus, Save, Trash2 } from 'lucide-react';
+import { BadgeCheck, ChevronDown, ChevronUp, ExternalLink, Loader2, Plus, Save, Sparkles, Trash2 } from 'lucide-react';
 import { ImageUploader } from '@/shared/ui/ImageUploader';
 import { IconTile } from '@/shared/ui/IconTile';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { parseCertificates, type Certificate } from '@/shared/lib/site-settings';
-import { cn } from '@/shared/lib/utils';
+import { requestTranslation } from '@/features/admin/content/translate-client';
+import { cn, faDigits } from '@/shared/lib/utils';
 
 const card = 'bg-[var(--card)] border border-[var(--border)] rounded-2xl';
 const inputCls = 'w-full h-11 bg-[var(--background)] border border-[var(--border)] rounded-xl px-3 text-sm focus:outline-none focus:border-[var(--accent)]';
@@ -17,6 +18,7 @@ const inputCls = 'w-full h-11 bg-[var(--background)] border border-[var(--border
 export default function AdminCertificatesPage() {
   const [list, setList] = useState<Certificate[] | null>(null);
   const [saving, setSaving] = useState(false);
+  const [translating, setTranslating] = useState(false);
 
   useEffect(() => {
     fetch('/api/settings')
@@ -32,6 +34,22 @@ export default function AdminCertificatesPage() {
       [next[i], next[i + d]] = [next[i + d], next[i]];
       return next;
     });
+
+  // فقط عنوان‌هایی که نسخه انگلیسی ندارند — ترجمه‌ای که دستی اصلاح شده بازنویسی نمی‌شود
+  const translate = async () => {
+    const todo = list!.flatMap((c, i) => (c.title.trim() && !c.titleEn.trim() ? [{ id: String(i), text: c.title, html: false }] : []));
+    if (!todo.length) return toast('همه عنوان‌ها ترجمه دارند');
+    setTranslating(true);
+    try {
+      const result = await requestTranslation(todo);
+      setList((l) => l!.map((c, i) => (result[i] ? { ...c, titleEn: result[i] } : c)));
+      toast.success(`${faDigits(Object.keys(result).length)} عنوان ترجمه شد — بازبینی و ذخیره کنید`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'ترجمه انجام نشد');
+    } finally {
+      setTranslating(false);
+    }
+  };
 
   const save = async () => {
     const clean = list!.filter((c) => c.title.trim() && c.image);
@@ -88,6 +106,10 @@ export default function AdminCertificatesPage() {
               <input value={c.title} onChange={(e) => update(i, { title: e.target.value })} placeholder="مثلاً: نشان استاندارد ملی ایران — ISIRI 9116" className={inputCls} />
             </label>
             <label className="block">
+              <span className="block text-xs font-bold text-[var(--muted-foreground)] mb-1.5">عنوان انگلیسی (خالی = همان عنوان فارسی)</span>
+              <input dir="ltr" style={{ direction: 'ltr', textAlign: 'left' }} value={c.titleEn} onChange={(e) => update(i, { titleEn: e.target.value })} placeholder="e.g. Iranian National Standard — ISIRI 9116" className={inputCls} />
+            </label>
+            <label className="block">
               <span className="block text-xs font-bold text-[var(--muted-foreground)] mb-1.5">شماره یا کد (اختیاری)</span>
               <input value={c.code} onChange={(e) => update(i, { code: e.target.value })} placeholder="مثلاً شماره پروانه یا تاریخ اعتبار" className={inputCls} />
             </label>
@@ -103,9 +125,14 @@ export default function AdminCertificatesPage() {
       {!list.length && <p className={cn(card, 'p-8 text-center text-sm text-[var(--muted-foreground)]')}>هنوز گواهی‌ای ثبت نشده است.</p>}
 
       <div className="flex flex-wrap gap-2">
-        <button onClick={() => setList((l) => [...l!, { title: '', code: '', image: '' }])} className="h-11 px-4 rounded-xl border-2 border-dashed border-[var(--border)] text-sm font-bold flex items-center gap-1.5 hover:border-[var(--accent)]">
+        <button onClick={() => setList((l) => [...l!, { title: '', titleEn: '', code: '', image: '' }])} className="h-11 px-4 rounded-xl border-2 border-dashed border-[var(--border)] text-sm font-bold flex items-center gap-1.5 hover:border-[var(--accent)]">
           <Plus className="w-4 h-4" /> افزودن گواهی
         </button>
+        {list.length > 0 && (
+          <button onClick={translate} disabled={translating || saving} className="h-11 px-4 rounded-xl border border-[var(--border)] text-sm font-bold flex items-center gap-1.5 hover:border-[var(--accent)] disabled:opacity-50">
+            {translating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />} ترجمه خودکار عنوان انگلیسی
+          </button>
+        )}
         <button onClick={save} disabled={saving} className="h-11 px-5 rounded-xl bg-[var(--accent)] text-[var(--accent-foreground)] text-sm font-black flex items-center gap-1.5 disabled:opacity-50">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} ذخیره
         </button>

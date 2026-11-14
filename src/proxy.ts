@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/shared/lib/auth';
 import { ADMIN_COOKIE } from '@/shared/lib/admin-auth';
+import { defaultLocale } from '@/shared/i18n/config';
 
 // proxy در Next 16 روی Node اجرا می‌شود، پس امضای JWT را همان‌جا بررسی می‌کنیم — decode ساده توکن جعلی را هم می‌پذیرفت
 function isLoggedIn(request: NextRequest): boolean {
@@ -8,11 +9,11 @@ function isLoggedIn(request: NextRequest): boolean {
   return Boolean(token && verifyToken(token));
 }
 
-export async function proxy(request: NextRequest) {
+function adminGuard(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
 
   // Protect all /admin routes except /admin/login
-  if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
+  if (pathname !== '/admin/login') {
     if (!request.cookies.get(ADMIN_COOKIE)) {
       const loginUrl = new URL('/admin/login', request.url);
       loginUrl.searchParams.set('redirect', pathname);
@@ -36,6 +37,38 @@ export async function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
+/** فایل‌های متادیتای Next (عکس og، آیکن) که خودش با پیشوند /fa لینک می‌دهد */
+const METADATA_FILE = /\/(opengraph-image|twitter-image|icon|apple-icon)(-[\w-]+)?$/;
+
+/**
+ * زبان: صفحه‌ها واقعاً زیر /[lang] هستند. آدرس فارسی بدون پیشوند می‌ماند (همان آدرس‌هایی که گوگل می‌شناسد)
+ * و این‌جا داخلی به /fa بازنویسی می‌شود؛ /en مستقیم می‌رود. /fa/... در نوار آدرس تکرار همان صفحه است، پس ۳۰۸ به آدرس بی‌پیشوند.
+ */
+function localeRouting(request: NextRequest): NextResponse {
+  const { pathname } = request.nextUrl;
+
+  if (pathname === `/${defaultLocale}` || pathname.startsWith(`/${defaultLocale}/`)) {
+    if (METADATA_FILE.test(pathname)) return NextResponse.next();
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.slice(defaultLocale.length + 1) || '/';
+    return NextResponse.redirect(url, 308);
+  }
+
+  if (pathname === '/en' || pathname.startsWith('/en/')) return NextResponse.next();
+
+  const url = request.nextUrl.clone();
+  url.pathname = `/${defaultLocale}${pathname === '/' ? '' : pathname}`;
+  return NextResponse.rewrite(url);
+}
+
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) return adminGuard(request);
+  return localeRouting(request);
+}
+
 export const config = {
-  matcher: ['/admin/:path*'],
+  // API، فایل‌های ثابت و مسیرهای بدون زبان (sitemap، robots، llms.txt، media) از proxy رد نمی‌شوند؛
+  // هر مسیری که پسوند فایل دارد (عکس، فونت، pdf) هم همین‌طور
+  matcher: ['/((?!api/|_next/|media/|uploads/|images/|videos/|catalogs/|favicon\\.ico|sitemap\\.xml|robots\\.txt|llms\\.txt|.*\\.[a-zA-Z0-9]{2,5}$).*)'],
 };

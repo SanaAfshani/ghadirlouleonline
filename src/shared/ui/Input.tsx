@@ -21,7 +21,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         <div className="relative">
           {icon && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)]">
+            <div className="absolute start-3 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)]">
               {icon}
             </div>
           )}
@@ -30,7 +30,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             className={cn(
               'w-full h-11 px-4 rounded-xl border bg-[var(--card)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] border-[var(--border)]',
               'focus:outline-none',
-              icon && 'pr-10',
+              icon && 'ps-10',
               error && 'border-red-500',
               className
             )}

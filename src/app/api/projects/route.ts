@@ -3,6 +3,9 @@ import { requireAdmin, isAdmin } from '@/shared/lib/admin-auth';
 import { prisma } from '@/shared/lib/prisma';
 import { normalizeProjectImages, serializeProject } from '@/shared/lib/serializers';
 import { slugify } from '@/shared/lib/utils';
+import { sanitizeTranslations } from '@/shared/lib/translations';
+import { stripDangerousHtml } from '@/shared/content/sanitize';
+import { revalidateLocalized } from '@/shared/i18n/server';
 
 export async function GET(request: NextRequest) {
   try {
@@ -49,8 +52,12 @@ export async function POST(request: NextRequest) {
         ogTitle: body.ogTitle || null,
         ogDescription: body.ogDescription || null,
         faqs: JSON.stringify(body.faqs || []),
+        ...(body.translations !== undefined && { translations: sanitizeTranslations('project', body.translations, stripDangerousHtml) }),
       },
     });
+
+    revalidateLocalized(`/projects/${project.slug}`);
+    revalidateLocalized('/projects');
 
     return NextResponse.json({ success: true, data: serializeProject(project) }, { status: 201 });
   } catch (error) {

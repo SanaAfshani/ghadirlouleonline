@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowRight, Save, FileJson, FileText, X, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { slugify } from '@/shared/lib/utils';
+import { cn, slugify } from '@/shared/lib/utils';
 import { uploadPdf } from '@/shared/lib/uploadPdf';
 import { ImageUploader } from '@/shared/ui/ImageUploader';
 import { ArticleImportDialog } from '@/features/admin/editor/ArticleImportDialog';
@@ -15,6 +15,10 @@ import { SeoPanel } from '@/features/admin/seo/SeoPanel';
 import type { SeoFields } from '@/features/admin/seo/seo';
 import { FaqEditor } from '@/features/admin/seo/FaqEditor';
 import type { FaqItem } from '@/shared/types';
+import type { Locale } from '@/shared/i18n/config';
+import { TranslationEditor, type EnglishTranslations } from '@/features/admin/translations/TranslationEditor';
+import { LocaleTabs, isUntranslated } from '@/features/admin/translations/LocaleTabs';
+import { BLOG_TRANSLATION_FIELDS } from '@/features/admin/translations/fields';
 
 export default function NewBlogPostPage() {
   const router = useRouter();
@@ -34,6 +38,8 @@ export default function NewBlogPostPage() {
   /** تغییر اسلاگ توسط کاربر، هم‌گام‌سازی خودکار با عنوان را متوقف می‌کند */
 
   const [importOpen, setImportOpen] = useState(false);
+  const [locale, setLocale] = useState<Locale>('fa');
+  const [en, setEn] = useState<EnglishTranslations>({});
 
   /** فقط فیلدهایی که کاربر در دیالوگ انتخاب کرده نوشته می‌شوند */
   const applyImport = (data: ImportedArticle, fields: ImportField[]) => {
@@ -108,6 +114,7 @@ export default function NewBlogPostPage() {
           ogTitle: form.ogTitle,
           ogDescription: form.ogDescription,
           faqs: form.faqs,
+          translations: { en },
           authorId,
         }),
       });
@@ -154,10 +161,17 @@ export default function NewBlogPostPage() {
         </button>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      {/* فیلد اجباری خالیِ فرم فارسی در زبانه English دیده نمی‌شود — زبانه فارسی باز می‌شود تا خطا معلوم باشد */}
+      <form onSubmit={handleSubmit} onInvalidCapture={() => setLocale('fa')} className="space-y-6">
+        <LocaleTabs value={locale} onChange={setLocale} untranslated={isUntranslated(en, 'title')} />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {locale === 'en' && (
+            <div className="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6">
+              <TranslationEditor fields={BLOG_TRANSLATION_FIELDS} source={form} value={en} onChange={setEn} />
+            </div>
+          )}
           {/* Main */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className={cn('lg:col-span-2 space-y-6', locale === 'en' && 'hidden')}>
             <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 space-y-4">
               <h2 className="text-[var(--foreground)] font-bold">محتوای مقاله</h2>
 

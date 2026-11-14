@@ -1,5 +1,12 @@
-import Link from 'next/link';
+import { Link } from '@/shared/i18n/Link';
 import { BookOpen, ChevronLeft } from 'lucide-react';
+import type { Locale } from '@/shared/i18n/config';
+import { defineMessages, fill } from '@/shared/i18n/messages';
+
+const messages = defineMessages({
+  fa: { title: 'راهنمای خرید {name}', read: 'خواندن راهنما' },
+  en: { title: '{name} buying guides', read: 'Read the guide' },
+});
 
 type Guide = { slug: string; title: string; excerpt: string | null };
 
@@ -10,15 +17,16 @@ type Guide = { slug: string; title: string; excerpt: string | null };
  * همه‌شان در وبلاگ همین سایت هست ولی از صفحه دسته هیچ راهی به آن نبود. این بخش آن راه را باز
  * می‌کند و در عین حال به گوگل می‌گوید صفحه دسته و این مقاله‌ها یک موضوع‌اند.
  */
-export function CategoryGuides({ categoryName, guides }: { categoryName: string; guides: Guide[] }) {
+export function CategoryGuides({ categoryName, guides, locale }: { categoryName: string; guides: Guide[]; locale: Locale }) {
   if (guides.length === 0) return null;
+  const t = messages[locale];
 
   return (
     <section className="container-main pb-12 lg:pb-16" aria-labelledby="category-guides">
       <div className="flex items-center gap-2.5 mb-4">
         <BookOpen className="w-5 h-5 text-[var(--accent-text)]" aria-hidden />
         <h2 id="category-guides" className="text-lg sm:text-xl font-black text-[var(--foreground)]">
-          راهنمای خرید {categoryName}
+          {fill(t.title, { name: categoryName })}
         </h2>
       </div>
 
@@ -36,8 +44,8 @@ export function CategoryGuides({ categoryName, guides }: { categoryName: string;
               <p className="mt-1.5 text-sm leading-7 text-[var(--muted-foreground)] line-clamp-2">{g.excerpt}</p>
             )}
             <span className="mt-2.5 inline-flex items-center gap-1 text-xs font-bold text-[var(--accent-text)]">
-              خواندن راهنما
-              <ChevronLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" aria-hidden />
+              {t.read}
+              <ChevronLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5 ltr:rotate-180 ltr:group-hover:translate-x-0.5" aria-hidden />
             </span>
           </Link>
         ))}

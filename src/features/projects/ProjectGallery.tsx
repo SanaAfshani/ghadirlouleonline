@@ -5,7 +5,9 @@ import Image from 'next/image';
 import { ZoomIn } from 'lucide-react';
 import type { ProjectImage } from '@/shared/types';
 import { ImageLightbox } from '@/shared/ui/ImageLightbox';
-import { faDigits } from '@/shared/lib/utils';
+import { useLocale, useMessages } from '@/shared/i18n/LocaleProvider';
+import { digits } from '@/shared/i18n/format';
+import { defineMessages, fill } from '@/shared/i18n/messages';
 
 /** تا وقتی نسبت واقعی عکس معلوم نشده، همین کادر ایستاده رزرو می‌شود تا چیدمان نپرد */
 const FALLBACK_RATIO = 3 / 4;
@@ -19,6 +21,11 @@ const FALLBACK_RATIO = 3 / 4;
  * بعدی شروع می‌شود. نسخه بهینه‌شده یک سال کش می‌شود، پس این هزینه فقط بار اول است.
  */
 const CONCURRENCY = 3;
+
+const messages = defineMessages({
+  fa: { zoom: 'بزرگ‌نمایی تصویر {n}', alt: '{title} — تصویر {n}' },
+  en: { zoom: 'Enlarge image {n}', alt: '{title} — image {n}' },
+});
 
 /**
  * گالری عکس‌های یک پروژه.
@@ -36,6 +43,8 @@ const CONCURRENCY = 3;
  * هست، پس این صف‌بندی چیزی از دید موتور جستجو پنهان نمی‌کند.
  */
 export function ProjectGallery({ images, title }: { images: ProjectImage[]; title: string }) {
+  const locale = useLocale();
+  const t = useMessages(messages);
   const [ratios, setRatios] = useState<Record<string, number>>({});
   const [ready, setReady] = useState(CONCURRENCY);
   const [zoom, setZoom] = useState<number | null>(null);
@@ -87,14 +96,14 @@ export function ProjectGallery({ images, title }: { images: ProjectImage[]; titl
             key={image.url}
             type="button"
             onClick={() => setZoom(i)}
-            aria-label={`بزرگ‌نمایی تصویر ${faDigits(i + 1)}`}
+            aria-label={fill(t.zoom, { n: digits(i + 1, locale) })}
             style={{ aspectRatio: ratios[image.url] ?? FALLBACK_RATIO }}
             className="group relative block w-full mb-3 break-inside-avoid rounded-2xl overflow-hidden bg-[var(--muted)] border border-[var(--border)] cursor-zoom-in"
           >
             {i < ready && (
               <Image
                 src={image.url}
-                alt={image.alt || `${title} — تصویر ${faDigits(i + 1)}`}
+                alt={image.alt || fill(t.alt, { title, n: digits(i + 1, locale) })}
                 fill
                 sizes="(max-width: 1024px) 50vw, 300px"
                 quality={90}
@@ -110,7 +119,7 @@ export function ProjectGallery({ images, title }: { images: ProjectImage[]; titl
             )}
             <span
               aria-hidden
-              className="absolute bottom-3 left-3 grid place-items-center w-9 h-9 rounded-full bg-black/55 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute bottom-3 end-3 grid place-items-center w-9 h-9 rounded-full bg-black/55 text-white opacity-0 group-hover:opacity-100 transition-opacity"
             >
               <ZoomIn className="w-4.5 h-4.5" />
             </span>

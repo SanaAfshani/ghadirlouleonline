@@ -1,6 +1,8 @@
 import type { SupplyStatus } from '@/shared/lib/supply-status';
 
 export interface Product {
+  /** ترجمه‌ها (JSON) — با localizeRecord در shared/lib/translations.ts خوانده می‌شود */
+  translations?: string | null;
   id: string;
   name: string;
   slug: string;
@@ -33,6 +35,8 @@ export interface Product {
 }
 
 export interface Category {
+  /** ترجمه‌ها (JSON) — با localizeRecord در shared/lib/translations.ts خوانده می‌شود */
+  translations?: string | null;
   id: string;
   name: string;
   slug: string;
@@ -67,6 +71,8 @@ export interface CatalogFile {
 }
 
 export interface BlogPost {
+  /** ترجمه‌ها (JSON) — با localizeRecord در shared/lib/translations.ts خوانده می‌شود */
+  translations?: string | null;
   id: string;
   title: string;
   slug: string;
@@ -101,6 +107,8 @@ export interface ProjectImage {
 }
 
 export interface Project {
+  /** ترجمه‌ها (JSON) — با localizeRecord در shared/lib/translations.ts خوانده می‌شود */
+  translations?: string | null;
   id: string;
   title: string;
   slug: string;
@@ -122,6 +130,8 @@ export interface Project {
 }
 
 export interface FAQ {
+  /** ترجمه‌ها (JSON) — با localizeRecord در shared/lib/translations.ts خوانده می‌شود */
+  translations?: string | null;
   id: string;
   question: string;
   answer: string;
@@ -131,6 +141,8 @@ export interface FAQ {
 }
 
 export interface Testimonial {
+  /** ترجمه‌ها (JSON) — با localizeRecord در shared/lib/translations.ts خوانده می‌شود */
+  translations?: string | null;
   id: string;
   name: string;
   company?: string;

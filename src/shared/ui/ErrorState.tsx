@@ -6,7 +6,7 @@ import { IconTile, type IconTone } from './IconTile';
  * صفحه وضعیت مشترک: خطای سرور، قطعی اینترنت، صفحه پیدا نشد، پیش‌فاکتور منقضی/ردشده و...
  * بدون hook — هم در error.tsx (کلاینت) و هم در not-found / صفحه سرور قابل استفاده است.
  */
-export function ErrorState({ icon, tone = 'accent', code, title, description, digest, children, className }: {
+export function ErrorState({ icon, tone = 'accent', code, title, description, digest, digestLabel = 'کد پیگیری:', children, className }: {
   icon: LucideIcon;
   tone?: IconTone;
   /** کد کوتاه بالای عنوان، مثلاً ۴۰۴ یا ۵۰۰ */
@@ -15,6 +15,8 @@ export function ErrorState({ icon, tone = 'accent', code, title, description, di
   description: React.ReactNode;
   /** شناسه خطای Next.js — برای پیگیری در لاگ سرور، وقتی مشتری با پشتیبانی تماس می‌گیرد */
   digest?: string;
+  /** برچسب digest به زبان صفحه — این کامپوننت hook ندارد، پس متن را صدازننده می‌دهد */
+  digestLabel?: string;
   /** دکمه‌های اقدام */
   children?: React.ReactNode;
   className?: string;
@@ -29,7 +31,7 @@ export function ErrorState({ icon, tone = 'accent', code, title, description, di
           <h1 className={cn('font-black text-2xl sm:text-3xl text-[var(--foreground)] leading-snug', code ? 'mt-1' : 'mt-6')}>{title}</h1>
           <div className="mt-3 text-[var(--muted-foreground)] leading-8">{description}</div>
           {children && <div className="mt-8 flex flex-wrap items-center justify-center gap-3">{children}</div>}
-          {digest && <p className="mt-6 text-[11px] text-[var(--muted-foreground)] num" dir="ltr">کد پیگیری: {digest}</p>}
+          {digest && <p className="mt-6 text-[11px] text-[var(--muted-foreground)] num" dir="ltr">{digestLabel} {digest}</p>}
         </div>
       </div>
     </div>

@@ -1,17 +1,27 @@
-import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
+import { Link } from '@/shared/i18n/Link';
 import { SectionHeading } from '@/shared/ui/SectionHeading';
 import { CategoryThumb } from '@/widgets/header/Header';
 import { groupCategories } from '@/shared/config/product-lines';
-import { faDigits } from '@/shared/lib/utils';
 import type { NavCategory } from '@/shared/lib/data';
+import type { Locale } from '@/shared/i18n/config';
+import { defineMessages } from '@/shared/i18n/messages';
+import { digits } from '@/shared/i18n/format';
+import type { ContentOf } from '@/shared/content/types';
+import type { homeProductLines } from '@/shared/content/pages/home';
+
+const messages = defineMessages({
+  fa: { priceTable: 'جدول قیمت' },
+  en: { priceTable: 'Price table' },
+});
 
 /**
  * محصولات صفحه اول: به‌جای «دسته‌ها» و «محصولات پرطرفدار» (که فقط ۸ سایز اول بود)، هر گروه یک کارت
  * با سایزها و انواعش — بازدیدکننده از همین‌جا مستقیم به صفحه سایز موردنظرش می‌رود.
  */
-export function ProductLinesSection({ categories }: { categories: NavCategory[] }) {
-  const groups = groupCategories(categories);
+export function ProductLinesSection({ categories, content, locale }: { categories: NavCategory[]; content: ContentOf<typeof homeProductLines>; locale: Locale }) {
+  const groups = groupCategories(categories, locale);
+  const t = messages[locale];
   if (!groups.length) return null;
 
   return (
@@ -20,10 +30,10 @@ export function ProductLinesSection({ categories }: { categories: NavCategory[] 
         <SectionHeading
           id="product-lines-title"
           align="right"
-          label="محصولات"
-          title="لوله کاروگیت، اسپیرال و اتصالات"
-          description="سایز را انتخاب کنید؛ هر سایز صفحه، مشخصات فنی و قیمت روز خودش را دارد."
-          action={{ href: '/products', label: 'همه محصولات' }}
+          label={content.label}
+          title={content.title}
+          description={content.description}
+          action={{ href: '/products', label: content.actionLabel }}
         />
 
         <div className="grid gap-4 sm:gap-5 lg:grid-cols-[1.5fr_1fr] items-start">
@@ -45,10 +55,10 @@ export function ProductLinesSection({ categories }: { categories: NavCategory[] 
                   <div key={c.slug}>
                     <div className="flex items-center justify-between gap-3">
                       <p className="font-black">
-                        {c.name} <span className="text-xs font-medium text-[var(--muted-foreground)] num">({faDigits(c.productCount)})</span>
+                        {c.name} <span className="text-xs font-medium text-[var(--muted-foreground)] num">({digits(c.productCount, locale)})</span>
                       </p>
                       <Link href={`/products/${c.slug}`} className="text-xs font-bold text-[var(--accent-text)] flex items-center gap-0.5 shrink-0">
-                        جدول قیمت <ChevronLeft className="w-3.5 h-3.5" />
+                        {t.priceTable} <ChevronLeft className="w-3.5 h-3.5 ltr:rotate-180" />
                       </Link>
                     </div>
                     <ul className="mt-2.5 flex flex-wrap gap-2">

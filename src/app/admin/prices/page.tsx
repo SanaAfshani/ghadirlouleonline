@@ -1,12 +1,13 @@
 'use client';
 
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import {
   AlertTriangle, ArrowDownLeft, ArrowDownUp, ArrowUpLeft, Check, ChevronDown, ChevronUp, ClipboardPaste, ExternalLink, Layers,
-  Loader2, Package, Percent, Plus, Power, Scale, Search, Tags, Trash2, TrendingUp, X,
+  Loader2, Package, Percent, Plus, Power, Scale, Search, Sparkles, Tags, Trash2, TrendingUp, X,
 } from 'lucide-react';
 import { WEEK_ORDER, WEEKDAY_LABEL, type MarketMode, type MarketSchedule, type MarketStatus } from '@/shared/lib/market';
 import { cn, formatPersianNumber, latinDigits } from '@/shared/lib/utils';
@@ -17,10 +18,14 @@ import { useConfirm } from '@/shared/ui/ConfirmDialog';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { Select } from '@/shared/ui/Select';
 import { IconTile } from '@/shared/ui/IconTile';
+import { translationsFor } from '@/shared/lib/translations';
+import { requestTranslation } from '@/features/admin/content/translate-client';
 
 type Item = {
   id: string; productId: string; title: string; size: string; grade: string; spec: string; dimensions: string;
   price: number | null; previousPrice: number | null; weight: string; note: string; sortOrder: number; priceChangedAt: string;
+  /** JSON ترجمه‌ها ({"en": {title, spec, note}}) */
+  translations?: string;
 };
 type ProductRow = {
   id: string; name: string; slug: string; published: boolean; pricePerKg: number | null;
@@ -249,8 +254,8 @@ const fieldCls = cn(
   // نمونه‌های راهنما («شاخه ۶ متری»...) در جدول شلوغی می‌سازند — فقط در ردیف جدید دیده می‌شوند
   '@[60rem]:placeholder:text-transparent',
 );
-/** ستون‌های حالت جدولی: انتخاب، مدل، سایز، کلاس، مشخصات، ابعاد، وزن، قیمت، توضیحات، ترتیب/حذف */
-const TABLE_COLS = '@[60rem]:grid-cols-[28px_minmax(0,1.3fr)_96px_108px_minmax(0,1fr)_minmax(0,0.8fr)_84px_160px_minmax(0,0.9fr)_92px]';
+/** ستون‌های حالت جدولی: انتخاب، مدل، سایز، کلاس، مشخصات، ابعاد، وزن، قیمت، توضیحات، ترتیب/ترجمه/حذف */
+const TABLE_COLS = '@[60rem]:grid-cols-[28px_minmax(0,1.3fr)_96px_108px_minmax(0,1fr)_minmax(0,0.8fr)_84px_160px_minmax(0,0.9fr)_128px]';
 
 /** چک‌باکس انتخاب ردیف */
 const checkCls = 'w-4.5 h-4.5 rounded-md accent-[var(--accent)] cursor-pointer';
@@ -447,6 +452,108 @@ const ADMIN_SORTS: { value: string; label: string }[] = [
   { value: 'price:asc', label: 'قیمت: کم به زیاد' },
   { value: 'price:desc', label: 'قیمت: زیاد به کم' },
 ];
+
+/* ─────────────────────────── ترجمه انگلیسی ردیف ─────────────────────────── */
+
+const EN_FIELDS = [
+  { name: 'title', label: 'مدل' },
+  { name: 'spec', label: 'مشخصات' },
+  { name: 'note', label: 'توضیحات' },
+] as const;
+type EnValues = Record<(typeof EN_FIELDS)[number]['name'], string>;
+
+function englishOf(item: Item): EnValues {
+  const tr = translationsFor(item.translations, 'en');
+  const str = (v: unknown) => (typeof v === 'string' ? v : '');
+  return { title: str(tr.title), spec: str(tr.spec), note: str(tr.note) };
+}
+
+/**
+ * نسخه انگلیسی مدل، مشخصات و توضیح یک ردیف برای جدول /en/prices؛ فیلد خالی همان متن فارسی را نشان می‌دهد.
+ * پنجره با portal بیرون از کارت باز می‌شود چون @container کارت، fixed را به خودش محدود می‌کند.
+ */
+function RowEnglish({ item, onSaved }: { item: Item; onSaved: (i: Item) => void }) {
+  const [value, setValue] = useState<EnValues | null>(null);
+  const [busy, setBusy] = useState<'save' | 'translate' | null>(null);
+  const untranslated = !englishOf(item).title.trim();
+
+  const translate = async () => {
+    if (!value) return;
+    const todo = EN_FIELDS.filter((f) => item[f.name].trim() && !value[f.name].trim()).map((f) => ({ id: f.name, text: item[f.name], html: false }));
+    if (!todo.length) return toast('همه فیلدها ترجمه دارند');
+    setBusy('translate');
+    try {
+      const result = await requestTranslation(todo);
+      setValue((v) => (v ? { ...v, ...result } : v));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'ترجمه انجام نشد');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const save = async () => {
+    if (!value) return;
+    setBusy('save');
+    try {
+      onSaved(await api<Item>(`/api/admin/prices/${item.id}`, { method: 'PATCH', body: JSON.stringify({ translations: { en: value } }) }));
+      setValue(null);
+      toast.success('نسخه انگلیسی ذخیره شد');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'ذخیره نشد');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <>
+      <button
+        onClick={() => setValue(englishOf(item))}
+        aria-label="ترجمه انگلیسی"
+        title={untranslated ? 'ترجمه انگلیسی ندارد' : 'ترجمه انگلیسی'}
+        className={cn(
+          'relative w-8 h-11 @[60rem]:h-9 grid place-items-center text-[10px] font-black hover:text-[var(--foreground)]',
+          untranslated ? 'text-amber-600 dark:text-amber-400' : 'text-[var(--muted-foreground)]',
+        )}
+      >
+        EN
+      </button>
+      {value &&
+        createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={() => setValue(null)}>
+            <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 space-y-3" role="dialog" aria-label="ترجمه انگلیسی ردیف">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-[var(--foreground)] font-bold text-sm truncate">ترجمه انگلیسی «{itemLabel(item)}»</h2>
+                <button type="button" onClick={() => setValue(null)} aria-label="بستن" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              {EN_FIELDS.map((f) => (
+                <label key={f.name} className="block">
+                  <span className="block mb-1 text-xs font-semibold text-[var(--foreground)]">
+                    {f.label} <span className="font-normal text-[var(--muted-foreground)]">— {item[f.name] || 'خالی'}</span>
+                  </span>
+                  <input value={value[f.name]} onChange={(e) => setValue({ ...value, [f.name]: e.target.value })} dir="ltr" className={cn(inputCls, 'w-full')} />
+                </label>
+              ))}
+              <div className="flex gap-2 pt-1">
+                <button type="button" onClick={save} disabled={busy !== null} className="h-10 px-5 rounded-xl bg-[var(--accent)] text-[var(--accent-foreground)] text-sm font-bold flex items-center gap-1.5 disabled:opacity-50">
+                  {busy === 'save' && <Loader2 className="w-4 h-4 animate-spin" />}
+                  ذخیره
+                </button>
+                <button type="button" onClick={translate} disabled={busy !== null} className="h-10 px-4 rounded-xl border border-[var(--border)] text-sm font-bold flex items-center gap-1.5 hover:border-[var(--accent)] disabled:opacity-50">
+                  {busy === 'translate' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  ترجمه خودکار
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
+    </>
+  );
+}
 
 function GradeSelect({ value, onChange, className }: { value: string; onChange: (v: string) => void; className?: string }) {
   return (
@@ -763,7 +870,7 @@ function ProductBoard({ product, onChange }: { product: ProductRow; onChange: (p
         <span className="px-3">وزن (kg)</span>
         <span className="px-3">قیمت (تومان)</span>
         <span className="px-3">توضیحات</span>
-        <span className="sr-only">ترتیب و حذف</span>
+        <span className="sr-only">ترتیب، ترجمه و حذف</span>
       </div>
 
       <div className="divide-y divide-[var(--border)] border-t border-[var(--border)] @[60rem]:border-t-0">
@@ -847,6 +954,7 @@ function ProductBoard({ product, onChange }: { product: ProductRow; onChange: (p
                 <div className="flex items-center justify-end col-span-2 @2xl:col-span-1 @[60rem]:opacity-40 @[60rem]:group-hover/row:opacity-100 @[60rem]:focus-within:opacity-100 transition-opacity">
                   <button onClick={() => move(idx, -1)} disabled={idx === 0 || !manual} aria-label="بالا" className="w-8 h-11 @[60rem]:h-9 grid place-items-center text-[var(--muted-foreground)] hover:text-[var(--foreground)] disabled:opacity-20"><ChevronUp className="w-4 h-4" /></button>
                   <button onClick={() => move(idx, 1)} disabled={idx === items.length - 1 || !manual} aria-label="پایین" className="w-8 h-11 @[60rem]:h-9 grid place-items-center text-[var(--muted-foreground)] hover:text-[var(--foreground)] disabled:opacity-20"><ChevronDown className="w-4 h-4" /></button>
+                  <RowEnglish item={i} onSaved={replaceItem} />
                   <button onClick={() => remove(i)} aria-label="حذف" className="w-8 h-11 @[60rem]:h-9 grid place-items-center text-[var(--muted-foreground)] hover:text-red-700 dark:hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
                 </div>
               </div>

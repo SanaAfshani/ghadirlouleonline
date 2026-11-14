@@ -6,6 +6,12 @@ import { Plus, Pencil, Trash2, HelpCircle, ChevronDown, Loader2, X } from 'lucid
 import toast from 'react-hot-toast';
 import type { FAQ } from '@/shared/types';
 import { useConfirm } from '@/shared/ui/ConfirmDialog';
+import { cn } from '@/shared/lib/utils';
+import { translationsFor } from '@/shared/lib/translations';
+import type { Locale } from '@/shared/i18n/config';
+import { TranslationEditor, type EnglishTranslations } from '@/features/admin/translations/TranslationEditor';
+import { LocaleTabs, isUntranslated } from '@/features/admin/translations/LocaleTabs';
+import { FAQ_TRANSLATION_FIELDS } from '@/features/admin/translations/fields';
 
 type FaqForm = {
   question: string;
@@ -27,6 +33,8 @@ export default function AdminFaqPage() {
   const [form, setForm] = useState<FaqForm>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [locale, setLocale] = useState<Locale>('fa');
+  const [en, setEn] = useState<EnglishTranslations>({});
 
   const loadFaqs = useCallback(async () => {
     setLoading(true);
@@ -52,6 +60,8 @@ export default function AdminFaqPage() {
   const openCreate = () => {
     setEditingId(null);
     setForm({ ...emptyForm, order: faqs.length + 1 });
+    setEn({});
+    setLocale('fa');
     setModalOpen(true);
   };
 
@@ -63,6 +73,8 @@ export default function AdminFaqPage() {
       published: faq.published,
       order: faq.order,
     });
+    setEn(translationsFor(faq.translations, 'en'));
+    setLocale('fa');
     setModalOpen(true);
   };
 
@@ -76,7 +88,7 @@ export default function AdminFaqPage() {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, translations: { en } }),
       });
       const json = await res.json();
 
@@ -236,7 +248,8 @@ export default function AdminFaqPage() {
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
               onSubmit={handleSave}
-              className="w-full max-w-lg bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 space-y-4"
+              onInvalidCapture={() => setLocale('fa')}
+              className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 space-y-4"
             >
               <div className="flex items-center justify-between">
                 <h2 className="text-[var(--foreground)] font-bold">{editingId ? 'ویرایش سوال' : 'سوال جدید'}</h2>
@@ -245,26 +258,39 @@ export default function AdminFaqPage() {
                 </button>
               </div>
 
-              <div>
-                <label className="block text-sm text-[var(--foreground)] mb-1.5">سوال *</label>
-                <input
-                  type="text"
-                  required
-                  value={form.question}
-                  onChange={(e) => setForm({ ...form, question: e.target.value })}
-                  className={inputCls}
+              <LocaleTabs value={locale} onChange={setLocale} untranslated={isUntranslated(en, 'question')} />
+              {locale === 'en' && (
+                <TranslationEditor
+                  fields={FAQ_TRANSLATION_FIELDS}
+                  // دسته سوال در این فرم ویرایش نمی‌شود؛ مقدار فارسی‌اش از خود رکورد می‌آید
+                  source={{ ...form, category: faqs.find((f) => f.id === editingId)?.category ?? '' }}
+                  value={en}
+                  onChange={setEn}
                 />
-              </div>
+              )}
 
-              <div>
-                <label className="block text-sm text-[var(--foreground)] mb-1.5">پاسخ *</label>
-                <textarea
-                  required
-                  value={form.answer}
-                  onChange={(e) => setForm({ ...form, answer: e.target.value })}
-                  rows={4}
-                  className={`${inputCls} resize-none`}
-                />
+              <div className={cn('space-y-4', locale === 'en' && 'hidden')}>
+                <div>
+                  <label className="block text-sm text-[var(--foreground)] mb-1.5">سوال *</label>
+                  <input
+                    type="text"
+                    required
+                    value={form.question}
+                    onChange={(e) => setForm({ ...form, question: e.target.value })}
+                    className={inputCls}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-[var(--foreground)] mb-1.5">پاسخ *</label>
+                  <textarea
+                    required
+                    value={form.answer}
+                    onChange={(e) => setForm({ ...form, answer: e.target.value })}
+                    rows={4}
+                    className={`${inputCls} resize-none`}
+                  />
+                </div>
               </div>
 
               <div className="flex items-center gap-4">

@@ -8,6 +8,9 @@ import { slugify } from '@/shared/lib/utils';
 import { recordRedirect } from '@/shared/lib/redirects';
 import { pingIndexNow } from '@/shared/lib/indexnow';
 import { isSupplyStatus } from '@/shared/lib/supply-status';
+import { sanitizeTranslations } from '@/shared/lib/translations';
+import { stripDangerousHtml } from '@/shared/content/sanitize';
+import { revalidateLocalized } from '@/shared/i18n/server';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -77,6 +80,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
     if (body.ogDescription !== undefined) data.ogDescription = optionalText(body.ogDescription);
     if (body.faqs !== undefined) data.faqs = serializeFaqs(body.faqs);
     if (body.catalogs !== undefined) data.catalogs = serializeCatalogs(body.catalogs);
+    if (body.translations !== undefined) data.translations = sanitizeTranslations('product', body.translations, stripDangerousHtml);
 
     const before = await prisma.product.findUnique({
       where: { id },
@@ -105,6 +109,11 @@ export async function PUT(request: NextRequest, { params }: Props) {
       ]);
     }
 
+    // نسخه cache‌شده صفحه محصول، فهرست‌ها (layout /products همه زیرمسیرها از جمله آدرس قبلی را می‌گیرد) و صفحه اصلی
+    revalidateLocalized(`/products/${product.category.slug}/${product.slug}`);
+    revalidateLocalized('/products', 'layout');
+    revalidateLocalized('/');
+
     return NextResponse.json({ success: true, data: serializeProduct(product) });
   } catch (error) {
     console.error('Product PUT error:', error);
@@ -125,6 +134,9 @@ export async function DELETE(request: NextRequest, { params }: Props) {
     if (product.published) {
       pingIndexNow([`/products/${product.category.slug}`, `/products/${product.category.slug}/${product.slug}`]);
     }
+    revalidateLocalized(`/products/${product.category.slug}/${product.slug}`);
+    revalidateLocalized('/products', 'layout');
+    revalidateLocalized('/');
     return NextResponse.json({ success: true, message: 'محصول حذف شد' });
   } catch (error) {
     console.error('Product DELETE error:', error);

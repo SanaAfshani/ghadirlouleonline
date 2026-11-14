@@ -4,6 +4,13 @@ import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from
 import { createPortal } from 'react-dom';
 import { Check, ChevronDown, type LucideIcon } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
+import { useMessages } from '@/shared/i18n/LocaleProvider';
+import { defineMessages } from '@/shared/i18n/messages';
+
+const messages = defineMessages({
+  fa: { placeholder: 'انتخاب کنید' },
+  en: { placeholder: 'Select…' },
+});
 
 export type SelectOption = { value: string; label: string; hint?: string };
 
@@ -14,7 +21,7 @@ type Props = {
   placeholder?: string;
   /** کلاس دکمه (اندازه، زمینه، کادر) — هم‌شکل inputهای همان فرم */
   className?: string;
-  /** آیکون سمت راست دکمه */
+  /** آیکون لبه شروع دکمه */
   icon?: LucideIcon;
   disabled?: boolean;
   /** برای فرم‌ها: input مخفی با required تا اعتبارسنجی مرورگر کار کند */
@@ -27,7 +34,8 @@ type Props = {
  * منوی انتخاب سفارشی به جای select بومی — فهرست باز شده‌ی select مرورگر قابل استایل نیست.
  * فهرست در portal با موقعیت fixed باز می‌شود تا داخل کارت/جدول بریده نشود؛ کیبورد: ↑↓ Home End Enter Esc و تایپ حرف اول.
  */
-export function Select({ value, onChange, options, placeholder = 'انتخاب کنید', className, icon: Icon, disabled, required, name, ...rest }: Props) {
+export function Select({ value, onChange, options, placeholder, className, icon: Icon, disabled, required, name, ...rest }: Props) {
+  const t = useMessages(messages);
   const id = useId();
   const btnRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
@@ -37,13 +45,15 @@ export function Select({ value, onChange, options, placeholder = 'انتخاب �
   const selected = options.find((o) => o.value === value);
 
   const place = useCallback(() => {
-    const r = btnRef.current?.getBoundingClientRect();
-    if (!r) return;
+    const btn = btnRef.current;
+    if (!btn) return;
+    const r = btn.getBoundingClientRect();
     const listH = Math.min(352, options.length * 44 + 14);
     const up = r.bottom + listH + 8 > window.innerHeight && r.top > listH + 8;
     const width = Math.max(r.width, 176);
-    // RTL: لبه راست فهرست با لبه راست دکمه هم‌تراز؛ از صفحه بیرون نزند
-    const left = Math.min(Math.max(8, r.right - width), window.innerWidth - width - 8);
+    // لبه شروع فهرست با لبه شروع دکمه هم‌تراز (RTL: راست، LTR: چپ)؛ از صفحه بیرون نزند
+    const rtl = getComputedStyle(btn).direction === 'rtl';
+    const left = Math.min(Math.max(8, rtl ? r.right - width : r.left), window.innerWidth - width - 8);
     setPos({ top: up ? r.top - listH - 6 : r.bottom + 6, left, width, up });
   }, [options.length]);
 
@@ -129,7 +139,7 @@ export function Select({ value, onChange, options, placeholder = 'انتخاب �
           }
         }}
         className={cn(
-          'relative flex items-center gap-2 text-right transition-[border-color,box-shadow] cursor-pointer',
+          'relative flex items-center gap-2 text-start transition-[border-color,box-shadow] cursor-pointer',
           'hover:border-[var(--accent)]/50 focus:outline-none focus-visible:border-[var(--accent)] focus-visible:ring-2 focus-visible:ring-[var(--accent)]/20',
           'disabled:opacity-50 disabled:cursor-not-allowed',
           open && 'border-[var(--accent)] ring-2 ring-[var(--accent)]/20',
@@ -137,7 +147,7 @@ export function Select({ value, onChange, options, placeholder = 'انتخاب �
         )}
       >
         {Icon && <Icon className="w-4 h-4 shrink-0 text-[var(--muted-foreground)]" />}
-        <span className={cn('flex-1 min-w-0 truncate', !selected && 'text-[var(--muted-foreground)]')}>{selected?.label ?? placeholder}</span>
+        <span className={cn('flex-1 min-w-0 truncate', !selected && 'text-[var(--muted-foreground)]')}>{selected?.label ?? placeholder ?? t.placeholder}</span>
         <ChevronDown className={cn('w-4 h-4 shrink-0 text-[var(--muted-foreground)] transition-transform duration-200', open && 'rotate-180')} />
       </button>
       {(required || name) && (
@@ -145,8 +155,8 @@ export function Select({ value, onChange, options, placeholder = 'انتخاب �
       )}
       {open && pos &&
         createPortal(
-          // .site: متغیرهای رنگ سایت/پنل به فهرستی که بیرون از درخت صفحه رندر می‌شود هم برسد
-          <div className="site contents" dir="rtl">
+          // .site: متغیرهای رنگ سایت/پنل به فهرستی که بیرون از درخت صفحه رندر می‌شود هم برسد؛ جهت از <html> ارث می‌رسد
+          <div className="site contents">
             <ul
               ref={listRef}
               id={`${id}-list`}

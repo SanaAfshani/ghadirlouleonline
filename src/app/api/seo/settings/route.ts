@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { revalidateLocalized } from '@/shared/i18n/server';
 import { prisma } from '@/shared/lib/prisma';
 import { requireSuperAdmin } from '@/shared/lib/admin-auth';
 import { serverErrorResponse } from '@/shared/lib/api-errors';
-import { defaultSiteSettings } from '@/shared/lib/site-settings';
+import { defaultLocalizedText } from '@/shared/lib/site-settings';
 
 /** فقط کلیدهای سئو از این مسیر قابل تغییرند */
-const KEYS = ['google_site_verification', 'home_seo_content'] as const;
+const KEYS = ['google_site_verification', 'home_seo_content', 'home_seo_content_en'] as const;
 
 export async function GET(request: NextRequest) {
   const auth = requireSuperAdmin(request);
@@ -14,7 +14,8 @@ export async function GET(request: NextRequest) {
   const rows = await prisma.siteSettings.findMany({ where: { key: { in: [...KEYS] } } });
   const data: Record<string, string> = Object.fromEntries(rows.map((r) => [r.key, r.value]));
   // همان متنی که الان روی صفحه اصلی است؛ وگرنه ذخیره فرم خالی، متن پیش‌فرض را پاک می‌کرد
-  data.home_seo_content ??= defaultSiteSettings.homeSeoContent;
+  data.home_seo_content ??= defaultLocalizedText.fa.homeSeoContent;
+  data.home_seo_content_en ??= defaultLocalizedText.en.homeSeoContent;
   return NextResponse.json({ success: true, data });
 }
 
@@ -30,7 +31,7 @@ export async function PUT(request: NextRequest) {
       if (key === 'google_site_verification') value = value.match(/content=["']([^"']+)["']/)?.[1] ?? value;
       await prisma.siteSettings.upsert({ where: { key }, update: { value }, create: { key, value, type: 'text' } });
     }
-    revalidatePath('/', 'layout');
+    revalidateLocalized('/', 'layout');
     return NextResponse.json({ success: true });
   } catch (error) {
     return serverErrorResponse(error, 'SEO settings error:');

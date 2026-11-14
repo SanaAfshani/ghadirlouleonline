@@ -1,4 +1,13 @@
+'use client';
+
 import { cn } from '@/shared/lib/utils';
+import { useMessages } from '@/shared/i18n/LocaleProvider';
+import { defineMessages } from '@/shared/i18n/messages';
+
+const messages = defineMessages({
+  fa: { loading: 'در حال بارگذاری' },
+  en: { loading: 'Loading' },
+});
 
 interface SkeletonProps {
   className?: string;
@@ -44,8 +53,9 @@ export function SkeletonPageHero() {
 
 /** جدول قیمت در حال بارگذاری — دسکتاپ ردیف جدول، موبایل کارت */
 export function SkeletonTable({ rows = 6, cols = 5 }: { rows?: number; cols?: number }) {
+  const t = useMessages(messages);
   return (
-    <div role="status" aria-label="در حال بارگذاری">
+    <div role="status" aria-label={t.loading}>
       <div className="hidden md:block rounded-2xl border border-[var(--border)] overflow-hidden">
         <div className="bg-[var(--muted)] px-5 py-3.5 flex gap-6">
           {Array.from({ length: cols }, (_, i) => <Skeleton key={i} className={i === 0 ? 'h-3 w-40' : 'h-3 w-16'} />)}

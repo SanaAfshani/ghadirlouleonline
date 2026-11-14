@@ -1,3 +1,5 @@
+import type { Locale } from '@/shared/i18n/config';
+
 /**
  * وضعیت تأمین هر محصول (هر سایز) — به‌جای «موجود/ناموجود»، که برای لوله پروژه‌ای و سفارشی گمراه‌کننده بود.
  * سه وضعیت همان است که در برنامه بهبود سایت توافق شد؛ موجودی هر سایز و کلاس باید از کارخانه تأیید شود.
@@ -11,6 +13,17 @@ export const SUPPLY_STATUS_LABEL: Record<SupplyStatus, string> = {
   inquiry: 'استعلام موجودی',
   pending: 'در انتظار تأیید مشخصات',
 };
+
+const SUPPLY_STATUS_LABEL_EN: Record<SupplyStatus, string> = {
+  ready: 'Ready to supply',
+  inquiry: 'Check availability',
+  pending: 'Specs pending confirmation',
+};
+
+/** برچسب وضعیت به زبان صفحه سایت؛ پنل ادمین همان SUPPLY_STATUS_LABEL فارسی را می‌خواند */
+export function supplyStatusLabel(status: SupplyStatus, locale: Locale): string {
+  return (locale === 'fa' ? SUPPLY_STATUS_LABEL : SUPPLY_STATUS_LABEL_EN)[status];
+}
 
 export const isSupplyStatus = (value: unknown): value is SupplyStatus =>
   typeof value === 'string' && (SUPPLY_STATUSES as readonly string[]).includes(value);

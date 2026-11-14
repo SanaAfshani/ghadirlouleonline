@@ -5,13 +5,17 @@ import { useRouter } from 'next/navigation';
 import { ArrowRight, Save, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { slugify } from '@/shared/lib/utils';
+import { cn, slugify } from '@/shared/lib/utils';
 import { HtmlContentEditor } from '@/features/admin/editor/HtmlContentEditor';
 import { SeoPanel } from '@/features/admin/seo/SeoPanel';
 import { FaqEditor } from '@/features/admin/seo/FaqEditor';
 import { ProjectImageEditor } from '@/features/admin/projects/ProjectImageEditor';
 import type { SeoFields } from '@/features/admin/seo/seo';
 import type { FaqItem, ProjectImage } from '@/shared/types';
+import type { Locale } from '@/shared/i18n/config';
+import { TranslationEditor, type EnglishTranslations } from '@/features/admin/translations/TranslationEditor';
+import { LocaleTabs, isUntranslated } from '@/features/admin/translations/LocaleTabs';
+import { PROJECT_TRANSLATION_FIELDS } from '@/features/admin/translations/fields';
 
 export default function NewProjectPage() {
   const router = useRouter();
@@ -35,6 +39,9 @@ export default function NewProjectPage() {
     ogDescription: '',
     faqs: [] as FaqItem[],
   });
+
+  const [locale, setLocale] = useState<Locale>('fa');
+  const [en, setEn] = useState<EnglishTranslations>({});
 
   const handleSeoChange = (patch: Partial<SeoFields>) => setForm((f) => ({ ...f, ...patch }));
 
@@ -63,6 +70,7 @@ export default function NewProjectPage() {
           ogTitle: form.ogTitle,
           ogDescription: form.ogDescription,
           faqs: form.faqs,
+          translations: { en },
         }),
       });
 
@@ -102,9 +110,21 @@ export default function NewProjectPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      {/* فیلد اجباری خالیِ فرم فارسی در زبانه English دیده نمی‌شود — زبانه فارسی باز می‌شود تا خطا معلوم باشد */}
+      <form onSubmit={handleSubmit} onInvalidCapture={() => setLocale('fa')} className="space-y-6">
+        <LocaleTabs value={locale} onChange={setLocale} untranslated={isUntranslated(en, 'title')} />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
+          {locale === 'en' && (
+            <div className="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6">
+              <TranslationEditor
+                fields={PROJECT_TRANSLATION_FIELDS}
+                source={{ ...form, imageAlts: form.images.map((img) => img.alt) }}
+                value={en}
+                onChange={setEn}
+              />
+            </div>
+          )}
+          <div className={cn('lg:col-span-2 space-y-6', locale === 'en' && 'hidden')}>
             <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 space-y-4">
               <h2 className="text-[var(--foreground)] font-bold">مشخصات پروژه</h2>
 

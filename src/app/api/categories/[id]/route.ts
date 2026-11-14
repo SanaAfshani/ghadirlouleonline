@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/shared/lib/admin-auth';
-import { revalidatePath } from 'next/cache';
+import { revalidateLocalized } from '@/shared/i18n/server';
 import { prisma } from '@/shared/lib/prisma';
 import { serverErrorResponse } from '@/shared/lib/api-errors';
 import { slugify } from '@/shared/lib/utils';
 import { recordRedirect } from '@/shared/lib/redirects';
+import { sanitizeTranslations } from '@/shared/lib/translations';
+import { stripDangerousHtml } from '@/shared/content/sanitize';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -28,6 +30,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
         ...(body.icon != null && { icon: body.icon }),
         ...(body.order != null && { order: Number(body.order) }),
         ...(body.published != null && { published: Boolean(body.published) }),
+        ...(body.translations !== undefined && { translations: sanitizeTranslations('category', body.translations, stripDangerousHtml) }),
       },
     });
 
@@ -36,8 +39,8 @@ export async function PUT(request: NextRequest, { params }: Props) {
       await recordRedirect(`/products/${before.slug}`, `/products/${category.slug}`);
     }
 
-    revalidatePath('/categories');
-    revalidatePath('/products', 'layout');
+    revalidateLocalized('/categories');
+    revalidateLocalized('/products', 'layout');
 
     return NextResponse.json({ success: true, data: category });
   } catch (error) {
@@ -67,9 +70,9 @@ export async function DELETE(request: NextRequest, { params }: Props) {
       await tx.category.delete({ where: { id } });
     });
 
-    revalidatePath('/categories');
-    revalidatePath('/products', 'layout');
-    revalidatePath('/');
+    revalidateLocalized('/categories');
+    revalidateLocalized('/products', 'layout');
+    revalidateLocalized('/');
 
     return NextResponse.json({
       success: true,

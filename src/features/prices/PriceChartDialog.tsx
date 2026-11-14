@@ -3,28 +3,70 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, m as motion } from 'framer-motion';
 import { Loader2, X } from 'lucide-react';
-import { cn, faDigits } from '@/shared/lib/utils';
+import { cn } from '@/shared/lib/utils';
 import type { HistoryPoint, HistoryRange } from '@/shared/lib/price-board-types';
+import { localeDir, localeTag, type Locale } from '@/shared/i18n/config';
+import { digits, formatNumber } from '@/shared/i18n/format';
+import { defineMessages, fill } from '@/shared/i18n/messages';
+import { useLocale } from '@/shared/i18n/LocaleProvider';
 
 export type ChartTarget = { id: string; title: string; productName: string; price: number };
 
-const RANGES: { value: HistoryRange; label: string }[] = [
-  { value: 7, label: 'یک هفته' },
-  { value: 30, label: 'یک ماه' },
-  { value: 90, label: 'سه ماه' },
-  { value: 365, label: 'یک سال' },
-];
+const messages = defineMessages({
+  fa: {
+    ranges: { 7: 'یک هفته', 30: 'یک ماه', 90: 'سه ماه', 365: 'یک سال' },
+    close: 'بستن',
+    eyebrow: 'نوسان قیمت · {product}',
+    rangeLabel: 'بازه زمانی',
+    loadError: 'خطا در دریافت نمودار',
+    networkError: 'خطا در ارتباط با سرور',
+    closed: 'فروش بسته است؛ نمودار قیمت در ساعت کاری نمایش داده می‌شود.',
+    inquiry: 'قیمت این ردیف استعلامی است.',
+    empty: 'هنوز قیمتی برای این بازه ثبت نشده است.',
+    last: 'آخرین قیمت',
+    min: 'کمترین',
+    max: 'بیشترین',
+    change: 'تغییر بازه',
+    noChange: 'بدون تغییر',
+    percent: '٪',
+    toman: 'تومان',
+    flat: 'از {date} تاکنون قیمت این ردیف تغییری نکرده است.',
+  },
+  en: {
+    ranges: { 7: '1 week', 30: '1 month', 90: '3 months', 365: '1 year' },
+    close: 'Close',
+    eyebrow: 'Price trend · {product}',
+    rangeLabel: 'Time range',
+    loadError: 'Could not load the chart',
+    networkError: 'Could not reach the server',
+    closed: 'Sales are closed; the price chart is shown during business hours.',
+    inquiry: 'This row is priced on request.',
+    empty: 'No prices have been recorded for this period yet.',
+    last: 'Last price',
+    min: 'Low',
+    max: 'High',
+    change: 'Change',
+    noChange: 'No change',
+    percent: '%',
+    toman: 'Toman',
+    flat: 'The price of this row has not changed since {date}.',
+  },
+});
+
+const RANGES: HistoryRange[] = [7, 30, 90, 365];
 
 type Result = { points: HistoryPoint[] } | { closed: true } | { inquiry: true } | { error: string };
 
-const dayLabel = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { timeZone: 'Asia/Tehran', day: 'numeric', month: 'short' });
-const dayFull = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { timeZone: 'Asia/Tehran', day: 'numeric', month: 'long', year: 'numeric' });
-/** کلید روز تهران → تاریخ شمسی (ظهر همان روز تا مرز روز جابه‌جا نشود) */
+/** فارسی تقویم شمسی، انگلیسی میلادی — هر دو به وقت تهران */
+const calendar = (locale: Locale) => (locale === 'fa' ? 'fa-IR-u-ca-persian' : 'en-US');
+const dayLabel = (locale: Locale) => new Intl.DateTimeFormat(calendar(locale), { timeZone: 'Asia/Tehran', day: 'numeric', month: 'short' });
+const dayFull = (locale: Locale) => new Intl.DateTimeFormat(calendar(locale), { timeZone: 'Asia/Tehran', day: 'numeric', month: 'long', year: 'numeric' });
+/** کلید روز تهران → تاریخ (ظهر همان روز تا مرز روز جابه‌جا نشود) */
 const toDate = (day: string) => new Date(`${day}T12:00:00+03:30`);
-const fa = (n: number) => n.toLocaleString('fa-IR');
 
 /** نمودار نوسان قیمت یک ردیف — موبایل bottom sheet، دسکتاپ پنجره وسط صفحه */
 export function PriceChartDialog({ target, onClose }: { target: ChartTarget | null; onClose: () => void }) {
+  const locale = useLocale();
   const isOpen = target != null;
   useEffect(() => {
     if (!isOpen) return;
@@ -41,7 +83,7 @@ export function PriceChartDialog({ target, onClose }: { target: ChartTarget | nu
     <AnimatePresence>
       {target && (
         <motion.div className="fixed inset-0 z-[70] flex items-end md:items-center justify-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-          <button aria-label="بستن" onClick={onClose} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <button aria-label={messages[locale].close} onClick={onClose} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <motion.div
             role="dialog"
             aria-modal="true"
@@ -61,6 +103,8 @@ export function PriceChartDialog({ target, onClose }: { target: ChartTarget | nu
 }
 
 function ChartBody({ target, onClose }: { target: ChartTarget; onClose: () => void }) {
+  const locale = useLocale();
+  const t = messages[locale];
   const [range, setRange] = useState<HistoryRange>(30);
   const [results, setResults] = useState<Record<string, Result>>({});
   // قیمت در کلید: اگر قیمت لحظه‌ای عوض شد، نمودار همان بازه از نو گرفته می‌شود
@@ -72,37 +116,38 @@ function ChartBody({ target, onClose }: { target: ChartTarget; onClose: () => vo
     const ctrl = new AbortController();
     fetch(`/api/prices/history/${encodeURIComponent(target.id)}?range=${range}`, { signal: ctrl.signal, cache: 'no-store' })
       .then((r) => r.json())
-      .then((json) => setResults((s) => ({ ...s, [cacheKey]: json.success ? json.data : { error: json.error || 'خطا در دریافت نمودار' } })))
-      .catch((e) => e.name !== 'AbortError' && setResults((s) => ({ ...s, [cacheKey]: { error: 'خطا در ارتباط با سرور' } })));
+      // پیام خطای API فارسی است؛ نسخه انگلیسی پیام خودش را نشان می‌دهد
+      .then((json) => setResults((s) => ({ ...s, [cacheKey]: json.success ? json.data : { error: (locale === 'fa' && json.error) || t.loadError } })))
+      .catch((e) => e.name !== 'AbortError' && setResults((s) => ({ ...s, [cacheKey]: { error: t.networkError } })));
     return () => ctrl.abort();
-  }, [cacheKey, range, results, target.id]);
+  }, [cacheKey, range, results, target.id, locale, t]);
 
   return (
     <>
       <div className="md:hidden mx-auto mt-3 h-1.5 w-12 rounded-full bg-[var(--border)]" />
       <div className="flex items-start justify-between gap-4 px-5 sm:px-7 pt-5">
         <div className="min-w-0">
-          <p className="tech-label">نوسان قیمت · {target.productName}</p>
-          <h2 id="chart-title" className="mt-1.5 text-lg sm:text-xl font-black leading-8">{faDigits(target.title)}</h2>
+          <p className="tech-label">{fill(t.eyebrow, { product: target.productName })}</p>
+          <h2 id="chart-title" className="mt-1.5 text-lg sm:text-xl font-black leading-8">{digits(target.title, locale)}</h2>
         </div>
-        <button onClick={onClose} aria-label="بستن" className="grid place-items-center w-10 h-10 -me-2 rounded-[var(--radius-control)] hover:bg-[var(--muted)] shrink-0">
+        <button onClick={onClose} aria-label={t.close} className="grid place-items-center w-10 h-10 -me-2 rounded-[var(--radius-control)] hover:bg-[var(--muted)] shrink-0">
           <X className="w-5 h-5" />
         </button>
       </div>
 
-      <div role="tablist" aria-label="بازه زمانی" className="mx-5 sm:mx-7 mt-4 grid grid-cols-4 p-1 rounded-[var(--radius-control)] bg-[var(--muted)]">
+      <div role="tablist" aria-label={t.rangeLabel} className="mx-5 sm:mx-7 mt-4 grid grid-cols-4 p-1 rounded-[var(--radius-control)] bg-[var(--muted)]">
         {RANGES.map((r) => (
           <button
-            key={r.value}
+            key={r}
             role="tab"
-            aria-selected={range === r.value}
-            onClick={() => setRange(r.value)}
+            aria-selected={range === r}
+            onClick={() => setRange(r)}
             className={cn(
               'h-9 rounded-[calc(var(--radius-control)-4px)] text-[13px] font-bold transition-colors',
-              range === r.value ? 'bg-[var(--background)] text-[var(--foreground)] shadow-sm' : 'text-[var(--muted-foreground)]',
+              range === r ? 'bg-[var(--background)] text-[var(--foreground)] shadow-sm' : 'text-[var(--muted-foreground)]',
             )}
           >
-            {r.label}
+            {t.ranges[r]}
           </button>
         ))}
       </div>
@@ -111,16 +156,16 @@ function ChartBody({ target, onClose }: { target: ChartTarget; onClose: () => vo
         {!result ? (
           <div className="h-[340px] grid place-items-center text-[var(--muted-foreground)]"><Loader2 className="w-6 h-6 animate-spin" /></div>
         ) : 'points' in result && result.points.length ? (
-          <Chart points={result.points} />
+          <Chart points={result.points} locale={locale} />
         ) : (
           <p className="h-[340px] grid place-items-center text-center text-sm text-[var(--muted-foreground)] leading-7">
             {'closed' in result
-              ? 'فروش بسته است؛ نمودار قیمت در ساعت کاری نمایش داده می‌شود.'
+              ? t.closed
               : 'inquiry' in result
-                ? 'قیمت این ردیف استعلامی است.'
+                ? t.inquiry
                 : 'error' in result
                   ? result.error
-                  : 'هنوز قیمتی برای این بازه ثبت نشده است.'}
+                  : t.empty}
           </p>
         )}
       </div>
@@ -139,7 +184,9 @@ function Stat({ label, value, tone }: { label: string; value: React.ReactNode; t
   );
 }
 
-function Chart({ points }: { points: HistoryPoint[] }) {
+function Chart({ points, locale }: { points: HistoryPoint[]; locale: Locale }) {
+  const t = messages[locale];
+  const num = (n: number) => formatNumber(n, locale);
   const [hover, setHover] = useState<number | null>(null);
   const prices = points.map((p) => p.price);
   const min = Math.min(...prices);
@@ -176,12 +223,12 @@ function Chart({ points }: { points: HistoryPoint[] }) {
   return (
     <div>
       <div className="grid grid-cols-4 rounded-[var(--radius-control)] border border-[var(--border)] bg-[var(--card)]">
-        <Stat label="آخرین قیمت" value={fa(last)} />
-        <Stat label="کمترین" value={fa(min)} />
-        <Stat label="بیشترین" value={fa(max)} />
+        <Stat label={t.last} value={num(last)} />
+        <Stat label={t.min} value={num(min)} />
+        <Stat label={t.max} value={num(max)} />
         <Stat
-          label="تغییر بازه"
-          value={flat ? 'بدون تغییر' : `${pct > 0 ? '▲' : pct < 0 ? '▼' : ''} ${Math.abs(pct).toLocaleString('fa-IR', { maximumFractionDigits: 1 })}٪`}
+          label={t.change}
+          value={flat ? t.noChange : `${pct > 0 ? '▲' : pct < 0 ? '▼' : ''} ${Math.abs(pct).toLocaleString(localeTag[locale], { maximumFractionDigits: 1 })}${t.percent}`}
           tone={pct > 0 ? 'up' : pct < 0 ? 'down' : undefined}
         />
       </div>
@@ -201,16 +248,16 @@ function Chart({ points }: { points: HistoryPoint[] }) {
                 <stop offset="1" stopColor="var(--accent)" stopOpacity="0" />
               </linearGradient>
             </defs>
-            {ticks.map((t) => (
-              <line key={t} x1="0" x2="100" y1={y(t)} y2={y(t)} stroke="var(--border)" strokeDasharray="2 3" vectorEffect="non-scaling-stroke" />
+            {ticks.map((tick) => (
+              <line key={tick} x1="0" x2="100" y1={y(tick)} y2={y(tick)} stroke="var(--border)" strokeDasharray="2 3" vectorEffect="non-scaling-stroke" />
             ))}
             <path d={area} fill="url(#chart-fill)" />
             <path d={line} fill="none" stroke="var(--accent)" strokeWidth="2.25" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
           </svg>
 
-          {ticks.map((t) => (
-            <span key={t} className="absolute left-0 -translate-y-full pb-0.5 text-[10px] text-[var(--muted-foreground)] num" style={{ top: `${y(t)}%` }}>
-              {fa(t)}
+          {ticks.map((tick) => (
+            <span key={tick} className="absolute left-0 -translate-y-full pb-0.5 text-[10px] text-[var(--muted-foreground)] num" style={{ top: `${y(tick)}%` }}>
+              {num(tick)}
             </span>
           ))}
 
@@ -221,12 +268,12 @@ function Chart({ points }: { points: HistoryPoint[] }) {
             style={{ left: `${ax}%`, top: `${y(points[active].price)}%` }}
           />
           <div
-            dir="rtl"
+            dir={localeDir[locale]}
             className="absolute top-1 px-2.5 py-1.5 rounded-[var(--radius-control)] bg-[var(--ink)] text-white text-xs shadow-lg pointer-events-none whitespace-nowrap"
             style={{ left: `${ax}%`, transform: ax > 60 ? 'translateX(calc(-100% - 8px))' : 'translateX(8px)' }}
           >
-            <span className="block text-[10px] text-slate-300 num">{dayFull.format(toDate(points[active].day))}</span>
-            <span className="block font-black num">{fa(points[active].price)} <span className="font-medium text-slate-300">تومان</span></span>
+            <span className="block text-[10px] text-slate-300 num">{dayFull(locale).format(toDate(points[active].day))}</span>
+            <span className="block font-black num">{num(points[active].price)} <span className="font-medium text-slate-300">{t.toman}</span></span>
           </div>
         </div>
 
@@ -237,7 +284,7 @@ function Chart({ points }: { points: HistoryPoint[] }) {
               className="absolute top-0 whitespace-nowrap"
               style={{ left: `${x(i)}%`, transform: `translateX(${i === n - 1 ? '-100%' : i === 0 ? '0' : '-50%'})` }}
             >
-              {dayLabel.format(toDate(points[i].day))}
+              {dayLabel(locale).format(toDate(points[i].day))}
             </span>
           ))}
         </div>
@@ -245,7 +292,7 @@ function Chart({ points }: { points: HistoryPoint[] }) {
 
       {flat && (
         <p className="mt-3 text-xs text-[var(--muted-foreground)] leading-6">
-          از {dayFull.format(toDate(points[0].day))} تاکنون قیمت این ردیف تغییری نکرده است.
+          {fill(t.flat, { date: dayFull(locale).format(toDate(points[0].day)) })}
         </p>
       )}
     </div>

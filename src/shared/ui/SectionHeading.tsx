@@ -1,9 +1,16 @@
 'use client';
 
-import Link from 'next/link';
 import { m as motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
+import { Link } from '@/shared/i18n/Link';
+import { useMessages } from '@/shared/i18n/LocaleProvider';
+import { defineMessages } from '@/shared/i18n/messages';
+
+const messages = defineMessages({
+  fa: { all: 'همه' },
+  en: { all: 'All' },
+});
 
 interface SectionHeadingProps {
   /** id تیتر — برای aria-labelledby بخش والد */
@@ -12,16 +19,18 @@ interface SectionHeadingProps {
   title: string;
   description?: string;
   className?: string;
+  /** right/left نام قدیمی (فارسی‌محور) لبه شروع/پایان است — در انگلیسی آینه می‌شود */
   align?: 'center' | 'right' | 'left';
   /** لینک «مشاهده همه» در سمت مقابل تیتر (فقط با align=right) */
   action?: { href: string; label: string };
 }
 
 export function SectionHeading({ id, label, title, description, className, align = 'center', action }: SectionHeadingProps) {
+  const t = useMessages(messages);
   const alignClass = {
     center: 'text-center mx-auto items-center',
-    right: 'text-right items-start',
-    left: 'text-left items-end',
+    right: 'text-start items-start',
+    left: 'text-end items-end',
   };
 
   return (
@@ -47,8 +56,8 @@ export function SectionHeading({ id, label, title, description, className, align
           className="shrink-0 flex items-center gap-1.5 h-10 px-4 rounded-lg border border-[var(--border)] text-sm font-bold hover:border-[var(--accent)] hover:text-[var(--accent-text)] transition-colors"
         >
           <span className="hidden sm:inline">{action.label}</span>
-          <span className="sm:hidden">همه</span>
-          <ArrowLeft className="w-4 h-4" />
+          <span className="sm:hidden">{t.all}</span>
+          <ArrowLeft className="w-4 h-4 ltr:rotate-180" />
         </Link>
       )}
     </motion.div>

@@ -3,6 +3,9 @@ import { formatPersianNumber } from '@/shared/lib/utils';
 import { isComingSoon } from '@/shared/lib/catalog';
 import { parseCatalogs } from '@/shared/lib/catalog-files';
 import { supplyStatusOf, type SupplyStatus } from '@/shared/lib/supply-status';
+import { localizeRecord, localizedSpecs } from '@/shared/lib/translations';
+import { formatNumber } from '@/shared/i18n/format';
+import { defaultLocale, type Locale } from '@/shared/i18n/config';
 
 export function parseJsonArray(value: string): string[] {
   try {
@@ -24,9 +27,10 @@ export function parseJsonObject(value: string): Record<string, string> {
   }
 }
 
-export function formatProductPrice(price: number | null | undefined): string {
-  if (price == null || price === 0) return '۰';
-  return formatPersianNumber(price);
+/** «۰» (در انگلیسی «0») یعنی قیمت ثبت نشده */
+export function formatProductPrice(price: number | null | undefined, locale: Locale = defaultLocale): string {
+  if (price == null || price === 0) return locale === 'fa' ? '۰' : '0';
+  return locale === 'fa' ? formatPersianNumber(price) : formatNumber(price, locale);
 }
 
 type DbProduct = {
@@ -50,8 +54,9 @@ type DbProduct = {
   ogDescription?: string | null;
   faqs?: string;
   catalogs?: string;
+  translations?: string | null;
   categoryId: string;
-  category: { slug: string; name: string; image?: string | null };
+  category: { slug: string; name: string; image?: string | null; translations?: string | null };
   createdAt: Date;
   updatedAt: Date;
 };
@@ -81,7 +86,10 @@ export type ProductListItem = {
   inStock: boolean;
   supplyStatus: SupplyStatus;
   featured: boolean;
+  /** مشخصات با کلید فارسی — برای منطق (SIZE_SPEC_KEY) و جستجو */
   specs: Record<string, string>;
+  /** همان مشخصات با برچسب و مقدار به زبان صفحه — برای نمایش */
+  specList: { key: string; label: string; value: string }[];
   image?: string;
   /** دسته فعلاً فروش ندارد — کارت «به زودی» بدون قیمت */
   comingSoon: boolean;
@@ -95,9 +103,12 @@ export type ProductListItem = {
 
 export function toProductListItem(
   p: DbProduct & { priceItems?: { price: number | null; priceChangedAt: Date }[] },
-  { showPrices = true }: { showPrices?: boolean } = {},
+  { showPrices = true, locale = defaultLocale }: { showPrices?: boolean; locale?: Locale } = {},
 ): ProductListItem {
   const specs = parseJsonObject(p.specifications);
+  // ترجمه‌نشده‌ها نام فارسی را نگه می‌دارند
+  const name = localizeRecord(p, locale, 'name').name;
+  const categoryName = localizeRecord(p.category, locale, 'name').name;
   const images = parseJsonArray(p.images);
   const comingSoon = isComingSoon(p.category.slug);
   const quoteOnly = p.quoteOnly ?? false;
@@ -106,17 +117,18 @@ export function toProductListItem(
   return {
     id: p.id,
     slug: p.slug,
-    name: p.name,
+    name,
     category: p.category.slug,
-    categoryName: p.category.name,
+    categoryName,
     // بیرون از ساعت کاری قیمت تکی هم مثل جدول قیمت پنهان است
-    price: withPrices ? formatProductPrice(p.price) : '۰',
+    price: formatProductPrice(withPrices ? p.price : null, locale),
     inStock: p.inStock,
     supplyStatus: supplyStatusOf(p),
     featured: p.featured,
     comingSoon,
     quoteOnly,
     specs,
+    specList: localizedSpecs(specs, p.translations, locale),
     image: images[0] || p.category.image || undefined,
     ...(() => {
       const items = comingSoon ? [] : (p.priceItems ?? []);

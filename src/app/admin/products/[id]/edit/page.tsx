@@ -15,6 +15,12 @@ import type { SeoFields } from '@/features/admin/seo/seo';
 import type { CatalogFile, FaqItem } from '@/shared/types';
 import { Select } from '@/shared/ui/Select';
 import { SUPPLY_STATUSES, SUPPLY_STATUS_LABEL, isSupplyStatus, type SupplyStatus } from '@/shared/lib/supply-status';
+import { cn } from '@/shared/lib/utils';
+import { translationsFor } from '@/shared/lib/translations';
+import type { Locale } from '@/shared/i18n/config';
+import { TranslationEditor, type EnglishTranslations } from '@/features/admin/translations/TranslationEditor';
+import { LocaleTabs, isUntranslated } from '@/features/admin/translations/LocaleTabs';
+import { PRODUCT_TRANSLATION_FIELDS } from '@/features/admin/translations/fields';
 
 type Spec = { key: string; value: string };
 
@@ -60,6 +66,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     faqs: [],
     catalogs: [],
   });
+  const [locale, setLocale] = useState<Locale>('fa');
+  const [en, setEn] = useState<EnglishTranslations>({});
 
   const handleSeoChange = (patch: Partial<SeoFields>) =>
     setForm((f) => ({ ...f, ...patch }));
@@ -109,6 +117,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           faqs: Array.isArray(product.faqs) ? product.faqs : [],
           catalogs: Array.isArray(product.catalogs) ? product.catalogs : [],
         });
+        setEn(translationsFor(product.translations, 'en'));
       } catch {
         toast.error('خطا در ارتباط با سرور');
       } finally {
@@ -117,14 +126,16 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     })();
   }, [id, router]);
 
+  // هم برای ذخیره و هم منبع ترجمه مشخصات (کلید فارسی ثابت می‌ماند)
+  const specifications = Object.fromEntries(
+    form.specs.filter((s) => s.key.trim()).map((s) => [s.key.trim(), s.value.trim()]),
+  );
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.categoryId) { toast.error('دسته‌بندی را انتخاب کنید'); return; }
 
     setLoading(true);
-    const specifications = Object.fromEntries(
-      form.specs.filter((s) => s.key.trim()).map((s) => [s.key.trim(), s.value.trim()]),
-    );
 
     try {
       const res = await fetch(`/api/products/${id}`, {
@@ -150,6 +161,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           ogDescription: form.ogDescription,
           faqs: form.faqs,
           catalogs: form.catalogs,
+          translations: { en },
         }),
       });
 
@@ -197,11 +209,24 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      {/* فیلد اجباری خالیِ فرم فارسی در زبانه English دیده نمی‌شود — زبانه فارسی باز می‌شود تا خطا معلوم باشد */}
+      <form onSubmit={handleSubmit} onInvalidCapture={() => setLocale('fa')} className="space-y-6">
+        <LocaleTabs value={locale} onChange={setLocale} untranslated={isUntranslated(en, 'name')} />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          {/* ── Main ── */}
-          <div className="lg:col-span-2 space-y-6">
+          {locale === 'en' && (
+            <div className="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6">
+              <TranslationEditor
+                fields={PRODUCT_TRANSLATION_FIELDS}
+                source={{ ...form, specifications, catalogTitles: form.catalogs.map((c) => c.title) }}
+                value={en}
+                onChange={setEn}
+              />
+            </div>
+          )}
+
+          {/* ── Main ── (در زبانه English پنهان می‌ماند تا state ویرایشگرها از دست نرود) */}
+          <div className={cn('lg:col-span-2 space-y-6', locale === 'en' && 'hidden')}>
             <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 space-y-4">
               <h2 className="text-[var(--foreground)] font-bold">اطلاعات اصلی</h2>
 

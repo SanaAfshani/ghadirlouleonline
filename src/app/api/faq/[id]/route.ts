@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/shared/lib/admin-auth';
 import { prisma } from '@/shared/lib/prisma';
+import { sanitizeTranslations } from '@/shared/lib/translations';
+import { stripDangerousHtml } from '@/shared/content/sanitize';
+import { revalidateLocalized } from '@/shared/i18n/server';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -19,9 +22,11 @@ export async function PUT(request: NextRequest, { params }: Props) {
         ...(body.category != null && { category: body.category }),
         ...(body.order != null && { order: Number(body.order) }),
         ...(body.published != null && { published: Boolean(body.published) }),
+        ...(body.translations !== undefined && { translations: sanitizeTranslations('faq', body.translations, stripDangerousHtml) }),
       },
     });
 
+    revalidateLocalized('/faq');
     return NextResponse.json({ success: true, data: faq });
   } catch (error) {
     console.error('FAQ PUT error:', error);
@@ -35,6 +40,7 @@ export async function DELETE(request: NextRequest, { params }: Props) {
   try {
     const { id } = await params;
     await prisma.fAQ.delete({ where: { id } });
+    revalidateLocalized('/faq');
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('FAQ DELETE error:', error);

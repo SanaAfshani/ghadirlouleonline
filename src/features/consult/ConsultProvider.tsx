@@ -5,10 +5,50 @@ import { AnimatePresence, m as motion } from 'framer-motion';
 import Image from 'next/image';
 import { CheckCircle2, Loader2, X } from 'lucide-react';
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
-import { faDigits } from '@/shared/lib/utils';
-import { siteConfig } from '@/shared/config/site';
 import { RubikaButton } from '@/shared/ui/RubikaButton';
 import { RubikaIcon } from '@/shared/ui/RubikaIcon';
+import { useLocale, useMessages } from '@/shared/i18n/LocaleProvider';
+import { defineMessages, fill } from '@/shared/i18n/messages';
+import { digits } from '@/shared/i18n/format';
+
+const messages = defineMessages({
+  fa: {
+    productMessage: 'درخواست قیمت و مشاوره برای «{product}»',
+    nameRequired: 'نام را وارد کنید',
+    invalidMobile: 'شماره موبایل معتبر نیست',
+    failed: 'ارسال ناموفق بود',
+    close: 'بستن',
+    title: 'درخواست مشاوره و خرید',
+    expertNote: '{name}، {role}، در کمترین زمان تماس می‌گیرد',
+    doneTitle: 'درخواست شما ثبت شد',
+    doneText: 'به‌زودی با شما تماس می‌گیریم.',
+    name: 'نام و نام خانوادگی',
+    mobile: 'شماره موبایل',
+    mobilePlaceholder: 'شماره موبایل — مثلاً ۰۹۱۲۱۲۳۴۵۶۷',
+    messagePlaceholder: 'محصول یا پروژه مورد نظر (اختیاری)',
+    submit: 'ثبت درخواست',
+    directCall: 'یا تماس مستقیم:',
+    rubika: 'روبیکا:',
+  },
+  en: {
+    productMessage: 'Price and advice request for “{product}”',
+    nameRequired: 'Please enter your name',
+    invalidMobile: 'Please enter a valid Iranian mobile number',
+    failed: 'Sending failed',
+    close: 'Close',
+    title: 'Request advice and a quote',
+    expertNote: '{name}, {role}, will call you back shortly',
+    doneTitle: 'Your request has been received',
+    doneText: 'We will contact you soon.',
+    name: 'Full name',
+    mobile: 'Mobile number',
+    mobilePlaceholder: 'Mobile number, e.g. 09121234567',
+    messagePlaceholder: 'Product or project you are interested in (optional)',
+    submit: 'Send request',
+    directCall: 'Or call us directly:',
+    rubika: 'Rubika:',
+  },
+});
 
 type ConsultContext = { open: (product?: string) => void };
 
@@ -42,10 +82,12 @@ export function ConsultProvider({ children }: { children: React.ReactNode }) {
 }
 
 function ConsultSheet({ open, product, onClose }: { open: boolean; product: string; onClose: () => void }) {
-  const { phone, phoneHref } = useSiteSettings();
+  const { phone, phoneHref, salesExpertName, salesExpertRole, rubikaId } = useSiteSettings();
+  const locale = useLocale();
+  const t = useMessages(messages);
   const [name, setName] = useState('');
   const [tel, setTel] = useState('');
-  const [message, setMessage] = useState(product ? `درخواست قیمت و مشاوره برای «${product}»` : '');
+  const [message, setMessage] = useState(product ? fill(t.productMessage, { product }) : '');
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
   const [error, setError] = useState('');
 
@@ -62,9 +104,9 @@ function ConsultSheet({ open, product, onClose }: { open: boolean; product: stri
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const digits = tel.replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/\D/g, '');
-    if (!name.trim()) return setError('نام را وارد کنید');
-    if (!/^0?9\d{9}$/.test(digits)) return setError('شماره موبایل معتبر نیست');
+    const mobile = tel.replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/\D/g, '');
+    if (!name.trim()) return setError(t.nameRequired);
+    if (!/^0?9\d{9}$/.test(mobile)) return setError(t.invalidMobile);
 
     setStatus('sending');
     setError('');
@@ -74,20 +116,22 @@ function ConsultSheet({ open, product, onClose }: { open: boolean; product: stri
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: name.trim(),
-          phone: digits,
+          phone: mobile,
+          // موضوع و متن پیش‌فرض برای پنل ادمین است (فارسی) — زبان صفحه از sourcePath (/en/...) پیداست
           subject: product ? `مشاوره خرید: ${product}` : 'درخواست مشاوره',
           message: message.trim() || 'درخواست تماس برای مشاوره',
           sourcePath: window.location.pathname,
         }),
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok || !json.success) throw new Error(json.error || 'ارسال ناموفق بود');
+      // پیام خطای API فارسی است؛ در نسخه انگلیسی پیام عمومی
+      if (!res.ok || !json.success) throw new Error((locale === 'fa' && json.error) || t.failed);
       setStatus('done');
       setName('');
       setTel('');
     } catch (err) {
       setStatus('error');
-      setError(err instanceof Error ? err.message : 'ارسال ناموفق بود');
+      setError(err instanceof Error ? err.message : t.failed);
     }
   };
 
@@ -103,7 +147,7 @@ function ConsultSheet({ open, product, onClose }: { open: boolean; product: stri
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          <button aria-label="بستن" onClick={onClose} className="absolute inset-0 bg-black/55 backdrop-blur-sm" />
+          <button aria-label={t.close} onClick={onClose} className="absolute inset-0 bg-black/55 backdrop-blur-sm" />
           <motion.div
             role="dialog"
             aria-modal="true"
@@ -119,20 +163,20 @@ function ConsultSheet({ open, product, onClose }: { open: boolean; product: stri
               <div className="flex items-center gap-3">
                 <Image
                   src="/images/site/sales-expert-avatar.webp"
-                  alt={siteConfig.salesExpert.name}
+                  alt={salesExpertName}
                   width={48}
                   height={48}
                   className="w-12 h-12 rounded-2xl object-cover ring-2 ring-[var(--accent)] shrink-0"
                 />
                 <div>
-                  <h2 id="consult-title" className="text-lg font-black">درخواست مشاوره و خرید</h2>
+                  <h2 id="consult-title" className="text-lg font-black">{t.title}</h2>
                   <p className="text-xs text-[var(--muted-foreground)] flex items-center gap-1.5">
                     <span className="live-dot" />
-                    {siteConfig.salesExpert.name}، {siteConfig.salesExpert.role}، در کمترین زمان تماس می‌گیرد
+                    {fill(t.expertNote, { name: salesExpertName, role: salesExpertRole })}
                   </p>
                 </div>
               </div>
-              <button onClick={onClose} aria-label="بستن" className="grid place-items-center w-9 h-9 rounded-xl hover:bg-[var(--muted)]">
+              <button onClick={onClose} aria-label={t.close} className="grid place-items-center w-9 h-9 rounded-xl hover:bg-[var(--muted)]">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -140,28 +184,29 @@ function ConsultSheet({ open, product, onClose }: { open: boolean; product: stri
             {status === 'done' ? (
               <div className="px-6 py-10 text-center">
                 <CheckCircle2 className="w-14 h-14 mx-auto text-emerald-500" />
-                <p className="mt-4 font-bold">درخواست شما ثبت شد</p>
-                <p className="mt-1 text-sm text-[var(--muted-foreground)]">به‌زودی با شما تماس می‌گیریم.</p>
+                <p className="mt-4 font-bold">{t.doneTitle}</p>
+                <p className="mt-1 text-sm text-[var(--muted-foreground)]">{t.doneText}</p>
                 <button onClick={onClose} className="mt-6 h-11 px-8 rounded-2xl bg-[var(--foreground)] text-[var(--background)] font-bold">
-                  بستن
+                  {t.close}
                 </button>
               </div>
             ) : (
               <form onSubmit={submit} className="px-6 pt-5 pb-6 space-y-3">
-                <input className={field} placeholder="نام و نام خانوادگی" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
+                <input className={field} placeholder={t.name} aria-label={t.name} value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
                 <input
                   className={`${field} ltr-field`}
                   type="tel"
                   inputMode="tel"
-                  placeholder="شماره موبایل — مثلاً ۰۹۱۲۱۲۳۴۵۶۷"
-                  aria-label="شماره موبایل"
+                  placeholder={t.mobilePlaceholder}
+                  aria-label={t.mobile}
                   value={tel}
-                  onChange={(e) => setTel(faDigits(e.target.value))}
+                  onChange={(e) => setTel(digits(e.target.value, locale))}
                   autoComplete="tel"
                 />
                 <textarea
                   className={`${field} h-24 py-3 resize-none`}
-                  placeholder="محصول یا پروژه مورد نظر (اختیاری)"
+                  placeholder={t.messagePlaceholder}
+                  aria-label={t.messagePlaceholder}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                 />
@@ -172,14 +217,14 @@ function ConsultSheet({ open, product, onClose }: { open: boolean; product: stri
                   className="w-full h-12 rounded-2xl bg-[var(--accent)] text-[var(--accent-foreground)] font-black shadow-accent disabled:opacity-60 flex items-center justify-center gap-2"
                 >
                   {status === 'sending' && <Loader2 className="w-5 h-5 animate-spin" />}
-                  ثبت درخواست
+                  {t.submit}
                 </button>
                 <a href={phoneHref} className="block text-center text-sm text-[var(--muted-foreground)] pt-1">
-                  یا تماس مستقیم: <span dir="ltr" className="font-bold text-[var(--foreground)] num">{faDigits(phone)}</span>
+                  {t.directCall} <span dir="ltr" className="font-bold text-[var(--foreground)] num">{digits(phone, locale)}</span>
                 </a>
                 <RubikaButton className="mx-auto flex items-center justify-center gap-1.5 text-sm text-[var(--muted-foreground)]">
                   <RubikaIcon className="w-4" />
-                  روبیکا: <span dir="ltr" className="font-bold text-[var(--foreground)]">{siteConfig.socials.rubikaId}</span>
+                  {t.rubika} <span dir="ltr" className="font-bold text-[var(--foreground)]">{rubikaId}</span>
                 </RubikaButton>
               </form>
             )}

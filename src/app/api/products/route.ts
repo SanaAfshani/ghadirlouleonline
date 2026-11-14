@@ -8,6 +8,9 @@ import { serializeCatalogs } from '@/shared/lib/catalog-files';
 import { getMarketNow } from '@/shared/lib/price-board';
 import { pingIndexNow } from '@/shared/lib/indexnow';
 import { isSupplyStatus } from '@/shared/lib/supply-status';
+import { sanitizeTranslations } from '@/shared/lib/translations';
+import { stripDangerousHtml } from '@/shared/content/sanitize';
+import { revalidateLocalized } from '@/shared/i18n/server';
 
 /** فیلد متنی اختیاری: رشته خالی را به null تبدیل می‌کند تا fallback سئو درست کار کند */
 function optionalText(value: unknown): string | null {
@@ -98,6 +101,7 @@ export async function POST(request: NextRequest) {
         ogDescription: optionalText(body.ogDescription),
         faqs: serializeFaqs(body.faqs),
         catalogs: serializeCatalogs(body.catalogs),
+        ...(body.translations !== undefined && { translations: sanitizeTranslations('product', body.translations, stripDangerousHtml) }),
         categoryId: body.categoryId,
       },
       include: { category: true },
@@ -106,6 +110,11 @@ export async function POST(request: NextRequest) {
     if (product.published) {
       pingIndexNow([`/products/${product.category.slug}`, `/products/${product.category.slug}/${product.slug}`]);
     }
+
+    // صفحه‌ها با ISR ساخته می‌شوند — بدون این، محصول تازه تا پایان تایمر revalidate در فهرست‌ها دیده نمی‌شود
+    revalidateLocalized(`/products/${product.category.slug}/${product.slug}`);
+    revalidateLocalized('/products', 'layout');
+    revalidateLocalized('/');
 
     return NextResponse.json({ success: true, data: serializeProduct(product) }, { status: 201 });
   } catch (error) {

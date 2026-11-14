@@ -1,11 +1,14 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { faDigits, formatDate } from '@/shared/lib/utils';
 import type { BlogPost } from '@/shared/types';
+import { Link } from '@/shared/i18n/Link';
+import type { Locale } from '@/shared/i18n/config';
+import { digits, formatDate } from '@/shared/i18n/format';
+import type { ContentOf } from '@/shared/content/types';
+import type { homeBlog } from '@/shared/content/pages/home';
 
 /** مجله در صفحه اصلی — فشرده: فهرست کارت‌های افقی با تصویر کوچک؛ موبایل یک ستون، دسکتاپ سه ستون */
-export function BlogPreview({ posts }: { posts: BlogPost[] }) {
+export function BlogPreview({ posts, content, locale }: { posts: BlogPost[]; content: ContentOf<typeof homeBlog>; locale: Locale }) {
   if (!posts.length) return null;
 
   return (
@@ -13,11 +16,11 @@ export function BlogPreview({ posts }: { posts: BlogPost[] }) {
       <div className="container-main">
         <div className="flex items-end justify-between gap-4 mb-4">
           <div>
-            <p className="tech-label">مجله تخصصی</p>
-            <h2 id="blog-title" className="mt-1.5 text-lg sm:text-xl font-black">آخرین مقالات و راهنماهای خرید</h2>
+            <p className="tech-label">{content.eyebrow}</p>
+            <h2 id="blog-title" className="mt-1.5 text-lg sm:text-xl font-black">{content.title}</h2>
           </div>
           <Link href="/blog" className="shrink-0 flex items-center gap-1 text-sm font-bold text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
-            همه مقالات <ArrowLeft className="w-4 h-4" />
+            {content.allLabel} <ArrowLeft className="w-4 h-4 ltr:rotate-180" />
           </Link>
         </div>
 
@@ -35,10 +38,10 @@ export function BlogPreview({ posts }: { posts: BlogPost[] }) {
                 <span className="min-w-0">
                   <span className="flex items-center gap-2 text-[11px] text-[var(--muted-foreground)] num">
                     {post.tags[0] && <span className="font-bold text-[var(--accent-text)] truncate">{post.tags[0]}</span>}
-                    <span className="whitespace-nowrap">{formatDate(post.createdAt)}</span>
+                    <span className="whitespace-nowrap">{formatDate(post.createdAt, locale)}</span>
                   </span>
                   <span className="mt-1 block font-bold text-[14px] leading-6 line-clamp-2 group-hover:text-[var(--accent-text)] transition-colors">
-                    {faDigits(post.title)}
+                    {digits(post.title, locale)}
                   </span>
                 </span>
               </Link>

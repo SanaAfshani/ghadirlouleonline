@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 import { HtmlContentEditor } from '@/features/admin/editor/HtmlContentEditor';
 import type { AuditItem, AuditType, Fix } from '@/shared/lib/seo-audit';
-import { formatPersianNumber } from '@/shared/lib/utils';
+import type { Locale } from '@/shared/i18n/config';
+import { cn, formatPersianNumber } from '@/shared/lib/utils';
 
 type Tab = 'overview' | 'pages' | 'redirects' | 'settings';
 type Redirect = { id: string; fromPath: string; toPath: string; createdAt: string };
@@ -327,7 +328,9 @@ function RedirectsTab() {
 
 function SettingsTab() {
   const [verification, setVerification] = useState('');
-  const [homeContent, setHomeContent] = useState('');
+  // متن سئوی صفحه اصلی برای هر زبان جدا؛ انگلیسی در home_seo_content_en
+  const [homeContent, setHomeContent] = useState<Record<Locale, string>>({ fa: '', en: '' });
+  const [contentLocale, setContentLocale] = useState<Locale>('fa');
   const [ready, setReady] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -337,7 +340,7 @@ function SettingsTab() {
       .then((d) => {
         if (!alive) return;
         setVerification(d.google_site_verification ?? '');
-        setHomeContent(d.home_seo_content ?? '');
+        setHomeContent({ fa: d.home_seo_content ?? '', en: d.home_seo_content_en ?? '' });
       })
       .catch((e) => toast.error(e.message))
       .finally(() => alive && setReady(true));
@@ -349,7 +352,11 @@ function SettingsTab() {
   const save = async () => {
     setSaving(true);
     try {
-      await api('/api/seo/settings', { method: 'PUT', body: JSON.stringify({ google_site_verification: verification, home_seo_content: homeContent }) });
+      await api('/api/seo/settings', { method: 'PUT', body: JSON.stringify({
+          google_site_verification: verification,
+          home_seo_content: homeContent.fa,
+          home_seo_content_en: homeContent.en,
+        }) });
       toast.success('ذخیره شد');
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'خطا');
@@ -376,8 +383,30 @@ function SettingsTab() {
 
       <div className={`${card} p-5`}>
         <h2 className="text-[var(--foreground)] font-bold mb-1">متن سئوی صفحه اصلی</h2>
-        <p className="text-sm text-[var(--muted-foreground)] mb-4 leading-7">متن پایین صفحه اصلی (با «ادامه مطلب»). خالی بگذارید تا نمایش داده نشود.</p>
-        <HtmlContentEditor value={homeContent} onChange={setHomeContent} rows={12} />
+        <p className="text-sm text-[var(--muted-foreground)] mb-4 leading-7">متن پایین صفحه اصلی (با «ادامه مطلب»). نسخه انگلیسی برای سایت /en است. خالی بگذارید تا در همان زبان نمایش داده نشود.</p>
+        <div className="inline-flex p-1 rounded-xl bg-[var(--muted)] mb-4" role="tablist">
+          {([{ locale: 'fa', label: 'فارسی' }, { locale: 'en', label: 'English' }] as const).map((t) => (
+            <button
+              key={t.locale}
+              type="button"
+              role="tab"
+              aria-selected={contentLocale === t.locale}
+              onClick={() => setContentLocale(t.locale)}
+              className={cn(
+                'h-9 px-4 rounded-lg text-sm font-bold transition-colors',
+                contentLocale === t.locale ? 'bg-[var(--card)] shadow-sm text-[var(--foreground)]' : 'text-[var(--muted-foreground)]',
+              )}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <HtmlContentEditor
+          key={contentLocale}
+          value={homeContent[contentLocale]}
+          onChange={(html) => setHomeContent((c) => ({ ...c, [contentLocale]: html }))}
+          rows={12}
+        />
       </div>
 
       <button onClick={save} disabled={saving} className="h-12 px-8 rounded-xl bg-[var(--accent)] text-[var(--accent-foreground)] font-bold flex items-center gap-2 disabled:opacity-50">

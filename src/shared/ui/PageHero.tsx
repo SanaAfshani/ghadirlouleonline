@@ -2,7 +2,7 @@ interface PageHeroProps {
   label?: string;
   title: string;
   description?: string;
-  /** Optional right-side element (e.g. breadcrumb or illustration) */
+  /** Optional end-side element (e.g. breadcrumb or illustration) */
   aside?: React.ReactNode;
 }
 
@@ -31,9 +31,9 @@ export function PageHero({ label, title, description, aside }: PageHeroProps) {
         </div>
       </div>
 
-      {/* لبه پایین: خط فولادی + تکه نوار هشدار در شروع (راست) */}
+      {/* لبه پایین: خط فولادی + تکه نوار هشدار در لبه شروع */}
       <div className="absolute bottom-0 inset-x-0 h-px bg-white/10" aria-hidden />
-      <div className="absolute bottom-0 right-0 h-1.5 w-28 sm:w-40 hazard" aria-hidden />
+      <div className="absolute bottom-0 start-0 h-1.5 w-28 sm:w-40 hazard" aria-hidden />
     </div>
   );
 }

@@ -1,11 +1,20 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { m as motion } from 'framer-motion';
 import { ArrowLeft, Clock } from 'lucide-react';
 import { PageHero } from '@/shared/ui/PageHero';
-import { faDigits } from '@/shared/lib/utils';
+import { Link } from '@/shared/i18n/Link';
+import { useLocale, useMessages } from '@/shared/i18n/LocaleProvider';
+import { digits } from '@/shared/i18n/format';
+import { defineMessages, fill } from '@/shared/i18n/messages';
+import type { ContentOf } from '@/shared/content/types';
+import type { blogHero } from '@/shared/content/pages/blog';
+
+const messages = defineMessages({
+  fa: { readTime: '{n} دقیقه مطالعه', minutes: '{n} دقیقه', readMore: 'خواندن مقاله' },
+  en: { readTime: '{n} min read', minutes: '{n} min', readMore: 'Read article' },
+});
 
 export type BlogPostCard = {
   slug: string;
@@ -26,13 +35,16 @@ function Cover({ src, alt, sizes }: { src?: string; alt: string; sizes: string }
   );
 }
 
-export function BlogListClient({ posts }: { posts: BlogPostCard[] }) {
+/** متن‌های سربرگ از پنل «محتوای صفحات ← وبلاگ» (shared/content/pages/blog.ts) */
+export function BlogListClient({ posts, hero }: { posts: BlogPostCard[]; hero: ContentOf<typeof blogHero> }) {
+  const locale = useLocale();
+  const t = useMessages(messages);
   const featured = posts.find((p) => p.featured) ?? posts[0];
   const rest = posts.filter((p) => p !== featured);
 
   return (
     <>
-      <PageHero label="مجله تخصصی" title="مقالات و راهنماها" description="آموزش، راهنمای فنی و اخبار دنیای لوله آب و فاضلاب، کاروگیت، پلی‌اتیلن و پلیکا" />
+      <PageHero label={hero.label} title={hero.title} description={hero.description} />
 
       <div className="container-main section-padding space-y-10">
         {featured && (
@@ -43,14 +55,14 @@ export function BlogListClient({ posts }: { posts: BlogPostCard[] }) {
               </div>
               <div className="p-6 sm:p-10 flex flex-col justify-center">
                 <span className="text-xs font-bold text-[var(--accent-text)]">{featured.tag}</span>
-                <h2 className="mt-2 text-xl sm:text-[1.75rem] font-black leading-snug group-hover:text-[var(--accent-text)] transition-colors">{faDigits(featured.title)}</h2>
-                {featured.excerpt && <p className="mt-3 text-[15px] leading-8 text-[var(--muted-foreground)] line-clamp-3">{faDigits(featured.excerpt)}</p>}
+                <h2 className="mt-2 text-xl sm:text-[1.75rem] font-black leading-snug group-hover:text-[var(--accent-text)] transition-colors">{digits(featured.title, locale)}</h2>
+                {featured.excerpt && <p className="mt-3 text-[15px] leading-8 text-[var(--muted-foreground)] line-clamp-3">{digits(featured.excerpt, locale)}</p>}
                 <div className="mt-6 flex items-center gap-4 text-xs text-[var(--muted-foreground)] num">
                   <span>{featured.date}</span>
-                  <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{faDigits(featured.readTime)} دقیقه مطالعه</span>
+                  <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{fill(t.readTime, { n: digits(featured.readTime, locale) })}</span>
                 </div>
                 <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-bold">
-                  خواندن مقاله <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                  {t.readMore} <ArrowLeft className="w-4 h-4 ltr:rotate-180 transition-transform rtl:group-hover:-translate-x-1 ltr:group-hover:translate-x-1" />
                 </span>
               </div>
             </Link>
@@ -68,17 +80,17 @@ export function BlogListClient({ posts }: { posts: BlogPostCard[] }) {
                   <div className="mt-4 flex items-center gap-3 text-xs text-[var(--muted-foreground)] num">
                     <span className="font-bold text-[var(--accent-text)]">{post.tag}</span>
                     <span>{post.date}</span>
-                    <span>{faDigits(post.readTime)} دقیقه</span>
+                    <span>{fill(t.minutes, { n: digits(post.readTime, locale) })}</span>
                   </div>
-                  <h3 className="mt-2 font-black text-[17px] leading-8 line-clamp-2 group-hover:text-[var(--accent-text)] transition-colors">{faDigits(post.title)}</h3>
-                  {post.excerpt && <p className="mt-1.5 text-sm leading-7 text-[var(--muted-foreground)] line-clamp-2">{faDigits(post.excerpt)}</p>}
+                  <h3 className="mt-2 font-black text-[17px] leading-8 line-clamp-2 group-hover:text-[var(--accent-text)] transition-colors">{digits(post.title, locale)}</h3>
+                  {post.excerpt && <p className="mt-1.5 text-sm leading-7 text-[var(--muted-foreground)] line-clamp-2">{digits(post.excerpt, locale)}</p>}
                 </Link>
               </motion.article>
             ))}
           </div>
         )}
 
-        {posts.length === 0 && <p className="text-center text-[var(--muted-foreground)] py-16">هنوز مقاله‌ای منتشر نشده است.</p>}
+        {posts.length === 0 && <p className="text-center text-[var(--muted-foreground)] py-16">{hero.emptyText}</p>}
       </div>
     </>
   );

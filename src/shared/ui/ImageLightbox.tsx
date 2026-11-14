@@ -4,10 +4,18 @@ import { useCallback, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { AnimatePresence, m as motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { faDigits } from '@/shared/lib/utils';
+import { useLocale, useMessages } from '@/shared/i18n/LocaleProvider';
+import { defineMessages, fill } from '@/shared/i18n/messages';
+import { digits } from '@/shared/i18n/format';
+import { localeDir } from '@/shared/i18n/config';
+
+const messages = defineMessages({
+  fa: { gallery: 'تصاویر {name}', image: '{name} — تصویر {n}', close: 'بستن', prev: 'تصویر قبلی', next: 'تصویر بعدی' },
+  en: { gallery: '{name} images', image: '{name} — image {n}', close: 'Close', prev: 'Previous image', next: 'Next image' },
+});
 
 /**
- * نمایش تمام‌صفحه عکس‌ها — RTL: «بعدی» سمت چپ است و با کشیدن به راست می‌آید.
+ * نمایش تمام‌صفحه عکس‌ها — «بعدی» در لبه پایان است (چپ در فارسی، راست در انگلیسی) و با کشیدن به سمت شروع می‌آید.
  * عکس با object-contain نشان داده می‌شود، پس هر چه در گالری بریده شده بود اینجا کامل دیده می‌شود.
  * قبلاً فقط داخل صفحه محصول بود؛ صفحه پروژه‌ها هم همین را لازم داشت.
  */
@@ -32,13 +40,17 @@ export function ImageLightbox({
     [index, count, onIndex],
   );
   const touchX = useRef<number | null>(null);
+  const locale = useLocale();
+  const t = useMessages(messages);
+  // جهت «بعدی» روی صفحه: در RTL به چپ (کلید ArrowLeft، کشیدن به راست)، در LTR برعکس
+  const forward = localeDir[locale] === 'rtl' ? 1 : -1;
 
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
-      else if (e.key === 'ArrowLeft') go(1);
-      else if (e.key === 'ArrowRight') go(-1);
+      else if (e.key === 'ArrowLeft') go(forward);
+      else if (e.key === 'ArrowRight') go(-forward);
     };
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
@@ -46,7 +58,7 @@ export function ImageLightbox({
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
     };
-  }, [isOpen, onClose, go]);
+  }, [isOpen, onClose, go, forward]);
 
   return (
     <AnimatePresence>
@@ -54,7 +66,7 @@ export function ImageLightbox({
         <motion.div
           role="dialog"
           aria-modal="true"
-          aria-label={`تصاویر ${name}`}
+          aria-label={fill(t.gallery, { name })}
           className="fixed inset-0 z-[80] bg-black/90 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -64,26 +76,26 @@ export function ImageLightbox({
             if (touchX.current == null) return;
             const dx = e.changedTouches[0].clientX - touchX.current;
             touchX.current = null;
-            if (Math.abs(dx) > 50) go(dx > 0 ? 1 : -1);
+            if (Math.abs(dx) > 50) go(dx > 0 ? forward : -forward);
           }}
         >
-          <button aria-label="بستن" onClick={onClose} className="absolute inset-0 cursor-zoom-out" />
+          <button aria-label={t.close} onClick={onClose} className="absolute inset-0 cursor-zoom-out" />
           <div className="pointer-events-none absolute inset-4 sm:inset-12">
-            <Image key={images[index]} src={images[index]} alt={`${name} — تصویر ${faDigits(index + 1)}`} fill sizes="100vw" quality={90} className="object-contain" />
+            <Image key={images[index]} src={images[index]} alt={fill(t.image, { name, n: digits(index + 1, locale) })} fill sizes="100vw" quality={90} className="object-contain" />
           </div>
-          <button onClick={onClose} aria-label="بستن" className="absolute top-4 left-4 grid place-items-center w-11 h-11 rounded-full bg-black/60 ring-1 ring-white/25 text-white hover:bg-black/80">
+          <button onClick={onClose} aria-label={t.close} className="absolute top-4 end-4 grid place-items-center w-11 h-11 rounded-full bg-black/60 ring-1 ring-white/25 text-white hover:bg-black/80">
             <X className="w-5 h-5" />
           </button>
           {count > 1 && (
             <>
-              <button onClick={() => go(-1)} aria-label="تصویر قبلی" className="absolute right-3 top-1/2 -translate-y-1/2 grid place-items-center w-11 h-11 rounded-full bg-black/60 ring-1 ring-white/25 text-white hover:bg-black/80">
-                <ChevronRight className="w-6 h-6" />
+              <button onClick={() => go(-1)} aria-label={t.prev} className="absolute start-3 top-1/2 -translate-y-1/2 grid place-items-center w-11 h-11 rounded-full bg-black/60 ring-1 ring-white/25 text-white hover:bg-black/80">
+                <ChevronRight className="w-6 h-6 ltr:rotate-180" />
               </button>
-              <button onClick={() => go(1)} aria-label="تصویر بعدی" className="absolute left-3 top-1/2 -translate-y-1/2 grid place-items-center w-11 h-11 rounded-full bg-black/60 ring-1 ring-white/25 text-white hover:bg-black/80">
-                <ChevronLeft className="w-6 h-6" />
+              <button onClick={() => go(1)} aria-label={t.next} className="absolute end-3 top-1/2 -translate-y-1/2 grid place-items-center w-11 h-11 rounded-full bg-black/60 ring-1 ring-white/25 text-white hover:bg-black/80">
+                <ChevronLeft className="w-6 h-6 ltr:rotate-180" />
               </button>
               <span className="absolute bottom-5 inset-x-0 text-center text-sm text-white/80 num pointer-events-none">
-                {faDigits(index + 1)} / {faDigits(count)}
+                {digits(index + 1, locale)} / {digits(count, locale)}
               </span>
             </>
           )}

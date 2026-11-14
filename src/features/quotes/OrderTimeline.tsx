@@ -1,6 +1,28 @@
+'use client';
+
 import { Check, ClipboardList, FileCheck2, Forklift, MapPinCheck, Package, Truck, type LucideIcon } from 'lucide-react';
-import { ORDER_STEPS, orderStepIndex, type OrderLogEntry } from '@/shared/lib/order-status';
+import { ORDER_STEPS, orderStepIndex, orderStepText, type OrderLogEntry } from '@/shared/lib/order-status';
 import { cn } from '@/shared/lib/utils';
+import { localeTag, type Locale } from '@/shared/i18n/config';
+import { defineMessages } from '@/shared/i18n/messages';
+import { useLocale } from '@/shared/i18n/LocaleProvider';
+
+const messages = defineMessages({
+  fa: {
+    requested: 'ثبت درخواست',
+    requestedDesc: 'پیش‌فاکتور ثبت شد',
+    issued: 'تأیید و صدور فاکتور',
+    issuedDesc: 'کارشناس فروش قیمت و موجودی را تأیید کرد',
+    current: ' (مرحله فعلی)',
+  },
+  en: {
+    requested: 'Request submitted',
+    requestedDesc: 'Your quote was submitted',
+    issued: 'Approved and invoiced',
+    issuedDesc: 'Our sales specialist confirmed price and stock',
+    current: ' (current step)',
+  },
+});
 
 const ICONS: Record<string, LucideIcon> = {
   REQUESTED: ClipboardList,
@@ -11,8 +33,8 @@ const ICONS: Record<string, LucideIcon> = {
   DELIVERED: MapPinCheck,
 };
 
-const when = (iso: string | null | undefined) =>
-  iso ? new Date(iso).toLocaleString('fa-IR', { timeZone: 'Asia/Tehran', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
+const when = (iso: string | null | undefined, locale: Locale) =>
+  iso ? new Date(iso).toLocaleString(localeTag[locale], { timeZone: 'Asia/Tehran', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
 
 /**
  * خط زمانی سفارش: ثبت درخواست ← صدور فاکتور ← آماده‌سازی ← بارگیری ← ارسال ← تحویل.
@@ -25,10 +47,12 @@ export function OrderTimeline({ status, createdAt, issuedAt, orderStatus, orderL
   orderStatus: string;
   orderLog: OrderLogEntry[];
 }) {
+  const locale = useLocale();
+  const t = messages[locale];
   const steps = [
-    { key: 'REQUESTED', label: 'ثبت درخواست', desc: 'پیش‌فاکتور ثبت شد', at: createdAt },
-    { key: 'ISSUED', label: 'تأیید و صدور فاکتور', desc: 'کارشناس فروش قیمت و موجودی را تأیید کرد', at: issuedAt },
-    ...ORDER_STEPS.map((s) => ({ ...s, at: orderLog.find((e) => e.status === s.key)?.at ?? null })),
+    { key: 'REQUESTED', label: t.requested, desc: t.requestedDesc, at: createdAt },
+    { key: 'ISSUED', label: t.issued, desc: t.issuedDesc, at: issuedAt },
+    ...ORDER_STEPS.map((s) => ({ key: s.key, ...orderStepText(s, locale), at: orderLog.find((e) => e.status === s.key)?.at ?? null })),
   ];
   // آخرین مرحله انجام‌شده
   const done = status === 'ISSUED' ? 1 + (orderStepIndex(orderStatus) + 1) : 0;
@@ -46,7 +70,7 @@ export function OrderTimeline({ status, createdAt, issuedAt, orderStatus, orderL
               <span
                 aria-hidden
                 className={cn(
-                  'absolute right-[19px] top-10 bottom-0 w-0.5 md:right-auto md:top-5 md:bottom-auto md:h-0.5 md:w-full md:left-[-50%]',
+                  'absolute start-[19px] top-10 bottom-0 w-0.5 md:start-auto md:top-5 md:bottom-auto md:h-0.5 md:w-full md:end-[-50%]',
                   i < done ? 'bg-emerald-500' : 'bg-[var(--border)]',
                 )}
               />
@@ -64,10 +88,10 @@ export function OrderTimeline({ status, createdAt, issuedAt, orderStatus, orderL
             <span className="min-w-0 md:px-1">
               <span className={cn('block text-sm font-black leading-6', isDone ? 'text-[var(--foreground)]' : 'text-[var(--muted-foreground)]')}>
                 {s.label}
-                {isCurrent && <span className="sr-only"> (مرحله فعلی)</span>}
+                {isCurrent && <span className="sr-only">{t.current}</span>}
               </span>
               <span className="block text-[11px] leading-5 text-[var(--muted-foreground)]">{s.desc}</span>
-              {isDone && when(s.at) && <span className="block mt-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 num">{when(s.at)}</span>}
+              {isDone && when(s.at, locale) && <span className="block mt-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 num">{when(s.at, locale)}</span>}
             </span>
           </li>
         );

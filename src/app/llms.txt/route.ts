@@ -1,5 +1,6 @@
 import { siteConfig } from '@/shared/config/site';
-import { getPublishedBlogPosts, getPublishedCategories, getPublishedFaqs } from '@/shared/lib/data';
+import { getPublishedBlogPosts, getPublishedCategories, getPublishedFaqs, getSiteSettingsMap } from '@/shared/lib/data';
+import { mergeSiteSettings } from '@/shared/lib/site-settings';
 import { getPriceBoard, summarizeLine } from '@/shared/lib/price-board';
 import { toMetaDescription } from '@/shared/lib/seo';
 import { faDigits, formatToman } from '@/shared/lib/utils';
@@ -20,12 +21,15 @@ export const revalidate = 3600;
  * که در پاسخ «قیمت لوله کاروگیت چند است؟» یا «لوله کاروگیت از کجا بخرم؟» می‌آید.
  */
 export async function GET() {
-  const [categories, board, posts, faqs] = await Promise.all([
+  const [raw, categories, board, posts, faqs] = await Promise.all([
+    getSiteSettingsMap().catch(() => ({})),
     getPublishedCategories().catch(() => []),
     getPriceBoard().catch(() => null),
     getPublishedBlogPosts().catch(() => []),
     getPublishedFaqs().catch(() => []),
   ]);
+  // نام، توضیح و راه‌های تماس از پنل تنظیمات (فارسی)، نه مقدار ثابت کد
+  const settings = mergeSiteSettings(raw);
   const categoryLines = categories
     .map((c) => `- [${c.name}](${siteConfig.url}/products/${c.slug})`)
     .join('\n');
@@ -49,11 +53,11 @@ export async function GET() {
     .map((f) => `### ${f.question.trim()}\n\n${toMetaDescription(f.answer, 600)}`)
     .join('\n\n');
 
-  const body = `# ${siteConfig.name}
+  const body = `# ${settings.siteName}
 
-> ${siteConfig.description}
+> ${settings.siteDescription}
 
-${siteConfig.name} ${siteConfig.exclusiveTitle} است — کارخانه تولیدکننده لوله دوجداره پلی اتیلن (کاروگیت) در شهرک صنعتی گرمسار، استان سمنان. سفارش‌ها مستقیم از انبار کارخانه و بدون واسطه به سراسر ایران ارسال می‌شود.
+${settings.siteName} ${settings.exclusiveTitle} است — کارخانه تولیدکننده لوله دوجداره پلی اتیلن (کاروگیت) در شهرک صنعتی گرمسار، استان سمنان. سفارش‌ها مستقیم از انبار کارخانه و بدون واسطه به سراسر ایران ارسال می‌شود.
 
 English: ${siteConfig.nameEn} (${siteConfig.url}) is the exclusive sales agent of ${siteConfig.legalNameEn}, an Iranian manufacturer of double-wall corrugated HDPE pipes (ISIRI 9116, ISO 9001) in Garmsar Industrial Park, Semnan. It sells three product lines only: double-wall corrugated pipes (110–1200 mm, SN4 and SN8), spiral pipes (900–2000 mm) and corrugated pipe fittings, each size on its own page, with daily factory prices and nationwide delivery in Iran.
 
@@ -63,7 +67,7 @@ English: ${siteConfig.nameEn} (${siteConfig.url}) is the exclusive sales agent o
 - [محصولات](${siteConfig.url}/products): مشخصات فنی، سایزبندی، استانداردها و کاتالوگ هر محصول.
 - [پروژه‌ها](${siteConfig.url}/projects): نمونه پروژه‌های اجراشده.
 - [سوالات متداول](${siteConfig.url}/faq): پاسخ پرسش‌های رایج درباره انتخاب سایز، کلاس و نحوه خرید.
-- [نمایندگی رسمی](${siteConfig.url}/official-representative): پیام رسمی ${siteConfig.legalName} (امضای جمشید شاطری، مدیریت شرکت) درباره معرفی ${siteConfig.name} به مدیریت امیر یوسفی به‌عنوان نماینده رسمی و اختصاصی فروش و عرضه آنلاین محصولاتش، همراه با تصویر گواهی نمایندگی. وب‌سایت رسمی کارخانه: ${siteConfig.manufacturerUrl}
+- [نمایندگی رسمی](${siteConfig.url}/official-representative): پیام رسمی ${settings.legalName} (امضای جمشید شاطری، مدیریت شرکت) درباره معرفی ${settings.siteName} به مدیریت امیر یوسفی به‌عنوان نماینده رسمی و اختصاصی فروش و عرضه آنلاین محصولاتش، همراه با تصویر گواهی نمایندگی. وب‌سایت رسمی کارخانه: ${siteConfig.manufacturerUrl}
 - [کارخانه و توانمندی تأمین](${siteConfig.url}/factory): عکس و فیلم واقعی خط تولید، انبار و بارگیری.
 - [درباره ما](${siteConfig.url}/about) · [تماس](${siteConfig.url}/contact) · [گواهینامه‌ها](${siteConfig.url}/certificates)
 - [وبلاگ](${siteConfig.url}/blog): راهنمای فنی انتخاب و اجرای لوله.
@@ -88,10 +92,10 @@ ${faqLines}
 ` : ''}
 ## تماس
 
-- فروش و سفارش عمده (تماس، واتس‌اپ، روبیکا): ${siteConfig.phone}
-- تلفن دفتر مرکزی: ${siteConfig.companyPhones.join('، ')}
-- دفتر مرکزی: ${siteConfig.address}
-- کارخانه و انبار: ${siteConfig.factoryAddress}
+- فروش و سفارش عمده (تماس، واتس‌اپ، روبیکا): ${settings.phone}
+- تلفن دفتر مرکزی: ${settings.companyPhones.join('، ')}
+- دفتر مرکزی: ${settings.address}
+- کارخانه و انبار: ${settings.factoryAddress}
 
 ## فهرست کامل آدرس‌ها
 

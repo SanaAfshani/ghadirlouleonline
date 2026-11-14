@@ -2,6 +2,13 @@
 
 import { Search, X } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
+import { useMessages } from '@/shared/i18n/LocaleProvider';
+import { defineMessages } from '@/shared/i18n/messages';
+
+const messages = defineMessages({
+  fa: { clear: 'پاک کردن جستجو' },
+  en: { clear: 'Clear search' },
+});
 
 export interface SearchInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
@@ -18,6 +25,7 @@ export function SearchInput({
   placeholder,
   ...props
 }: SearchInputProps) {
+  const t = useMessages(messages);
   return (
     <div className={cn('relative', wrapperClassName)}>
       <Search
@@ -41,7 +49,7 @@ export function SearchInput({
           type="button"
           onClick={() => onValueChange('')}
           className="absolute top-1/2 start-3 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
-          aria-label="پاک کردن جستجو"
+          aria-label={t.clear}
         >
           <X className="h-4 w-4" />
         </button>

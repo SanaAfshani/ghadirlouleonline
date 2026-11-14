@@ -5,11 +5,16 @@ import Image from 'next/image';
 import { m as motion } from 'framer-motion';
 import { Plus, Search, Trash2, Layers, Loader2, Pencil } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { slugify } from '@/shared/lib/utils';
+import { cn, slugify } from '@/shared/lib/utils';
+import { translationsFor } from '@/shared/lib/translations';
+import type { Locale } from '@/shared/i18n/config';
 import type { Category } from '@/shared/types';
 import { useConfirm } from '@/shared/ui/ConfirmDialog';
 import { ImageUploader } from '@/shared/ui/ImageUploader';
 import { HtmlContentEditor } from '@/features/admin/editor/HtmlContentEditor';
+import { TranslationEditor, type EnglishTranslations } from '@/features/admin/translations/TranslationEditor';
+import { LocaleTabs, isUntranslated } from '@/features/admin/translations/LocaleTabs';
+import { CATEGORY_TRANSLATION_FIELDS } from '@/features/admin/translations/fields';
 
 type CategoryRow = Category & { _count?: { products: number } };
 
@@ -22,6 +27,8 @@ function CategoryEditor({ cat, onSaved, onCancel }: { cat: CategoryRow; onSaved:
   const [content, setContent] = useState(cat.content ?? '');
   const [image, setImage] = useState(cat.image ?? '');
   const [saving, setSaving] = useState(false);
+  const [locale, setLocale] = useState<Locale>('fa');
+  const [en, setEn] = useState<EnglishTranslations>(() => translationsFor(cat.translations, 'en'));
 
   const save = async () => {
     if (!name.trim()) return toast.error('نام دسته را وارد کنید');
@@ -30,7 +37,7 @@ function CategoryEditor({ cat, onSaved, onCancel }: { cat: CategoryRow; onSaved:
       const res = await fetch(`/api/categories/${cat.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), description, content, image }),
+        body: JSON.stringify({ name: name.trim(), description, content, image, translations: { en } }),
       });
       const json = await res.json();
       if (!res.ok || !json.success) {
@@ -54,21 +61,27 @@ function CategoryEditor({ cat, onSaved, onCancel }: { cat: CategoryRow; onSaved:
         <p className="mt-2 text-xs text-[var(--muted-foreground)] leading-6">در منوی محصولات، صفحه دسته‌ها و کارت دسته نمایش داده می‌شود. عکس افقی با کیفیت بهتر است.</p>
       </div>
       <div className="grid gap-3 content-start">
-        <label className="block">
-          <span className="block text-sm font-medium text-[var(--foreground)] mb-1.5">نام</span>
-          <input value={name} onChange={(e) => setName(e.target.value)} className={`${fieldCls} h-11`} />
-        </label>
-        <label className="block">
-          <span className="block text-sm font-medium text-[var(--foreground)] mb-1.5">توضیح کوتاه</span>
-          <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className={`${fieldCls} py-2.5 leading-7`} />
-        </label>
-        <HtmlContentEditor
-          label="متن بلند صفحه دسته (زیر محصولات و جدول قیمت)"
-          value={content}
-          onChange={setContent}
-          rows={8}
-          placeholder="راهنمای جامع این دسته — خالی بماند تا فقط محصولات نمایش داده شوند"
-        />
+        <LocaleTabs value={locale} onChange={setLocale} untranslated={isUntranslated(en, 'name')} className="justify-self-start" />
+        {locale === 'en' && (
+          <TranslationEditor fields={CATEGORY_TRANSLATION_FIELDS} source={{ name, description, content }} value={en} onChange={setEn} />
+        )}
+        <div className={cn('grid gap-3', locale === 'en' && 'hidden')}>
+          <label className="block">
+            <span className="block text-sm font-medium text-[var(--foreground)] mb-1.5">نام</span>
+            <input value={name} onChange={(e) => setName(e.target.value)} className={`${fieldCls} h-11`} />
+          </label>
+          <label className="block">
+            <span className="block text-sm font-medium text-[var(--foreground)] mb-1.5">توضیح کوتاه</span>
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className={`${fieldCls} py-2.5 leading-7`} />
+          </label>
+          <HtmlContentEditor
+            label="متن بلند صفحه دسته (زیر محصولات و جدول قیمت)"
+            value={content}
+            onChange={setContent}
+            rows={8}
+            placeholder="راهنمای جامع این دسته — خالی بماند تا فقط محصولات نمایش داده شوند"
+          />
+        </div>
         <div className="flex gap-2">
           <button type="button" onClick={save} disabled={saving} className="h-11 px-6 rounded-xl bg-[var(--accent)] text-[var(--accent-foreground)] font-semibold text-sm disabled:opacity-50 flex items-center gap-2">
             {saving && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -89,6 +102,8 @@ export default function AdminCategoriesPage() {
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [newName, setNewName] = useState('');
+  const [newLocale, setNewLocale] = useState<Locale>('fa');
+  const [newEn, setNewEn] = useState<EnglishTranslations>({});
   const [categories, setCategories] = useState<CategoryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -132,6 +147,7 @@ export default function AdminCategoriesPage() {
           name: newName.trim(),
           slug: slugify(newName),
           published: true,
+          translations: { en: newEn },
         }),
       });
       const json = await res.json();
@@ -143,6 +159,7 @@ export default function AdminCategoriesPage() {
 
       toast.success(`دسته‌بندی «${newName}» اضافه شد!`);
       setNewName('');
+      setNewEn({});
       setShowForm(false);
       loadCategories();
     } catch {
@@ -233,35 +250,43 @@ export default function AdminCategoriesPage() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           onSubmit={handleAdd}
-          className="bg-[var(--card)] border border-[var(--accent)]/30 rounded-2xl p-6 flex items-end gap-4"
+          onInvalidCapture={() => setNewLocale('fa')}
+          className="bg-[var(--card)] border border-[var(--accent)]/30 rounded-2xl p-6 space-y-4"
         >
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">نام دسته‌بندی جدید</label>
-            <input
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder="مثال: لوله پلی‌اتیلن"
-              required
-              autoFocus
-              className="w-full h-11 bg-[var(--muted)] border border-[var(--border)] rounded-xl px-4 text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none"
-            />
+          <LocaleTabs value={newLocale} onChange={setNewLocale} untranslated={isUntranslated(newEn, 'name')} />
+          {/* دسته تازه فقط نام دارد؛ توضیح و متن بلند بعداً در «ویرایش» ترجمه می‌شوند */}
+          {newLocale === 'en' && (
+            <TranslationEditor fields={CATEGORY_TRANSLATION_FIELDS.slice(0, 1)} source={{ name: newName }} value={newEn} onChange={setNewEn} />
+          )}
+          <div className="flex items-end gap-4">
+            <div className={cn('flex-1', newLocale === 'en' && 'hidden')}>
+              <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">نام دسته‌بندی جدید</label>
+              <input
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="مثال: لوله پلی‌اتیلن"
+                required
+                autoFocus
+                className="w-full h-11 bg-[var(--muted)] border border-[var(--border)] rounded-xl px-4 text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={saving}
+              className="h-11 px-6 rounded-xl bg-[var(--accent)] text-[var(--accent-foreground)] font-semibold hover:bg-[var(--accent)]/90 transition-colors text-sm disabled:opacity-50 flex items-center gap-2"
+            >
+              {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+              ذخیره
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowForm(false)}
+              className="h-11 px-4 rounded-xl bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors text-sm"
+            >
+              انصراف
+            </button>
           </div>
-          <button
-            type="submit"
-            disabled={saving}
-            className="h-11 px-6 rounded-xl bg-[var(--accent)] text-[var(--accent-foreground)] font-semibold hover:bg-[var(--accent)]/90 transition-colors text-sm disabled:opacity-50 flex items-center gap-2"
-          >
-            {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-            ذخیره
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowForm(false)}
-            className="h-11 px-4 rounded-xl bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors text-sm"
-          >
-            انصراف
-          </button>
         </motion.form>
       )}
 

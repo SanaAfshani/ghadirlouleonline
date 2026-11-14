@@ -4,6 +4,9 @@ import { prisma } from '@/shared/lib/prisma';
 import { normalizeProjectImages, serializeProject } from '@/shared/lib/serializers';
 import { slugify } from '@/shared/lib/utils';
 import { recordRedirect } from '@/shared/lib/redirects';
+import { sanitizeTranslations } from '@/shared/lib/translations';
+import { stripDangerousHtml } from '@/shared/content/sanitize';
+import { revalidateLocalized } from '@/shared/i18n/server';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -54,12 +57,18 @@ export async function PUT(request: NextRequest, { params }: Props) {
         ...(body.ogTitle != null && { ogTitle: body.ogTitle || null }),
         ...(body.ogDescription != null && { ogDescription: body.ogDescription || null }),
         ...(body.faqs != null && { faqs: JSON.stringify(body.faqs) }),
+        ...(body.translations !== undefined && { translations: sanitizeTranslations('project', body.translations, stripDangerousHtml) }),
       },
     });
 
     if (before && before.slug !== project.slug) {
       await recordRedirect(`/projects/${before.slug}`, `/projects/${project.slug}`);
     }
+
+    // صفحه‌ها با ISR ساخته می‌شوند — تغییر همین حالا دیده شود، نه بعد از تایمر revalidate
+    if (before && before.slug !== project.slug) revalidateLocalized(`/projects/${before.slug}`);
+    revalidateLocalized(`/projects/${project.slug}`);
+    revalidateLocalized('/projects');
 
     return NextResponse.json({ success: true, data: serializeProject(project) });
   } catch (error) {
@@ -73,7 +82,9 @@ export async function DELETE(request: NextRequest, { params }: Props) {
   if (auth instanceof NextResponse) return auth;
   try {
     const { id } = await params;
-    await prisma.project.delete({ where: { id } });
+    const project = await prisma.project.delete({ where: { id }, select: { slug: true } });
+    revalidateLocalized(`/projects/${project.slug}`);
+    revalidateLocalized('/projects');
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Project DELETE error:', error);

@@ -128,8 +128,8 @@
   }
 }
 
+/* جهت از dir خود <html> می‌آید (fa: rtl، en: ltr) — این‌جا ثابت نمی‌شود */
 html {
-  direction: rtl;
   scroll-behavior: smooth;
   scroll-padding-top: var(--nav-height);
   font-family: var(--font-sans);
@@ -155,12 +155,12 @@ body {
     font-family: var(--font-sans);
     font-weight: 700;
     line-height: 1.35;
-    text-align: right;
+    text-align: start;
   }
 
   p {
     line-height: 1.85;
-    text-align: right;
+    text-align: start;
   }
 
   a {
@@ -405,9 +405,6 @@ body {
 /* Navigation arrows in RTL: right-pointing = "back/previous" */
 .rtl-arrow-forward { transform: rotate(180deg); }
 
-/* Ensure Tailwind's text-left/right work correctly in RTL context */
-.text-start { text-align: right !important; }
-.text-end   { text-align: left  !important; }
 
 /* ─── SECTION DIVIDER ────────────────────────────────────────────── */
 .section-divider {
@@ -487,7 +484,12 @@ body {
 /* ─── FORM ELEMENTS ──────────────────────────────────────────────── */
 input, textarea, select {
   font-family: var(--font-sans);
-  direction: rtl;
+  text-align: start;
+}
+
+/* در صفحه فارسی، فیلد چپ‌به‌راست (شماره، ایمیل، اسلاگ) هم‌تراز بقیه فرم راست‌چین می‌ماند؛
+   text-left یعنی عمداً چپ‌چین (مثل ورودی‌های انگلیسی پنل) */
+html[dir='rtl'] :is(input, textarea, select)[dir='ltr']:not(.text-left) {
   text-align: right;
 }
 
@@ -657,8 +659,7 @@ input, textarea, select {
     font-size: 0.9375rem;
     color: var(--foreground);
     font-family: var(--font-sans);
-    direction: rtl;
-    text-align: right;
+    text-align: start;
     outline: none;
   }
 
@@ -699,8 +700,7 @@ input, textarea, select {
   padding: 0.625rem 0.875rem;
   font-family: var(--font-sans);
   color: #F1F5F9;
-  direction: rtl;
-  text-align: right;
+  text-align: start;
   outline: none;
   font-size: 0.875rem;
 }
@@ -827,7 +827,7 @@ input, textarea, select {
 .article-content td {
   border: 1px solid var(--border);
   padding: 0.65rem 0.85rem;
-  text-align: right;
+  text-align: start;
 }
 .article-content th {
   background: var(--muted);
@@ -1262,8 +1262,9 @@ input, textarea, select {
 
 /* فیلد شماره/ایمیل: مقدار چپ‌به‌راست (ترتیب ارقام درست بماند) ولی تراز راست؛
    تا خالی است placeholder فارسی راست‌به‌چپ نمایش داده می‌شود */
-.ltr-field { direction: ltr; text-align: right; }
-.ltr-field:placeholder-shown { direction: rtl; }
+.ltr-field { direction: ltr; text-align: left; }
+html[dir='rtl'] .ltr-field { text-align: right; }
+html[dir='rtl'] .ltr-field:placeholder-shown { direction: rtl; }
 
 /* نوار گردشی دسته‌ها در hero موبایل — RTL: لیست به راست می‌رود و نیمه تکراری جایش را می‌گیرد */
 @keyframes hero-marquee {

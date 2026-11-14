@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { revalidateLocalized } from '@/shared/i18n/server';
 import { requireAdmin, isAdmin } from '@/shared/lib/admin-auth';
 import { prisma } from '@/shared/lib/prisma';
 import { slugify } from '@/shared/lib/utils';
@@ -7,6 +7,8 @@ import { recordRedirect } from '@/shared/lib/redirects';
 import { parseFaqs } from '@/shared/lib/serializers';
 import { serializeFaqs } from '@/shared/lib/page-faqs';
 import { pingIndexNow } from '@/shared/lib/indexnow';
+import { sanitizeTranslations } from '@/shared/lib/translations';
+import { stripDangerousHtml } from '@/shared/content/sanitize';
 
 type RouteContext = { params: Promise<{ slug: string }> };
 
@@ -95,6 +97,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
           ogDescription: optionalText(body.ogDescription),
         }),
         ...(body.faqs !== undefined && { faqs: serializeFaqs(body.faqs) }),
+        ...(body.translations !== undefined && { translations: sanitizeTranslations('blogPost', body.translations, stripDangerousHtml) }),
       },
       include: { author: { select: { id: true, name: true, email: true } } },
     });
@@ -104,9 +107,9 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     }
 
     // نسخه cache‌شده صفحه (یا ۴۰۴ پیش از انتشار) همین حالا کنار می‌رود، نه بعد از ۳۰ دقیقه
-    revalidatePath(`/blog/${existing.slug}`);
-    revalidatePath(`/blog/${post.slug}`);
-    revalidatePath('/blog');
+    revalidateLocalized(`/blog/${existing.slug}`);
+    revalidateLocalized(`/blog/${post.slug}`);
+    revalidateLocalized('/blog');
 
     // منتشر یا از انتشار خارج شد یا ویرایش شد — آدرس قدیم و جدید هر دو خبر داده می‌شوند
     if (post.published || existing.published) {
@@ -141,8 +144,8 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
 
     await prisma.blogPost.delete({ where: { id: existing.id } });
 
-    revalidatePath(`/blog/${existing.slug}`);
-    revalidatePath('/blog');
+    revalidateLocalized(`/blog/${existing.slug}`);
+    revalidateLocalized('/blog');
 
     // آدرس حالا ۴۰۴ می‌دهد — خبر دادن باعث می‌شود Bing (و ChatGPT و Copilot) زودتر از نتایج برش دارند
     if (existing.published) pingIndexNow(['/blog', `/blog/${existing.slug}`]);

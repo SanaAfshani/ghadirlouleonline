@@ -3,7 +3,7 @@ import { prisma } from '@/shared/lib/prisma';
 /**
  * ستون‌هایی که کد جدید لازم دارد، اگر دیتابیس هنوز نداشته باشد (همان SQL مایگریشن‌های prisma/migrations، idempotent).
  * دیپلوی سرور اصلی (Runflare) فقط build می‌گیرد و migrate deploy اجرا نمی‌کند؛ بدون این، با دیپلوی کد جدید روی
- * دیتابیس قدیمی هر کوئری PriceItem/Quote خطای ۵۰۰ می‌داد. فقط ADD COLUMN IF NOT EXISTS — هیچ داده‌ای تغییر/حذف نمی‌شود.
+ * دیتابیس قدیمی هر کوئری PriceItem/Quote خطای ۵۰۰ می‌داد. فقط ADD COLUMN / CREATE TABLE IF NOT EXISTS — هیچ داده‌ای تغییر/حذف نمی‌شود.
  * مایگریشن جدید که اضافه شد، دستورهایش را این‌جا هم بگذارید.
  */
 const STATEMENTS = [
@@ -34,6 +34,15 @@ const STATEMENTS = [
   `ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "supplyStatus" TEXT NOT NULL DEFAULT ''`,
   // 20261106010000_category_content
   `ALTER TABLE "Category" ADD COLUMN IF NOT EXISTS "content" TEXT`,
+  // 20261114000000_i18n_content
+  `CREATE TABLE IF NOT EXISTS "ContentBlock" ("key" TEXT NOT NULL, "data" TEXT NOT NULL DEFAULT '{}', "updatedAt" TIMESTAMP(3) NOT NULL, CONSTRAINT "ContentBlock_pkey" PRIMARY KEY ("key"))`,
+  `ALTER TABLE "Category" ADD COLUMN IF NOT EXISTS "translations" TEXT NOT NULL DEFAULT '{}'`,
+  `ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "translations" TEXT NOT NULL DEFAULT '{}'`,
+  `ALTER TABLE "BlogPost" ADD COLUMN IF NOT EXISTS "translations" TEXT NOT NULL DEFAULT '{}'`,
+  `ALTER TABLE "Project" ADD COLUMN IF NOT EXISTS "translations" TEXT NOT NULL DEFAULT '{}'`,
+  `ALTER TABLE "FAQ" ADD COLUMN IF NOT EXISTS "translations" TEXT NOT NULL DEFAULT '{}'`,
+  `ALTER TABLE "Testimonial" ADD COLUMN IF NOT EXISTS "translations" TEXT NOT NULL DEFAULT '{}'`,
+  `ALTER TABLE "PriceItem" ADD COLUMN IF NOT EXISTS "translations" TEXT NOT NULL DEFAULT '{}'`,
 ];
 
 export async function ensureSchema() {

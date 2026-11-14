@@ -3,6 +3,13 @@
 import { Fragment, useEffect, useState } from 'react';
 import Image from 'next/image';
 import type { HeroSlide } from '@/shared/lib/site-settings';
+import { useMessages } from '@/shared/i18n/LocaleProvider';
+import { defineMessages, fill } from '@/shared/i18n/messages';
+
+const messages = defineMessages({
+  fa: { slide: 'عکس {n} از {total}' },
+  en: { slide: 'Photo {n} of {total}' },
+});
 
 const INTERVAL = 6000;
 
@@ -22,6 +29,7 @@ export function HeroSlides({ slides }: { slides: HeroSlide[] }) {
    */
   const [seen, setSeen] = useState(0);
   const [paused, setPaused] = useState(false);
+  const t = useMessages(messages);
 
   const many = slides.length > 1;
   const go = (i: number) => {
@@ -100,7 +108,7 @@ export function HeroSlides({ slides }: { slides: HeroSlide[] }) {
               onClick={() => go(i)}
               onFocus={() => setPaused(true)}
               onBlur={() => setPaused(false)}
-              aria-label={`عکس ${i + 1} از ${slides.length}`}
+              aria-label={fill(t.slide, { n: i + 1, total: slides.length })}
               aria-current={i === active}
               className={`h-2.5 rounded-full transition-all ${
                 i === active ? 'w-7 bg-[var(--accent)]' : 'w-2.5 bg-white/50 hover:bg-white/80'

@@ -14,6 +14,12 @@ import { SeoPanel } from '@/features/admin/seo/SeoPanel';
 import type { SeoFields } from '@/features/admin/seo/seo';
 import { FaqEditor } from '@/features/admin/seo/FaqEditor';
 import type { FaqItem } from '@/shared/types';
+import { cn } from '@/shared/lib/utils';
+import { translationsFor } from '@/shared/lib/translations';
+import type { Locale } from '@/shared/i18n/config';
+import { TranslationEditor, type EnglishTranslations } from '@/features/admin/translations/TranslationEditor';
+import { LocaleTabs, isUntranslated } from '@/features/admin/translations/LocaleTabs';
+import { BLOG_TRANSLATION_FIELDS } from '@/features/admin/translations/fields';
 
 export default function EditBlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -44,6 +50,10 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ slug: s
 
 
   const [importOpen, setImportOpen] = useState(false);
+  const [locale, setLocale] = useState<Locale>('fa');
+  const [en, setEn] = useState<EnglishTranslations>({});
+  // برچسب‌ها در این فرم ویرایش نمی‌شوند؛ فقط منبع ترجمه انگلیسی‌شان است
+  const [tags, setTags] = useState<string[]>([]);
 
   /** فقط فیلدهایی که کاربر در دیالوگ انتخاب کرده نوشته می‌شوند */
   const applyImport = (data: ImportedArticle, fields: ImportField[]) => {
@@ -103,6 +113,8 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ slug: s
           ogDescription: post.ogDescription || '',
           faqs: Array.isArray(post.faqs) ? post.faqs : [],
         });
+        setTags(Array.isArray(post.tags) ? post.tags : []);
+        setEn(translationsFor(post.translations, 'en'));
       } catch {
         toast.error('خطا در ارتباط با سرور');
       } finally {
@@ -149,6 +161,7 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ slug: s
           ogTitle: form.ogTitle,
           ogDescription: form.ogDescription,
           faqs: form.faqs,
+          translations: { en },
         }),
       });
 
@@ -203,9 +216,16 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ slug: s
         </button>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      {/* فیلد اجباری خالیِ فرم فارسی در زبانه English دیده نمی‌شود — زبانه فارسی باز می‌شود تا خطا معلوم باشد */}
+      <form onSubmit={handleSubmit} onInvalidCapture={() => setLocale('fa')} className="space-y-6">
+        <LocaleTabs value={locale} onChange={setLocale} untranslated={isUntranslated(en, 'title')} />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
+          {locale === 'en' && (
+            <div className="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6">
+              <TranslationEditor fields={BLOG_TRANSLATION_FIELDS} source={{ ...form, tags }} value={en} onChange={setEn} />
+            </div>
+          )}
+          <div className={cn('lg:col-span-2 space-y-6', locale === 'en' && 'hidden')}>
             <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 space-y-4">
               <h2 className="text-[var(--foreground)] font-bold">محتوای مقاله</h2>
 

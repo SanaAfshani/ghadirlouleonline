@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { ChevronDown, ChevronUp, ExternalLink, GalleryHorizontal, Loader2, Plus, Save, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, ExternalLink, GalleryHorizontal, Loader2, Plus, Save, Sparkles, Trash2 } from 'lucide-react';
 import { ImageUploader } from '@/shared/ui/ImageUploader';
 import { IconTile } from '@/shared/ui/IconTile';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { parseHeroSlides, type HeroSlide } from '@/shared/lib/site-settings';
-import { formatPersianNumber } from '@/shared/lib/utils';
+import { requestTranslation } from '@/features/admin/content/translate-client';
+import { faDigits, formatPersianNumber } from '@/shared/lib/utils';
 import { cn } from '@/shared/lib/utils';
 
 const card = 'bg-[var(--card)] border border-[var(--border)] rounded-2xl';
@@ -23,11 +24,12 @@ const FOCUS: { x: number; y: number; label: string }[] = [
   { x: 0, y: 100, label: 'پایین چپ' }, { x: 50, y: 100, label: 'پایین وسط' }, { x: 100, y: 100, label: 'پایین راست' },
 ];
 
-const EMPTY: HeroSlide = { image: '', alt: '', focusX: 50, focusY: 0, fit: 'cover' };
+const EMPTY: HeroSlide = { image: '', alt: '', altEn: '', focusX: 50, focusY: 0, fit: 'cover' };
 
 export default function AdminHeroPage() {
   const [list, setList] = useState<HeroSlide[] | null>(null);
   const [saving, setSaving] = useState(false);
+  const [translating, setTranslating] = useState(false);
 
   useEffect(() => {
     fetch('/api/settings')
@@ -45,6 +47,22 @@ export default function AdminHeroPage() {
       [next[i], next[i + d]] = [next[i + d], next[i]];
       return next;
     });
+
+  // فقط alt فارسیِ دارای متن با alt انگلیسی خالی — ترجمه‌ای که دستی اصلاح شده بازنویسی نمی‌شود
+  const translate = async () => {
+    const todo = list!.flatMap((s, i) => (s.alt.trim() && !s.altEn.trim() ? [{ id: String(i), text: s.alt, html: false }] : []));
+    if (!todo.length) return toast('همه متن‌ها ترجمه دارند');
+    setTranslating(true);
+    try {
+      const result = await requestTranslation(todo);
+      setList((l) => l!.map((s, i) => (result[i] ? { ...s, altEn: result[i] } : s)));
+      toast.success(`${faDigits(Object.keys(result).length)} متن ترجمه شد — بازبینی و ذخیره کنید`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'ترجمه انجام نشد');
+    } finally {
+      setTranslating(false);
+    }
+  };
 
   const save = async () => {
     const clean = list!.filter((s) => s.image);
@@ -172,6 +190,22 @@ export default function AdminHeroPage() {
                     className={inputCls}
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
+                    متن جایگزین انگلیسی (alt)
+                  </label>
+                  <input
+                    type="text"
+                    dir="ltr"
+                    // قاعده سراسری input در globals.css بر dir غلبه دارد
+                    style={{ direction: 'ltr', textAlign: 'left' }}
+                    value={slide.altEn}
+                    onChange={(e) => update(i, { altEn: e.target.value })}
+                    placeholder="e.g. Factory yard with stacked corrugated pipes"
+                    className={inputCls}
+                  />
+                  <p className="text-xs text-[var(--muted-foreground)] mt-1">خالی = در سایت انگلیسی همان متن فارسی</p>
+                </div>
               </div>
 
               <div>
@@ -250,6 +284,15 @@ export default function AdminHeroPage() {
         >
           <Plus className="w-4 h-4" />
           افزودن اسلاید
+        </button>
+        <button
+          type="button"
+          onClick={translate}
+          disabled={translating || saving}
+          className="h-11 px-4 rounded-xl border border-[var(--border)] text-sm font-semibold flex items-center gap-2 hover:border-[var(--accent)] transition-colors disabled:opacity-50"
+        >
+          {translating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+          ترجمه خودکار alt انگلیسی
         </button>
         <button
           type="button"

@@ -1,5 +1,6 @@
 import { siteConfig } from '@/shared/config/site';
 import type { SiteSettings } from '@/shared/lib/site-settings';
+import { defaultLocale, localeTag, localizePath, locales, type Locale } from '@/shared/i18n/config';
 
 /** حذف تگ‌های HTML و کوتاه‌سازی برای meta description */
 export function toMetaDescription(input: string | null | undefined, max = 158): string {
@@ -23,10 +24,10 @@ type Crumb = { name: string; path: string };
 
 /**
  * BreadcrumbList — گوگل مسیر صفحه را به جای URL خام در نتایج نشان می‌دهد.
- * همیشه با «خانه» شروع می‌شود.
+ * همیشه با «خانه» شروع می‌شود؛ path ها فارسی‌وار نوشته می‌شوند و این‌جا پیشوند زبان می‌گیرند.
  */
-export function breadcrumbSchema(crumbs: Crumb[]) {
-  const items = [{ name: 'خانه', path: '/' }, ...crumbs];
+export function breadcrumbSchema(crumbs: Crumb[], locale: Locale = defaultLocale) {
+  const items = [{ name: locale === 'fa' ? 'خانه' : 'Home', path: '/' }, ...crumbs];
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -34,7 +35,7 @@ export function breadcrumbSchema(crumbs: Crumb[]) {
       '@type': 'ListItem',
       position: i + 1,
       name: c.name,
-      item: absoluteUrl(c.path),
+      item: absoluteUrl(localizePath(c.path, locale)),
     })),
   };
 }
@@ -56,19 +57,19 @@ export function faqPageSchema(faqs: { question: string; answer: string }[]) {
 }
 
 /** WebSite + SearchAction — شرط لازم برای sitelinks searchbox */
-export function websiteSchema() {
+export function websiteSchema(s: Pick<SiteSettings, 'siteName' | 'locale'>) {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: siteConfig.name,
-    alternateName: siteConfig.nameEn,
-    url: siteConfig.url,
-    inLanguage: 'fa-IR',
+    name: s.siteName,
+    alternateName: s.locale === 'fa' ? siteConfig.nameEn : siteConfig.name,
+    url: absoluteUrl(localizePath('/', s.locale)),
+    inLanguage: localeTag[s.locale],
     potentialAction: {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: `${siteConfig.url}/search?q={search_term_string}`,
+        urlTemplate: `${absoluteUrl(localizePath('/search', s.locale))}?q={search_term_string}`,
       },
       'query-input': 'required name=search_term_string',
     },
@@ -81,24 +82,33 @@ function e164(phone: string) {
   return d.startsWith('98') ? `+${d}` : `+98${d.replace(/^0/, '')}`;
 }
 
-type ContactSettings = Pick<SiteSettings, 'phone' | 'mobile' | 'email' | 'address' | 'companyPhones' | 'factoryAddress' | 'mapUrl'>;
+type ContactSettings = Pick<
+  SiteSettings,
+  'locale' | 'siteName' | 'siteDescription' | 'legalName' | 'phone' | 'mobile' | 'email' | 'address' | 'companyPhones' | 'factoryAddress' | 'mapUrl' | 'whatsappUrl' | 'rubikaUrl'
+>;
+
+/** نام شهر و استان در آدرس پستی schema — به زبان صفحه */
+const PLACE_NAMES: Record<Locale, { officeCity: string; officeRegion: string; factoryCity: string; factoryRegion: string; country: string }> = {
+  fa: { officeCity: siteConfig.office.city, officeRegion: siteConfig.office.region, factoryCity: siteConfig.factory.city, factoryRegion: siteConfig.factory.region, country: siteConfig.serviceArea },
+  en: { officeCity: 'Tehran', officeRegion: 'Tehran', factoryCity: 'Garmsar', factoryRegion: 'Semnan', country: 'Iran' },
+};
 
 const officeAddress = (s: ContactSettings) => ({
   '@type': 'PostalAddress',
   streetAddress: s.address,
-  addressLocality: siteConfig.office.city,
-  addressRegion: siteConfig.office.region,
+  addressLocality: PLACE_NAMES[s.locale].officeCity,
+  addressRegion: PLACE_NAMES[s.locale].officeRegion,
   addressCountry: 'IR',
 });
 
 const factoryPlace = (s: ContactSettings) => ({
   '@type': 'Place',
-  name: `کارخانه ${siteConfig.legalName}`,
+  name: s.locale === 'fa' ? `کارخانه ${s.legalName}` : `${s.legalName} factory`,
   address: {
     '@type': 'PostalAddress',
     streetAddress: s.factoryAddress,
-    addressLocality: siteConfig.factory.city,
-    addressRegion: siteConfig.factory.region,
+    addressLocality: PLACE_NAMES[s.locale].factoryCity,
+    addressRegion: PLACE_NAMES[s.locale].factoryRegion,
     addressCountry: 'IR',
   },
   geo: { '@type': 'GeoCoordinates', latitude: siteConfig.factory.lat, longitude: siteConfig.factory.lng },
@@ -112,13 +122,13 @@ export function organizationSchema(s: ContactSettings) {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     '@id': `${siteConfig.url}/#organization`,
-    name: siteConfig.name,
-    legalName: siteConfig.legalName,
-    alternateName: [siteConfig.nameEn, siteConfig.legalName, siteConfig.legalNameEn],
-    url: siteConfig.url,
+    name: s.siteName,
+    legalName: s.legalName,
+    alternateName: [siteConfig.name, siteConfig.nameEn, siteConfig.legalName, siteConfig.legalNameEn].filter((n) => n !== s.siteName),
+    url: absoluteUrl(localizePath('/', s.locale)),
     logo: absoluteUrl('/images/logo.png'),
     image: absoluteUrl('/images/logo.png'),
-    description: siteConfig.description,
+    description: s.siteDescription,
     email: s.email,
     telephone: phones[0] ?? e164(s.phone),
     address: officeAddress(s),
@@ -129,11 +139,11 @@ export function organizationSchema(s: ContactSettings) {
         telephone,
         contactType: 'sales',
         areaServed: 'IR',
-        availableLanguage: ['fa'],
+        availableLanguage: [...locales],
       })),
       { '@type': 'ContactPoint', telephone: e164(s.mobile), contactType: 'customer service', areaServed: 'IR', availableLanguage: ['fa'] },
     ],
-    sameAs: [s.mapUrl, ...Object.values(siteConfig.socials)].filter(Boolean),
+    sameAs: [s.mapUrl, s.whatsappUrl, s.rubikaUrl].filter(Boolean),
   };
 }
 
@@ -150,12 +160,15 @@ export function localBusinessSchema(s: ContactSettings) {
       {
         '@type': 'HardwareStore',
         '@id': `${siteConfig.url}/#localbusiness`,
-        name: siteConfig.name,
-        url: siteConfig.url,
+        name: s.siteName,
+        url: absoluteUrl(localizePath('/', s.locale)),
         image: absoluteUrl('/images/logo.png'),
         telephone: phones[0] ?? e164(s.phone),
         email: s.email,
-        description: `فروش آنلاین مستقیم از کارخانه ${siteConfig.legalName} — ${siteConfig.description}`,
+        description:
+          s.locale === 'fa'
+            ? `فروش آنلاین مستقیم از کارخانه ${s.legalName} — ${s.siteDescription}`
+            : `Online sales direct from the ${s.legalName} factory — ${s.siteDescription}`,
         address: officeAddress(s),
         priceRange: '$$',
         currenciesAccepted: 'IRR',
@@ -167,17 +180,20 @@ export function localBusinessSchema(s: ContactSettings) {
             closes: '18:00',
           },
         ],
-        areaServed: { '@type': 'Country', name: siteConfig.serviceArea },
+        areaServed: { '@type': 'Country', name: PLACE_NAMES[s.locale].country },
         parentOrganization: { '@id': `${siteConfig.url}/#organization` },
       },
       {
         '@type': 'LocalBusiness',
         '@id': `${siteConfig.url}/#factory`,
         name: factory.name,
-        url: `${siteConfig.url}/contact`,
+        url: absoluteUrl(localizePath('/contact', s.locale)),
         image: absoluteUrl('/images/logo.png'),
         telephone: phones[0] ?? e164(s.phone),
-        description: `کارخانه تولید لوله دوجداره پلی اتیلن و انبار ${siteConfig.legalName}`,
+        description:
+          s.locale === 'fa'
+            ? `کارخانه تولید لوله دوجداره پلی اتیلن و انبار ${s.legalName}`
+            : `${s.legalName} double-wall polyethylene pipe factory and warehouse`,
         address: factory.address,
         geo: factory.geo,
         hasMap: factory.hasMap,

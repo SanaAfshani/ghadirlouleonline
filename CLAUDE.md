@@ -9,13 +9,15 @@
 ```
 src/
   app/
-    (main)/          ← صفحات عمومی سایت
-    admin/           ← پنل ادمین (بدون layout عمومی)
+    [lang]/(main)/   ← صفحات عمومی سایت (fa بدون پیشوند، en زیر /en) — root layout سایت در [lang]/layout.tsx
+    admin/           ← پنل ادمین (root layout جدا، همیشه فارسی)
     api/             ← API Routes (REST)
   features/          ← کامپوننت‌های پیچیده هر بخش
   widgets/           ← ویجت‌های مشترک (Header, Footer, AdminSidebar)
   shared/
-    lib/             ← prisma, auth, data fetching, utils
+    lib/             ← prisma, auth, data fetching, utils, translations (ترجمه محتوای دیتابیس)
+    i18n/            ← زبان‌ها، Link زبان‌دار، defineMessages، قالب‌بندی عدد/تاریخ
+    content/         ← محتوای قابل‌ویرایش صفحات (تعریف بخش‌ها + پیش‌فرض fa/en)
     types/           ← تایپ‌های مشترک TypeScript
     ui/              ← کامپوننت‌های UI پایه (Button, Input, Card, ...)
     hooks/           ← custom hooks
@@ -34,17 +36,27 @@ src/
 | Project | پروژه‌های انجام‌شده |
 | FAQ | سوالات متداول |
 | Testimonial | نظرات مشتریان |
-| SiteSettings | تنظیمات سایت (key/value) |
+| SiteSettings | تنظیمات سایت (key/value)؛ متن‌های چندزبانه نسخه انگلیسی را در `<key>_en` دارند |
+| ContentBlock | محتوای ویرایش‌شده بخش‌های صفحات (`{fa, en}` JSON) — `src/shared/content` |
 | ContactMessage | پیام‌های تماس |
 
 ## نکات مهم فنی
 
-- **Auth:** JWT در cookie به نام `token`. هر API ادمین باید از `verifyToken` در `src/shared/lib/auth.ts` استفاده کند.
+- **دوزبانه (fa/en):** صفحه‌ها واقعاً زیر `/[lang]` هستند؛ `src/proxy.ts` آدرس فارسی بی‌پیشوند را داخلی به `/fa` بازنویسی می‌کند و `/fa/...` را ۳۰۸ به آدرس بی‌پیشوند می‌برد.
+  - لینک داخلی سایت عمومی: `Link` از `@/shared/i18n/Link` (نه `next/link`)، ناوبری: `useLocalizedRouter`. زبان: `resolveLocale(params)` در سرور، `useLocale()` در کلاینت.
+  - متن ثابت رابط (دکمه، برچسب فرم، خطا): `defineMessages({ fa, en })` کنار همان کامپوننت. عدد/تاریخ/قیمت: `digits`، `formatNumber`، `formatDate`، `formatToman` از `@/shared/i18n/format`.
+  - **revalidatePath مستقیم کار نمی‌کند** (مسیر واقعی `/fa/...` است) — همیشه `revalidateLocalized` از `@/shared/i18n/server`.
+  - متادیتا: `localeAlternates(path, locale, translated)` (canonical + hreflang؛ محتوای ترجمه‌نشده در /en noindex می‌شود). JSON-LD های `seo.ts` locale می‌گیرند.
+  - کلاس‌های جهت‌دار فیزیکی (`ml/mr/pl/pr/left/right/text-left/right`) ممنوع؛ منطقی (`ms/me/ps/pe/start/end/text-start`) و فلش «جلو» با `ltr:rotate-180`.
+- **محتوای صفحات از پنل:** هر بخش صفحه در `src/shared/content/pages/<page>.ts` با `defineSection` (فیلدها + متن پیش‌فرض فارسی و انگلیسی) تعریف و در `registry.ts` ثبت می‌شود؛ صفحه با `getSection(def, locale)` می‌خواند و پنل «محتوای صفحات» (`/admin/content`) فرمش را خودکار می‌سازد. عکس و لینک بین دو زبان مشترک‌اند؛ آیتم‌های فهرست `id` ثابت دارند. متن جدید صفحه = بخش جدید، نه متن ثابت در کامپوننت.
+- **ترجمه محتوای دیتابیس:** ستون `translations` (`{"en": {...}}`) روی Category/Product/BlogPost/Project/FAQ/Testimonial/PriceItem؛ خواندن با `localizeRecord` / `localizedSpecs` و ذخیره با `sanitizeTranslations` (`src/shared/lib/translations.ts`). فرم‌های پنل زبانه «English» با دکمه ترجمه خودکار دارند (`/api/admin/translate`، نیاز به `ANTHROPIC_API_KEY`).
+- **نقش‌ها:** تنظیمات، سئو، ریدایرکت و کاربران فقط ADMIN (`requireSuperAdmin`)؛ بقیه API های ادمین `requireAdmin`. کوکی `admin_token` httpOnly است.
+- **Auth:** JWT در cookie httpOnly به نام `admin_token` (امضا در proxy هم بررسی می‌شود). هر API ادمین باید از `requireAdmin` / `requireSuperAdmin` در `src/shared/lib/admin-auth.ts` استفاده کند.
 - **دیتابیس:** PostgreSQL (محلی از طریق `DATABASE_URL` در `.env`).  
-  برای اعمال تغییر schema: `npx prisma db push` یا `npx prisma migrate dev`.
+  برای اعمال تغییر schema: `npx prisma db push` یا `npx prisma migrate dev`. دیپلوی Runflare migrate اجرا نمی‌کند: هر مایگریشن جدید را idempotent در `src/shared/lib/ensure-schema.ts` هم بگذارید.
 - **آپلود فایل:** فایل‌های آپلودی در `public/uploads/` ذخیره می‌شوند و از مسیر `/uploads/...` قابل دسترسی هستند.
 - **تصاویر:** Next.js Image با `fill` و `object-cover` برای تصاویر پوشش.
-- **RTL:** سایت فارسی و RTL است. در فرم‌ها `dir="ltr"` فقط برای فیلدهای slug/url.
+- **RTL/LTR:** جهت از `dir` تگ html می‌آید (fa: rtl، en: ltr) و globals.css جهت ثابت ندارد. در فرم‌ها `dir="ltr"` فقط برای فیلدهای slug/url/شماره (در صفحه فارسی راست‌چین می‌ماند؛ `text-left` یعنی عمداً چپ‌چین).
 - **رنگ accent:** `var(--accent)` = amber-500، استایل دارک با کلاس‌های `slate-*`.
 
 ## دستورات مفید
@@ -70,4 +82,5 @@ npm run db:seed      # seed داده‌های اولیه
 - [x] کاتالوگ فقط سه محصول (مثل دیجی‌کالا، هر سایز یک صفحه): لوله کاروگیت ۱۱۰ تا ۱۲۰۰ (بدون ۹۰۰، کلاس SN4/SN8 — SN16 نداریم)، لوله اسپیرال ۹۰۰ تا ۲۰۰۰ و اتصالات کاروگیت (هر نوع یک صفحه). فهرست سایزها/انواع: `src/shared/config/product-lines.ts` و `pipe-dimensions.ts`؛ ساخت صفحه‌ها و منتشرنکردن بقیه با ریدایرکت: `scripts/restructure-catalog.ts` (پیش‌فرض آزمایشی، `--apply`). قیمت روز هر کیلو روی همه محصولات هم‌دسته اعمال می‌شود و تابلوی قیمت برای هر دسته یک جدول دارد (`groupLinesByCategory`)
 - [x] صفحه «کارخانه و توانمندی تأمین» (`/factory`): فیلم‌های خط تولید و عکس‌های انبار/بارگیری/اتصالات جدا از هم، فهرست در `src/shared/config/factory-media.ts` (فایل‌ها در `public/images/factory` و `public/videos/factory`، با واترمارک)؛ افزودن همین عکس‌ها به گالری محصولات: `scripts/add-factory-photos.ts`
 - [x] صفحه پیام رسمی نمایندگی (`/official-representative`): متن رسمی قدیر لوله پاسارگاد عیناً + گواهی نمایندگی؛ «تنها نماینده انحصاری» در هدر/هیرو/فوتر به آن لینک می‌دهد. سایت رسمی کارخانه `siteConfig.manufacturerUrl` (بک‌لینک فالو در فوتر و schema)
+- [x] سایت دوزبانه فارسی/انگلیسی (`/en`) با سوییچ زبان در هدر، hreflang و sitemap دوزبانه؛ همه متن‌ها و عکس‌های صفحات ثابت از پنل «محتوای صفحات» قابل ویرایش (فارسی و انگلیسی) و ترجمه خودکار در پنل
 - رنگ پیش‌فرض تم: «آبی صنعتی» (preset `water`)؛ رنگ ذخیره‌شده در پنل (`theme_color`) روی آن می‌نشیند

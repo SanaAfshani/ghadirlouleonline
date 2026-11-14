@@ -4,10 +4,18 @@ import { useState } from 'react';
 import { m as motion } from 'framer-motion';
 import { ChevronDown, HelpCircle } from 'lucide-react';
 import type { FaqItem } from '@/shared/types';
+import { useMessages } from '@/shared/i18n/LocaleProvider';
+import { defineMessages } from '@/shared/i18n/messages';
+
+const messages = defineMessages({
+  fa: { title: 'سوالات متداول' },
+  en: { title: 'Frequently asked questions' },
+});
 
 /** آکاردئون سوالات متداول برای انتهای صفحه مقاله یا محصول */
 export function FaqAccordion({ faqs }: { faqs: FaqItem[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const t = useMessages(messages);
 
   if (!faqs.length) return null;
 
@@ -15,7 +23,7 @@ export function FaqAccordion({ faqs }: { faqs: FaqItem[] }) {
     <section className="mt-12 pt-8 border-t border-[var(--border)]">
       <h2 className="flex items-center gap-2.5 text-xl sm:text-2xl font-black text-[var(--foreground)] mb-6">
         <HelpCircle className="w-6 h-6 text-[var(--accent-text)]" />
-        سوالات متداول
+        {t.title}
       </h2>
 
       <div className="space-y-3">
@@ -30,7 +38,7 @@ export function FaqAccordion({ faqs }: { faqs: FaqItem[] }) {
                 type="button"
                 onClick={() => setOpenIndex(isOpen ? null : i)}
                 aria-expanded={isOpen}
-                className="w-full flex items-center justify-between gap-4 p-5 text-right"
+                className="w-full flex items-center justify-between gap-4 p-5 text-start"
               >
                 <span className="font-semibold text-[var(--foreground)]">{faq.question}</span>
                 <motion.div

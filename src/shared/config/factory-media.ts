@@ -1,10 +1,14 @@
 /**
  * عکس‌ها و فیلم‌های واقعی کارخانه برای صفحه «کارخانه و توانمندی تأمین» (/factory).
+ * این فهرست فقط پیش‌فرض بخش‌های «فیلم‌ها» و «عکس‌ها» در پنل محتواست (shared/content/pages/factory.ts)؛
+ * صفحه مقدار پنل را نمایش می‌دهد.
  *
  * فایل‌ها در public/ هستند: عکس‌ها با واترمارک سایت و WebP (حداکثر ۱۶۰۰ پیکسل)، فیلم‌ها ۷۲۰p بی‌صدا
  * با واترمارک و faststart، و برای هر فیلم یک پوستر WebP هم‌نام. عکس و فیلم جدا نگه داشته می‌شوند
  * و عکس‌ها بر اساس موضوع گروه‌بندی شده‌اند.
  */
+
+import { latinDigits } from '@/shared/lib/utils';
 
 export type FactoryPhoto = { src: string; alt: string; width: number; height: number };
 export type FactoryPhotoGroup = { id: string; title: string; description: string; photos: FactoryPhoto[] };
@@ -94,3 +98,9 @@ export const FACTORY_VIDEOS: FactoryVideo[] = [
   video(10, 'میز انتقال و برش لوله', 25),
   video(1, 'آماده‌سازی سر لوله برای اتصال', 30),
 ];
+
+/** مدت فیلم از پنل (ثانیه، با رقم فارسی یا لاتین)؛ مقدار نامعتبر = بدون مدت */
+export function videoSeconds(value: string): number {
+  const seconds = Number(latinDigits(value.trim()));
+  return Number.isInteger(seconds) && seconds > 0 ? seconds : 0;
+}

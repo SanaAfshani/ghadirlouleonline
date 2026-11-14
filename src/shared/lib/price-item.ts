@@ -1,4 +1,5 @@
 import { latinDigits } from '@/shared/lib/utils';
+import { defaultLocale, type Locale } from '@/shared/i18n/config';
 
 /** مشخصات جدای یک ردیف قیمت — توابع خالص، قابل استفاده در سرور و کلاینت */
 
@@ -14,6 +15,29 @@ export function toGrade(value: unknown): Grade | '' {
   return GRADES.find((g) => g === v) ?? '';
 }
 
+/** برچسب انگلیسی کلاس‌ها — مقدار ذخیره‌شده، فیلتر و مرتب‌سازی همان فارسی GRADES می‌ماند */
+const GRADE_LABELS_EN: Record<Grade, string> = { سبک: 'Light', 'نیمه‌سنگین': 'Medium', سنگین: 'Heavy' };
+
+/** نام نمایشی کلاس به زبان صفحه («سبک» → «Light») */
+export function gradeLabel(grade: string, locale: Locale) {
+  if (locale === defaultLocale) return grade;
+  return GRADE_LABELS_EN[grade as Grade] ?? grade;
+}
+
+/**
+ * سایز و ابعاد ترجمه ندارند (عدد + واحد فارسی)؛ در انگلیسی فقط ارقام لاتین و واحد کوتاه می‌شوند:
+ * «۱۶۰ میلیمتر (۶ اینچ)» → «160 mm (6 in)»
+ */
+export function unitsLabel(value: string, locale: Locale) {
+  if (locale === defaultLocale || !value) return value;
+  return latinDigits(value)
+    .replace(/میلی[\s\u200c]?متر/g, 'mm')
+    .replace(/سانتی[\s\u200c]?متر/g, 'cm')
+    .replace(/اینچ/g, 'in')
+    .replace(/متر/g, 'm')
+    .replace(/،/g, ',');
+}
+
 /** رتبه کلاس برای مرتب‌سازی — بدون کلاس آخر */
 export function gradeRank(grade: string) {
   const i = GRADES.indexOf(grade as Grade);
@@ -26,10 +50,13 @@ export function sizeValue(size: string) {
   return m ? Number(m[0].replace(/[٫/]/g, '.')) : Number.POSITIVE_INFINITY;
 }
 
-/** نام کامل ردیف برای پیش‌فاکتور، نمودار، استعلام و خروجی اکسل: «لوله کاروگیت ۱۶۰ میلیمتر · سبک · SN4» */
-export function itemLabel(i: ItemSpecs) {
-  const head = [i.title, i.size].filter(Boolean).join(' ');
-  return [head, i.grade, i.spec, i.dimensions].filter(Boolean).join(' · ');
+/**
+ * نام کامل ردیف برای پیش‌فاکتور، نمودار، استعلام و خروجی اکسل: «لوله کاروگیت ۱۶۰ میلیمتر · سبک · SN4».
+ * سند پیش‌فاکتور (API) همیشه فارسی است؛ locale فقط برای نمایش در نسخه انگلیسی سایت است.
+ */
+export function itemLabel(i: ItemSpecs, locale: Locale = defaultLocale) {
+  const head = [i.title, unitsLabel(i.size, locale)].filter(Boolean).join(' ');
+  return [head, gradeLabel(i.grade, locale), i.spec, unitsLabel(i.dimensions, locale)].filter(Boolean).join(' · ');
 }
 
 export type SortKey = 'default' | 'size' | 'grade' | 'price';

@@ -4,6 +4,8 @@
  * همه محاسبات با ساعت تهران است، چون سرور معمولاً روی UTC اجرا می‌شود.
  */
 
+import { defaultLocale, type Locale } from '@/shared/i18n/config';
+
 export type MarketMode = 'auto' | 'open' | 'closed';
 /** کلید: روز هفته جاوااسکریپت (۰=یکشنبه … ۶=شنبه)؛ مقدار: [باز، بسته] به صورت «HH:MM» */
 export type MarketSchedule = Partial<Record<'0' | '1' | '2' | '3' | '4' | '5' | '6', [string, string]>>;
@@ -98,6 +100,20 @@ export function getMarketStatus(config: MarketConfig, now = new Date()): MarketS
     };
   }
   return { open: false, mode: 'auto', nextChangeAt: null, nextChangeLabel: null, nextOpenDay: null };
+}
+
+const DAY_NAMES_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+/**
+ * nextOpenDay به زبان صفحه. وضعیت بازار یک‌بار روی سرور و به فارسی ساخته می‌شود (پنل ادمین هم همان را می‌خواند)؛
+ * نسخه انگلیسی سایت فقط برچسب را برمی‌گرداند.
+ */
+export function openDayLabel(day: string, locale: Locale) {
+  if (locale === defaultLocale) return day;
+  if (day === 'امروز') return 'today';
+  if (day === 'فردا') return 'tomorrow';
+  const i = DAY_NAMES.indexOf(day);
+  return i < 0 ? day : DAY_NAMES_EN[i];
 }
 
 export const WEEK_ORDER = ['6', '0', '1', '2', '3', '4', '5'] as const;

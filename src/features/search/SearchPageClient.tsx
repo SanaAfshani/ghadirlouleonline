@@ -3,11 +3,49 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { m as motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
 import { Search, Package, FileText, Building2, ArrowLeft, TrendingUp, Loader2 } from 'lucide-react';
 import { SearchInput } from '@/shared/ui/SearchInput';
+import { Link } from '@/shared/i18n/Link';
+import { useLocale, useMessages } from '@/shared/i18n/LocaleProvider';
+import { digits } from '@/shared/i18n/format';
+import { defineMessages, fill } from '@/shared/i18n/messages';
+import type { ContentOf } from '@/shared/content/types';
+import type { searchHero } from '@/shared/content/pages/search';
 
-const suggestions = ['لوله کاروگیت', 'کاروگیت ۴۰۰', 'لوله اسپیرال', 'کوپلر', 'واشر', 'اتصالات'];
+const messages = defineMessages({
+  fa: {
+    placeholder: 'جستجو در محصولات، مقالات و پروژه‌ها...',
+    popular: 'جستجوهای پرطرفدار:',
+    searching: 'در حال جستجو...',
+    loading: 'در حال بارگذاری...',
+    noResults: 'نتیجه‌ای یافت نشد',
+    noResultsFor: 'برای «{q}» نتیجه‌ای پیدا نکردیم.',
+    allProducts: 'مشاهده همه محصولات',
+    resultsFor: 'نتیجه برای «{q}»',
+    products: 'محصولات ({n})',
+    posts: 'مقالات ({n})',
+    projects: 'پروژه‌ها ({n})',
+  },
+  en: {
+    placeholder: 'Search products, articles and projects...',
+    popular: 'Popular searches:',
+    searching: 'Searching...',
+    loading: 'Loading...',
+    noResults: 'No results found',
+    noResultsFor: 'We could not find anything for “{q}”.',
+    allProducts: 'View all products',
+    resultsFor: 'results for “{q}”',
+    products: 'Products ({n})',
+    posts: 'Articles ({n})',
+    projects: 'Projects ({n})',
+  },
+});
+
+type Props = {
+  hero: ContentOf<typeof searchHero>;
+  /** جستجوهای پرطرفدار از پنل «محتوای صفحات ← جستجو» */
+  suggestions: string[];
+};
 
 type SearchProduct = {
   id: string;
@@ -30,7 +68,9 @@ type SearchProject = {
   description: string;
 };
 
-function SearchResultsInner() {
+function SearchResultsInner({ hero, suggestions }: Props) {
+  const locale = useLocale();
+  const t = useMessages(messages);
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
   const [query, setQuery] = useState(initialQuery);
@@ -55,7 +95,8 @@ function SearchResultsInner() {
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+        // نام و عنوان نتایج به زبان صفحه برگردانده می‌شود
+        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&locale=${locale}`);
         const json = await res.json();
         if (json.success) {
           setProducts(json.data.products);
@@ -70,7 +111,7 @@ function SearchResultsInner() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, locale]);
 
   const total = products.length + posts.length + projects.length;
 
@@ -79,16 +120,16 @@ function SearchResultsInner() {
       <SearchInput
         value={query}
         onValueChange={setQuery}
-        placeholder="جستجو در محصولات، مقالات و پروژه‌ها..."
+        placeholder={t.placeholder}
         wrapperClassName="mb-8 max-w-2xl"
         className="h-12 text-base"
         autoFocus={!initialQuery}
       />
 
       <div className="flex flex-wrap gap-2 mb-8">
-        <span className="flex items-center gap-1 text-xs text-[var(--muted-foreground)] ml-1 self-center">
+        <span className="flex items-center gap-1 text-xs text-[var(--muted-foreground)] me-1 self-center">
           <TrendingUp className="w-3.5 h-3.5" />
-          جستجوهای پرطرفدار:
+          {t.popular}
         </span>
         {suggestions.map((term) => (
           <button
@@ -109,7 +150,7 @@ function SearchResultsInner() {
       {loading && (
         <div className="flex items-center justify-center gap-2 py-12 text-[var(--muted-foreground)]">
           <Loader2 className="w-5 h-5 animate-spin" />
-          در حال جستجو...
+          {t.searching}
         </div>
       )}
 
@@ -119,32 +160,32 @@ function SearchResultsInner() {
             <div className="w-20 h-20 rounded-full bg-[var(--muted)] flex items-center justify-center mx-auto mb-5">
               <Search className="w-8 h-8 text-[var(--muted-foreground)]" />
             </div>
-            <p className="text-[var(--foreground)] font-semibold text-lg mb-2">دنبال چه محصولی می‌گردید؟</p>
-            <p className="text-[var(--muted-foreground)] text-sm">عبارت جستجو را وارد کنید یا یکی از پیشنهادها را انتخاب کنید</p>
+            <p className="text-[var(--foreground)] font-semibold text-lg mb-2">{hero.emptyTitle}</p>
+            <p className="text-[var(--muted-foreground)] text-sm">{hero.emptyText}</p>
           </motion.div>
         ) : !loading && total === 0 ? (
           <motion.div key="no-result" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-20">
             <div className="w-20 h-20 rounded-full bg-[var(--muted)] flex items-center justify-center mx-auto mb-5">
               <Search className="w-8 h-8 text-[var(--muted-foreground)]" />
             </div>
-            <p className="text-[var(--foreground)] font-semibold text-lg mb-1">نتیجه‌ای یافت نشد</p>
-            <p className="text-[var(--muted-foreground)] text-sm">برای «{query}» نتیجه‌ای پیدا نکردیم.</p>
+            <p className="text-[var(--foreground)] font-semibold text-lg mb-1">{t.noResults}</p>
+            <p className="text-[var(--muted-foreground)] text-sm">{fill(t.noResultsFor, { q: query })}</p>
             <Link href="/products" className="inline-flex items-center gap-2 mt-6 h-10 px-6 rounded-xl bg-[var(--accent)] text-[var(--accent-foreground)] text-sm font-semibold">
-              مشاهده همه محصولات
-              <ArrowLeft className="w-4 h-4" />
+              {t.allProducts}
+              <ArrowLeft className="w-4 h-4 ltr:rotate-180" />
             </Link>
           </motion.div>
         ) : !loading ? (
           <motion.div key="results" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-10">
             <p className="text-sm text-[var(--muted-foreground)]">
-              <span className="font-semibold text-[var(--foreground)]">{total}</span> نتیجه برای «{query}»
+              <span className="font-semibold text-[var(--foreground)]">{digits(total, locale)}</span> {fill(t.resultsFor, { q: query })}
             </p>
 
             {products.length > 0 && (
               <section>
                 <h2 className="flex items-center gap-2 font-bold text-lg mb-4">
                   <Package className="w-4 h-4 text-[var(--accent-text)]" />
-                  محصولات ({products.length})
+                  {fill(t.products, { n: digits(products.length, locale) })}
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {products.map((p) => (
@@ -168,7 +209,7 @@ function SearchResultsInner() {
               <section>
                 <h2 className="flex items-center gap-2 font-bold text-lg mb-4">
                   <FileText className="w-4 h-4 text-blue-400" />
-                  مقالات ({posts.length})
+                  {fill(t.posts, { n: digits(posts.length, locale) })}
                 </h2>
                 <div className="space-y-2.5">
                   {posts.map((p) => (
@@ -181,7 +222,7 @@ function SearchResultsInner() {
                         <h3 className="font-semibold text-sm group-hover:text-[var(--accent-text)] truncate">{p.title}</h3>
                         <p className="text-xs text-[var(--muted-foreground)] line-clamp-1">{p.excerpt}</p>
                       </div>
-                      <ArrowLeft className="w-4 h-4 flex-shrink-0 text-[var(--muted-foreground)]" />
+                      <ArrowLeft className="w-4 h-4 flex-shrink-0 text-[var(--muted-foreground)] ltr:rotate-180" />
                     </Link>
                   ))}
                 </div>
@@ -192,7 +233,7 @@ function SearchResultsInner() {
               <section>
                 <h2 className="flex items-center gap-2 font-bold text-lg mb-4">
                   <Building2 className="w-4 h-4 text-teal-400" />
-                  پروژه‌ها ({projects.length})
+                  {fill(t.projects, { n: digits(projects.length, locale) })}
                 </h2>
                 <div className="space-y-2.5">
                   {projects.map((p) => (
@@ -205,7 +246,7 @@ function SearchResultsInner() {
                         <h3 className="font-semibold text-sm group-hover:text-[var(--accent-text)] truncate">{p.title}</h3>
                         <p className="text-xs text-[var(--muted-foreground)] line-clamp-1">{p.description}</p>
                       </div>
-                      <ArrowLeft className="w-4 h-4 flex-shrink-0" />
+                      <ArrowLeft className="w-4 h-4 flex-shrink-0 ltr:rotate-180" />
                     </Link>
                   ))}
                 </div>
@@ -218,17 +259,18 @@ function SearchResultsInner() {
   );
 }
 
-export function SearchPageClient() {
+export function SearchPageClient(props: Props) {
+  const t = useMessages(messages);
   return (
     <Suspense
       fallback={
         <div className="container-main py-16 text-center text-[var(--muted-foreground)]">
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3" />
-          در حال بارگذاری...
+          {t.loading}
         </div>
       }
     >
-      <SearchResultsInner />
+      <SearchResultsInner {...props} />
     </Suspense>
   );
 }

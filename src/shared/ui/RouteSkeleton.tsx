@@ -3,9 +3,18 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { SkeletonArticle, SkeletonGridPage, SkeletonHome, SkeletonProductPage, SkeletonTextPage } from './Skeleton';
+import { useMessages } from '@/shared/i18n/LocaleProvider';
+import { defineMessages } from '@/shared/i18n/messages';
+import { splitLocalePath } from '@/shared/i18n/config';
 
-/** شکل اسکلت بر اساس مسیر مقصد */
-function pick(path: string) {
+const messages = defineMessages({
+  fa: { loading: 'در حال بارگذاری صفحه' },
+  en: { loading: 'Loading page' },
+});
+
+/** شکل اسکلت بر اساس مسیر مقصد (بدون پیشوند /en) */
+function pick(target: string) {
+  const { path } = splitLocalePath(target);
   if (path === '/') return <SkeletonHome />;
   if (/^\/products\/[^/]+\/[^/]+/.test(path)) return <SkeletonProductPage />;
   if (/^\/(blog|projects)\/[^/]+/.test(path)) return <SkeletonArticle />;
@@ -24,6 +33,7 @@ export function RouteSkeleton() {
   const [target, setTarget] = useState<string | null>(null);
   const [shown, setShown] = useState(false);
   const [from, setFrom] = useState(pathname);
+  const t = useMessages(messages);
 
   // صفحه جدید رسید — اسکلت جمع شود
   if (pathname !== from) {
@@ -64,7 +74,7 @@ export function RouteSkeleton() {
 
   if (!target || !shown) return null;
   return (
-    <div role="status" aria-label="در حال بارگذاری صفحه" className="fixed inset-x-0 top-[var(--nav-height)] bottom-0 z-30 overflow-hidden bg-[var(--background)] animate-[fade-in_0.2s_ease-out_both]">
+    <div role="status" aria-label={t.loading} className="fixed inset-x-0 top-[var(--nav-height)] bottom-0 z-30 overflow-hidden bg-[var(--background)] animate-[fade-in_0.2s_ease-out_both]">
       {pick(target)}
     </div>
   );

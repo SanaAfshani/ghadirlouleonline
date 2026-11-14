@@ -1,25 +1,35 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { m as motion } from 'framer-motion';
 import { Headphones, Home, LayoutGrid, Phone, Tag } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { useSiteSettings } from '@/shared/providers/SiteSettingsProvider';
 import { useConsult } from '@/features/consult/ConsultProvider';
+import { Link } from '@/shared/i18n/Link';
+import { useMessages } from '@/shared/i18n/LocaleProvider';
+import { defineMessages } from '@/shared/i18n/messages';
+import { splitLocalePath } from '@/shared/i18n/config';
+
+const messages = defineMessages({
+  fa: { nav: 'ناوبری پایین', home: 'خانه', products: 'محصولات', prices: 'قیمت روز', call: 'تماس تلفنی', consultLabel: 'درخواست مشاوره', consult: 'مشاوره' },
+  en: { nav: 'Bottom navigation', home: 'Home', products: 'Products', prices: 'Prices', call: 'Call us', consultLabel: 'Request a consultation', consult: 'Advice' },
+});
 
 const ITEMS = [
-  { href: '/', label: 'خانه', icon: Home },
-  { href: '/products', label: 'محصولات', icon: LayoutGrid },
+  { href: '/', label: 'home', icon: Home },
+  { href: '/products', label: 'products', icon: LayoutGrid },
   null, // جای دکمه تماس وسط
-  { href: '/prices', label: 'قیمت روز', icon: Tag },
+  { href: '/prices', label: 'prices', icon: Tag },
 ] as const;
 
 /** صفحه جزئیات محصول نوار اقدام مخصوص خودش (تماس، واتس‌اپ، مشاوره) را دارد */
 const PRODUCT_DETAIL = /^\/products\/[^/]+\/[^/]+/;
 
 export function MobileBottomNav() {
-  const pathname = usePathname();
+  // مسیر بدون پیشوند /en
+  const { path: pathname } = splitLocalePath(usePathname());
+  const t = useMessages(messages);
   const { phoneHref } = useSiteSettings();
   const { open } = useConsult();
 
@@ -29,7 +39,7 @@ export function MobileBottomNav() {
 
   return (
     <nav
-      aria-label="ناوبری پایین"
+      aria-label={t.nav}
       className="lg:hidden fixed inset-x-0 bottom-0 z-40 bg-[var(--ink)] border-t border-white/10 pb-[env(safe-area-inset-bottom)] print:hidden"
     >
       <div className="relative mx-auto max-w-md h-[64px] grid grid-cols-5 items-stretch">
@@ -38,7 +48,7 @@ export function MobileBottomNav() {
             <div key="call" className="flex justify-center items-start">
               <a
                 href={phoneHref}
-                aria-label="تماس تلفنی"
+                aria-label={t.call}
                 className="-mt-5 grid place-items-center w-[54px] h-[54px] rounded-xl bg-[var(--accent)] text-[var(--accent-foreground)] shadow-accent ring-4 ring-[var(--ink)] active:scale-95 transition-transform"
               >
                 <Phone className="w-6 h-6" />
@@ -50,13 +60,13 @@ export function MobileBottomNav() {
                 <motion.span layoutId="bottom-nav-active" className="absolute top-0 inset-x-4 h-[3px] bg-[var(--accent)]" transition={{ type: 'spring', damping: 26, stiffness: 380 }} />
               )}
               <item.icon className={cn('w-[22px] h-[22px]', active(item.href) ? 'text-[var(--accent-text)]' : 'text-slate-400')} />
-              <span className={cn('text-[10.5px] font-bold', active(item.href) ? 'text-white' : 'text-slate-400')}>{item.label}</span>
+              <span className={cn('text-[10.5px] font-bold', active(item.href) ? 'text-white' : 'text-slate-400')}>{t[item.label]}</span>
             </Link>
           ),
         )}
-        <button onClick={() => open()} className="flex flex-col items-center justify-center gap-1" aria-label="درخواست مشاوره">
+        <button onClick={() => open()} className="flex flex-col items-center justify-center gap-1" aria-label={t.consultLabel}>
           <Headphones className="w-[22px] h-[22px] text-slate-400" />
-          <span className="text-[10.5px] font-bold text-slate-400">مشاوره</span>
+          <span className="text-[10.5px] font-bold text-slate-400">{t.consult}</span>
         </button>
       </div>
     </nav>

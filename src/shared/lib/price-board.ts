@@ -5,6 +5,8 @@ import { getMarketStatus, parseMarketConfig, type MarketStatus } from '@/shared/
 import type { PriceBoard } from '@/shared/lib/price-board-types';
 import { categoryRank, productRank } from '@/shared/lib/catalog';
 import { siteConfig } from '@/shared/config/site';
+import { localizeRecord } from '@/shared/lib/translations';
+import { defaultLocale, type Locale } from '@/shared/i18n/config';
 
 export * from '@/shared/lib/price-board-types';
 
@@ -30,7 +32,8 @@ export async function getBoardVersion(): Promise<string> {
   return `${agg._max.updatedAt?.getTime() ?? 0}.${agg._count._all}.${market.open ? 1 : 0}.${market.mode}`;
 }
 
-export const getPriceBoard = cache(async (): Promise<PriceBoard> => {
+/** تابلو به زبان صفحه: نام دسته/محصول و عنوان، مشخصات و توضیح ردیف از ستون translations؛ ترجمه‌نشده فارسی می‌ماند */
+export const getPriceBoard = cache(async (locale: Locale = defaultLocale): Promise<PriceBoard> => {
   const [market, products, version] = await Promise.all([
     getMarketNow(),
     prisma.product.findMany({
@@ -46,7 +49,8 @@ export const getPriceBoard = cache(async (): Promise<PriceBoard> => {
         id: true,
         slug: true,
         name: true,
-        category: { select: { slug: true, name: true, order: true } },
+        translations: true,
+        category: { select: { slug: true, name: true, order: true, translations: true } },
         priceItems: { orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] },
       },
     }),
@@ -54,16 +58,17 @@ export const getPriceBoard = cache(async (): Promise<PriceBoard> => {
   ]);
 
   const now = Date.now();
+  // مرتب‌سازی با نام فارسی (پیش از ترجمه) تا ترتیب تابلو در هر دو زبان یکی باشد
   const lines = products
     .sort((a, b) => categoryRank(a.category.slug) - categoryRank(b.category.slug) || a.category.order - b.category.order || productRank(a.slug) - productRank(b.slug) || a.name.localeCompare(b.name, 'fa'))
     .map((p) => ({
       productId: p.id,
       productSlug: p.slug,
-      productName: p.name,
+      productName: localizeRecord(p, locale, 'name').name,
       categorySlug: p.category.slug,
-      categoryName: p.category.name,
+      categoryName: localizeRecord(p.category, locale, 'name').name,
       href: `/products/${p.category.slug}/${p.slug}`,
-      items: p.priceItems.map((i) => ({
+      items: p.priceItems.map((raw) => localizeRecord(raw, locale, 'title')).map((i) => ({
         id: i.id,
         title: i.title,
         size: i.size,
@@ -88,5 +93,5 @@ export const getPriceBoard = cache(async (): Promise<PriceBoard> => {
       })),
     }));
 
-  return { market, version, lines };
+  return { market, version, locale, lines };
 });

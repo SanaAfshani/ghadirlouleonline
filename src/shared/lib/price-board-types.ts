@@ -1,4 +1,5 @@
 import type { MarketStatus } from '@/shared/lib/market';
+import type { Locale } from '@/shared/i18n/config';
 
 /** تایپ‌ها و توابع خالص تابلوی قیمت — بدون وابستگی سرور، قابل import در کامپوننت‌های کلاینت */
 
@@ -33,6 +34,8 @@ export type PriceBoard = {
   market: MarketStatus;
   /** با هر تغییر قیمت یا باز/بسته شدن بازار عوض می‌شود — کلاینت فقط وقتی عوض شد داده کامل می‌گیرد */
   version: string;
+  /** زبان نام‌ها و عنوان ردیف‌ها — polling کلاینت همین زبان را از API می‌خواهد */
+  locale: Locale;
   lines: PriceLine[];
 };
 
