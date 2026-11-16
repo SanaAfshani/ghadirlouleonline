@@ -14,7 +14,7 @@ import { ImageUploader } from '@/shared/ui/ImageUploader';
 import { HtmlContentEditor } from '@/features/admin/editor/HtmlContentEditor';
 import { TranslationEditor, type EnglishTranslations } from '@/features/admin/translations/TranslationEditor';
 import { LocaleTabs, isUntranslated } from '@/features/admin/translations/LocaleTabs';
-import { CATEGORY_TRANSLATION_FIELDS } from '@/features/admin/translations/fields';
+import { CATEGORY_TRANSLATION_FIELDS } from '@/shared/lib/translation-fields';
 
 type CategoryRow = Category & { _count?: { products: number } };
 

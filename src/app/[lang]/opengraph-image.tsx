@@ -1,16 +1,22 @@
 import { ImageResponse } from 'next/og';
-import { siteConfig } from '@/shared/config/site';
 import { getSiteSettingsMap } from '@/shared/lib/data';
 import { mergeSiteSettings } from '@/shared/lib/site-settings';
 import { resolveLocale } from '@/shared/i18n/server';
+import { defaultLocale, isLocale } from '@/shared/i18n/config';
 import { defineMessages } from '@/shared/i18n/messages';
+import { OG_IMAGE_ID, OG_IMAGE_SIZE, ogImageAlt } from '@/shared/lib/og-image';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-// alt ثابت فایل است (پارامتر زبان نمی‌گیرد) — generateImageMetadata آدرس تصویر را عوض می‌کرد
-export const alt =`${siteConfig.name} | تامین کننده لوله و اتصالات صنعتی`;
-export const size = { width: 1200, height: 630 };
-export const contentType = 'image/png';
+
+/** alt ثابتِ فایل زبان نمی‌شناسد؛ با generateImageMetadata هر زبان alt خودش را دارد (آدرس: /opengraph-image/card) */
+export async function generateImageMetadata({ params }: { params: Promise<{ lang?: string }> | { lang?: string } | undefined }) {
+  // Next این را برای فهرست id ها (generateStaticParams) بدون lang هم صدا می‌زند؛ آن‌جا alt اهمیتی ندارد
+  const lang = (await params)?.lang;
+  const locale = isLocale(lang) ? lang : defaultLocale;
+  const { siteName } = mergeSiteSettings(await getSiteSettingsMap(), locale);
+  return [{ id: OG_IMAGE_ID, alt: ogImageAlt(siteName, locale), size: OG_IMAGE_SIZE, contentType: 'image/png' }];
+}
 
 /** فونت فارسی برای رندر تصویر — بدون آن متن فارسی به صورت مربع نمایش داده می‌شود */
 async function loadVazirmatn(): Promise<ArrayBuffer | null> {
@@ -94,7 +100,7 @@ export default async function OpengraphImage({ params }: { params: Promise<{ lan
       </div>
     ),
     {
-      ...size,
+      ...OG_IMAGE_SIZE,
       ...(font
         ? { fonts: [{ name: 'Vazirmatn', data: font, style: 'normal' as const, weight: 700 as const }] }
         : {}),

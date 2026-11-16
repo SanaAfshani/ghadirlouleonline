@@ -202,7 +202,7 @@ export default function AdminSettingsPage() {
     }
 
     const nextValues = Object.fromEntries(TEXT_KEYS.map((key) => [key, values[key].trim()]));
-    const nextBadges = badges.map((b) => ({ name: b.name.trim(), image: b.image, href: b.href.trim() }));
+    const nextBadges = badges.map((b) => ({ name: b.name.trim(), nameEn: b.nameEn?.trim() ?? '', image: b.image, href: b.href.trim() }));
     const payload: Values = Object.fromEntries(changedKeys.map((key) => [key, nextValues[key]]));
     if (badgesChanged) payload.trust_badges = JSON.stringify(nextBadges);
 
@@ -327,6 +327,10 @@ export default function AdminSettingsPage() {
                 <div>
                   <label className="block text-xs font-bold text-[var(--muted-foreground)] mb-1.5">نام نماد</label>
                   <TextInput value={badge.name} onChange={(name) => updateBadge(i, { name })} placeholder="مثلاً: نماد اعتماد الکترونیکی" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[var(--muted-foreground)] mb-1.5">نام انگلیسی</label>
+                  <TextInput value={badge.nameEn ?? ''} onChange={(nameEn) => updateBadge(i, { nameEn })} placeholder="e.g. eNamad trust seal" ltr />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-[var(--muted-foreground)] mb-1.5">لینک استعلام</label>

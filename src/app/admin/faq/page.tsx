@@ -11,7 +11,7 @@ import { translationsFor } from '@/shared/lib/translations';
 import type { Locale } from '@/shared/i18n/config';
 import { TranslationEditor, type EnglishTranslations } from '@/features/admin/translations/TranslationEditor';
 import { LocaleTabs, isUntranslated } from '@/features/admin/translations/LocaleTabs';
-import { FAQ_TRANSLATION_FIELDS } from '@/features/admin/translations/fields';
+import { FAQ_TRANSLATION_FIELDS } from '@/shared/lib/translation-fields';
 
 type FaqForm = {
   question: string;

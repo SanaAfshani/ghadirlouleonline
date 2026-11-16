@@ -8,7 +8,7 @@ import { siteConfig } from '@/shared/config/site';
 import { JsonLd } from '@/shared/ui/JsonLd';
 import { absoluteUrl, breadcrumbSchema, faqPageSchema, toMetaDescription } from '@/shared/lib/seo';
 import { stripHtml } from '@/shared/lib/utils';
-import { localeTag, localizePath } from '@/shared/i18n/config';
+import { localeTag, localizePath, type Locale } from '@/shared/i18n/config';
 import { defineMessages, fill } from '@/shared/i18n/messages';
 import { localeAlternates, resolveLocale } from '@/shared/i18n/server';
 import { localizeRecord } from '@/shared/lib/translations';
@@ -32,6 +32,11 @@ const messages = defineMessages({
 export async function generateStaticParams() {
   const posts = await getPublishedBlogPosts();
   return posts.map((p) => ({ slug: p.slug }));
+}
+
+/** نام نویسنده فقط فارسی ثبت می‌شود؛ صفحه انگلیسی نام مجموعه را به‌عنوان نویسنده نشان می‌دهد */
+function bylineOf(authorName: string | undefined, siteName: string, locale: Locale): string {
+  return locale === 'fa' && authorName ? authorName : siteName;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -65,7 +70,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'article',
       publishedTime: post.createdAt.toISOString(),
       modifiedTime: post.updatedAt.toISOString(),
-      authors: [post.author?.name ?? settings.siteName],
+      authors: [bylineOf(post.author?.name, settings.siteName, locale)],
       ...(image ? { images: [{ url: image, alt: ogTitle }] } : {}),
     },
     twitter: {
@@ -111,10 +116,11 @@ export default async function BlogPostPage({ params }: Props) {
     name: post.title,
     description: toMetaDescription(post.metaDescription || post.excerpt || post.content, 400),
     ...(post.focusKeyword && locale === 'fa' ? { keywords: post.focusKeyword } : {}),
-    author: {
-      '@type': 'Person',
-      name: post.author?.name ?? settings.siteName,
-    },
+    // نسخه انگلیسی: نام نویسنده فارسی (از جدول کاربران) ترجمه ندارد، پس نویسنده خود مجموعه است
+    author:
+      locale === 'fa' && post.author?.name
+        ? { '@type': 'Person', name: post.author.name }
+        : { '@type': 'Organization', name: settings.siteName },
     publisher: {
       '@type': 'Organization',
       name: settings.siteName,
@@ -150,7 +156,10 @@ export default async function BlogPostPage({ params }: Props) {
           locale,
         )}
       />
-      <BlogPostView post={post} relatedCategories={relatedCategories} />
+      <BlogPostView
+        post={{ ...post, author: { ...post.author, name: bylineOf(post.author?.name, settings.siteName, locale) } }}
+        relatedCategories={relatedCategories}
+      />
     </>
   );
 }

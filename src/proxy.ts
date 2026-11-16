@@ -38,7 +38,7 @@ function adminGuard(request: NextRequest): NextResponse {
 }
 
 /** فایل‌های متادیتای Next (عکس og، آیکن) که خودش با پیشوند /fa لینک می‌دهد */
-const METADATA_FILE = /\/(opengraph-image|twitter-image|icon|apple-icon)(-[\w-]+)?$/;
+const METADATA_FILE = /\/(opengraph-image|twitter-image|icon|apple-icon)(-[\w-]+)?(\/[\w-]+)?$/;
 
 /**
  * زبان: صفحه‌ها واقعاً زیر /[lang] هستند. آدرس فارسی بدون پیشوند می‌ماند (همان آدرس‌هایی که گوگل می‌شناسد)

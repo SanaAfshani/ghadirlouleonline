@@ -48,7 +48,7 @@ export type LocalizedSiteText = {
 };
 
 /** نماد اعتماد فوتر؛ href لینک استعلام رسمی همان نماد است */
-export type TrustBadge = { name: string; image: string; href: string };
+export type TrustBadge = { name: string; nameEn?: string; image: string; href: string };
 
 export type SiteSettings = LocalizedSiteText & {
   locale: Locale;
@@ -70,7 +70,7 @@ export type SiteSettings = LocalizedSiteText & {
 };
 
 /** کلید دیتابیس هر متن چندزبانه */
-const LOCALIZED_KEYS: Record<keyof LocalizedSiteText, string> = {
+export const LOCALIZED_KEYS: Record<keyof LocalizedSiteText, string> = {
   siteName: 'site_title',
   siteDescription: 'site_description',
   address: 'contact_address',
@@ -242,7 +242,12 @@ export function parseTrustBadges(raw: string | undefined): TrustBadge[] | null {
     const list = JSON.parse(raw);
     if (!Array.isArray(list)) return null;
     return list
-      .map((b) => ({ name: String(b?.name ?? '').trim().slice(0, 120), image: String(b?.image ?? '').trim(), href: String(b?.href ?? '').trim() }))
+      .map((b) => ({
+        name: String(b?.name ?? '').trim().slice(0, 120),
+        nameEn: String(b?.nameEn ?? '').trim().slice(0, 120),
+        image: String(b?.image ?? '').trim(),
+        href: String(b?.href ?? '').trim(),
+      }))
       .filter((b) => b.name && IMAGE_SRC.test(b.image))
       .map((b) => ({ ...b, href: /^https:\/\//i.test(b.href) ? b.href : '' }))
       .slice(0, 8);
@@ -294,6 +299,6 @@ export function mergeSiteSettings(raw: Record<string, string>, locale: Locale = 
     certificates: parseCertificates(raw.certificates).map((c) => ({ ...c, title: (en && c.titleEn) || c.title })),
     // خالی بودن یعنی هنوز چیزی تنظیم نشده — عکس پیش‌فرض می‌ماند تا هرو هیچ‌وقت بی‌عکس نشود
     heroSlides: (heroSlides.length ? heroSlides : defaultSiteSettings.heroSlides).map((s) => ({ ...s, alt: (en && s.altEn) || s.alt })),
-    trustBadges: parseTrustBadges(raw.trust_badges) ?? defaultSiteSettings.trustBadges,
+    trustBadges: (parseTrustBadges(raw.trust_badges) ?? defaultSiteSettings.trustBadges).map((b) => ({ ...b, name: (en && b.nameEn) || b.name })),
   };
 }

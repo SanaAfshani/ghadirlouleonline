@@ -24,12 +24,14 @@ import { localizePath } from '@/shared/i18n/config';
 import { localeAlternates, resolveLocale } from '@/shared/i18n/server';
 import { getSection } from '@/shared/content/server';
 import { homeBlog, homeFactory, homeHero, homePrices, homeProductLines, homeSeo, homeServices } from '@/shared/content/pages/home';
+import { ogImage } from '@/shared/lib/og-image';
 
 type Props = { params: Promise<{ lang: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = await resolveLocale(params);
-  const seo = await getSection(homeSeo, locale);
+  const [seo, raw] = await Promise.all([getSection(homeSeo, locale), getSiteSettingsMap()]);
+  const settings = mergeSiteSettings(raw, locale);
   return {
     // absolute: وگرنه قالب «%s | نام سایت» لایه روت نام سایت را دوباره اضافه می‌کند
     title: { absolute: seo.metaTitle },
@@ -41,7 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: absoluteUrl(localizePath('/', locale)),
       type: 'website',
       // openGraph صفحه جایگزین openGraph روت می‌شود و تصویر opengraph-image.tsx را با خودش می‌برد
-      images: localizePath('/opengraph-image', locale),
+      images: ogImage(settings.siteName, locale),
     },
   };
 }

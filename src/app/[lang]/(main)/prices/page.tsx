@@ -16,6 +16,9 @@ import { defineMessages, fill } from '@/shared/i18n/messages';
 import { localeAlternates, resolveLocale } from '@/shared/i18n/server';
 import { getSection } from '@/shared/content/server';
 import { pricesClosedNotice, pricesHero, pricesSeo } from '@/shared/content/pages/prices';
+import { ogImage } from '@/shared/lib/og-image';
+import { getSiteSettingsMap } from '@/shared/lib/site-settings-store';
+import { mergeSiteSettings } from '@/shared/lib/site-settings';
 
 const messages = defineMessages({
   fa: {
@@ -58,7 +61,8 @@ function boardCategoryNames(board: Awaited<ReturnType<typeof getPriceBoard>>, lo
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = await resolveLocale(params);
-  const [board, seo] = await Promise.all([getPriceBoard(locale), getSection(pricesSeo, locale)]);
+  const [board, seo, raw] = await Promise.all([getPriceBoard(locale), getSection(pricesSeo, locale), getSiteSettingsMap()]);
+  const settings = mergeSiteSettings(raw, locale);
   const values = { names: boardCategoryNames(board, locale), year: currentYear(locale) };
   const title = fill(seo.metaTitle, values);
   const description = fill(seo.metaDescription, values);
@@ -67,7 +71,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     ...localeAlternates('/prices', locale),
     // images: openGraph صفحه جایگزین openGraph روت می‌شود و تصویر opengraph-image.tsx را با خودش می‌برد
-    openGraph: { title, description, url: absoluteUrl(localizePath('/prices', locale)), type: 'website', images: '/opengraph-image' },
+    openGraph: { title, description, url: absoluteUrl(localizePath('/prices', locale)), type: 'website', images: ogImage(settings.siteName, locale) },
   };
 }
 

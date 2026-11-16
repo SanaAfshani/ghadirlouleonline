@@ -1,4 +1,4 @@
-import type { TranslationFieldDef } from './TranslationEditor';
+import type { TranslationFieldDef } from '@/shared/lib/translation-items';
 
 /**
  * فیلدهای زبانه English هر فرم پنل — همان TRANSLATABLE_FIELDS در shared/lib/translations.ts.
@@ -58,4 +58,10 @@ export const TESTIMONIAL_TRANSLATION_FIELDS: TranslationFieldDef[] = [
   { name: 'company', label: 'شرکت', type: 'text' },
   { name: 'position', label: 'سمت', type: 'text' },
   { name: 'content', label: 'متن نظر', type: 'textarea' },
+];
+
+export const PRICE_ITEM_TRANSLATION_FIELDS: TranslationFieldDef[] = [
+  { name: 'title', label: 'مدل', type: 'text' },
+  { name: 'spec', label: 'مشخصه', type: 'text' },
+  { name: 'note', label: 'توضیح', type: 'text' },
 ];

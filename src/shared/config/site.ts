@@ -82,9 +82,9 @@ export const siteConfig = {
    * چون نمادِ بدون لینک استعلام برای مشتری قابل بررسی نیست، لینک را حتماً بگذارید.
    */
   trustBadges: [
-    { name: 'نشان ملی ثبت رسانه‌های دیجیتال (ساماندهی)', image: '/images/trust/samandehi.webp', href: '' },
-    { name: 'اتحادیه کشوری کسب و کارهای مجازی', image: '/images/trust/ettehadieh.webp', href: '' },
-  ] as { name: string; image: string; href: string }[],
+    { name: 'نشان ملی ثبت رسانه‌های دیجیتال (ساماندهی)', nameEn: 'National Digital Media Registration (Samandehi)', image: '/images/trust/samandehi.webp', href: '' },
+    { name: 'اتحادیه کشوری کسب و کارهای مجازی', nameEn: 'National Union of Online Businesses', image: '/images/trust/ettehadieh.webp', href: '' },
+  ] as { name: string; nameEn?: string; image: string; href: string }[],
   socials: {
     // instagram: 'https://instagram.com/luleonlinemashhad',
     // telegram: 'https://t.me/luleonlinemashhad',

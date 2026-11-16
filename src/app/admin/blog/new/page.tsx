@@ -18,7 +18,7 @@ import type { FaqItem } from '@/shared/types';
 import type { Locale } from '@/shared/i18n/config';
 import { TranslationEditor, type EnglishTranslations } from '@/features/admin/translations/TranslationEditor';
 import { LocaleTabs, isUntranslated } from '@/features/admin/translations/LocaleTabs';
-import { BLOG_TRANSLATION_FIELDS } from '@/features/admin/translations/fields';
+import { BLOG_TRANSLATION_FIELDS } from '@/shared/lib/translation-fields';
 
 export default function NewBlogPostPage() {
   const router = useRouter();

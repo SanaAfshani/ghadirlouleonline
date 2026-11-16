@@ -17,7 +17,7 @@ import { translationsFor } from '@/shared/lib/translations';
 import type { Locale } from '@/shared/i18n/config';
 import { TranslationEditor, type EnglishTranslations } from '@/features/admin/translations/TranslationEditor';
 import { LocaleTabs, isUntranslated } from '@/features/admin/translations/LocaleTabs';
-import { PROJECT_TRANSLATION_FIELDS } from '@/features/admin/translations/fields';
+import { PROJECT_TRANSLATION_FIELDS } from '@/shared/lib/translation-fields';
 
 export default function EditProjectPage() {
   const { id } = useParams<{ id: string }>();
