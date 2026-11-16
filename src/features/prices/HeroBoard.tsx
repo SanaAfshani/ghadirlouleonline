@@ -62,7 +62,7 @@ export function HeroBoard({ initial, rows = 5 }: { initial: PriceBoard; rows?: n
       <div className="px-4 sm:px-5 pt-4 sm:pt-5 flex items-center justify-between gap-3">
         <div>
           <p className="text-white font-black">{t.title}</p>
-          <p className="text-[11px] text-slate-400 mt-0.5 sm:hidden">{marketDetail(board.market)}</p>
+          <p className="text-[11px] text-slate-400 mt-0.5 sm:hidden">{marketDetail(board.market, locale)}</p>
         </div>
         <MarketStatus market={board.market} tone="dark" />
       </div>
