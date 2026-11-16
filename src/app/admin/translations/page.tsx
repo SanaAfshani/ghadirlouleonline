@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { CheckCircle2, Languages, Loader2, Sparkles, Square } from 'lucide-react';
+import { CheckCircle2, Download, Languages, Loader2, Sparkles, Square, Upload } from 'lucide-react';
 import { IconTile } from '@/shared/ui/IconTile';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { cn, faDigits } from '@/shared/lib/utils';
@@ -75,6 +75,29 @@ export default function AdminTranslationsPage() {
 
   const pending = coverage?.reduce((sum, c) => sum + c.pendingTexts, 0) ?? 0;
 
+  /** فایل ترجمه‌شده (خروجی «دانلود» با فیلد translation پرشده) */
+  const importFile = async (file: File | undefined) => {
+    if (!file) return;
+    setRunning('import');
+    try {
+      const entries = JSON.parse(await file.text());
+      if (!Array.isArray(entries)) throw new Error('فایل باید همان فایل دانلودشده باشد');
+      const res = await fetch('/api/admin/translations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ import: entries }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok || !j.success) throw new Error(j.error || 'بارگذاری نشد');
+      await load();
+      toast.success(`${faDigits(j.data.saved)} ترجمه ذخیره شد`);
+    } catch (e) {
+      toast.error(e instanceof SyntaxError ? 'فایل JSON معتبر نیست' : e instanceof Error ? e.message : 'بارگذاری نشد');
+    } finally {
+      setRunning(null);
+    }
+  };
+
   return (
     <div className="max-w-4xl space-y-6">
       <div className="flex flex-wrap items-center gap-4">
@@ -111,6 +134,35 @@ export default function AdminTranslationsPage() {
         فقط متن‌هایی که نسخه انگلیسی ندارند ترجمه می‌شوند؛ ترجمه‌هایی که دستی نوشته یا اصلاح کرده‌اید دست نمی‌خورند. هر رکوردی که نامش ترجمه شود،
         صفحه انگلیسی‌اش در گوگل ایندکس و به سایت‌مپ اضافه می‌شود. بعد از ترجمه، چند مورد را در زبانه «English» همان فرم بازبینی کنید — به‌خصوص
         نام محصولات و اصطلاحات فنی.
+      </div>
+
+      <div className={cn(card, 'p-5 space-y-3')}>
+        <p className="font-bold text-[var(--foreground)]">ترجمه بیرون از سایت (بدون کلید API)</p>
+        <p className="text-sm text-[var(--muted-foreground)] leading-7">
+          فایل متن‌های بدون ترجمه را دانلود کنید، فیلد <code dir="ltr">translation</code> هر ردیف را با ترجمه انگلیسی پر کنید (یا فایل را به مترجم بدهید)
+          و همان فایل را بارگذاری کنید. فقط ردیف‌هایی که ترجمه دارند ذخیره می‌شوند.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            // پاسخ API فایل دانلودی است (Content-Disposition)، نه صفحه
+            onClick={() => window.location.assign('/api/admin/translations?export=1')}
+            disabled={!pending}
+            className="h-10 px-4 rounded-xl border border-[var(--border)] text-sm font-bold flex items-center gap-1.5 hover:border-[var(--accent)] disabled:opacity-50"
+          >
+            <Download className="w-4 h-4" /> دانلود متن‌های بدون ترجمه
+          </button>
+          <label
+            className={cn(
+              'h-10 px-4 rounded-xl border border-[var(--border)] text-sm font-bold flex items-center gap-1.5 hover:border-[var(--accent)] cursor-pointer',
+              running !== null && 'pointer-events-none opacity-50',
+            )}
+          >
+            {running === 'import' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+            بارگذاری فایل ترجمه
+            <input type="file" accept="application/json,.json" className="hidden" onChange={(e) => importFile(e.target.files?.[0]).finally(() => (e.target.value = ''))} />
+          </label>
+        </div>
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}

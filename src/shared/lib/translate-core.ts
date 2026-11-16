@@ -44,9 +44,31 @@ export async function translateToEnglish(items: TranslateItem[]): Promise<Record
   const todo = items.filter((item) => item.text.trim());
   if (!todo.length) return {};
 
-  const client = new Anthropic();
   const payload = todo.map((item) => ({ id: item.id, html: Boolean(item.html), text: item.text }));
+  const prompt = `Translate these items:\n${JSON.stringify(payload)}`;
+  // سرویس سازگار با ChatGPT (مثلاً درگاه‌های ایرانی یا مدل‌های رایگان OpenRouter) اگر تنظیم شده باشد؛ وگرنه Claude
+  const text = process.env.TRANSLATE_API_BASE_URL ? await translateWithOpenAICompatible(prompt) : await translateWithClaude(prompt);
 
+  let parsed: z.infer<typeof ResultSchema>;
+  try {
+    parsed = ResultSchema.parse(JSON.parse(extractJson(text)));
+  } catch {
+    throw new TranslateError('پاسخ سرویس ترجمه قابل خواندن نبود؛ دوباره امتحان کنید', 502);
+  }
+
+  const known = new Set(todo.map((item) => item.id));
+  return Object.fromEntries(parsed.translations.filter((t) => known.has(t.id)).map((t) => [t.id, t.text]));
+}
+
+/** بعضی مدل‌ها JSON را داخل ```json یا با متن اضافه برمی‌گردانند */
+function extractJson(text: string): string {
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  return start !== -1 && end > start ? text.slice(start, end + 1) : text;
+}
+
+async function translateWithClaude(prompt: string): Promise<string> {
+  const client = new Anthropic();
   let message;
   try {
     // استریم چون خروجی مقاله‌های بلند از سقف زمانی درخواست معمولی بیشتر می‌شود
@@ -58,7 +80,7 @@ export async function translateToEnglish(items: TranslateItem[]): Promise<Record
         betas: ['server-side-fallback-2026-07-01'],
         fallbacks: 'default',
         system: SYSTEM,
-        messages: [{ role: 'user', content: `Translate these items:\n${JSON.stringify(payload)}` }],
+        messages: [{ role: 'user', content: prompt }],
         output_config: { format: betaZodOutputFormat(ResultSchema) },
       })
       .finalMessage();
@@ -67,20 +89,50 @@ export async function translateToEnglish(items: TranslateItem[]): Promise<Record
     if (error instanceof Anthropic.RateLimitError) throw new TranslateError('سرویس ترجمه موقتاً شلوغ است؛ چند دقیقه دیگر دوباره امتحان کنید', 429);
     if (error instanceof Anthropic.APIError) throw new TranslateError(`خطای سرویس ترجمه (${error.status ?? 'شبکه'})`, 502);
     // بدون هیچ اعتبارنامه‌ای SDK پیش از ارسال درخواست خطا می‌دهد
-    throw new TranslateError('ترجمه خودکار تنظیم نشده است: ANTHROPIC_API_KEY را در متغیرهای محیطی سرور قرار دهید', 503);
+    throw new TranslateError(
+      'ترجمه خودکار تنظیم نشده است: ANTHROPIC_API_KEY یا TRANSLATE_API_BASE_URL/TRANSLATE_API_KEY/TRANSLATE_MODEL را در متغیرهای محیطی سرور قرار دهید',
+      503,
+    );
   }
 
   if (message.stop_reason === 'refusal') throw new TranslateError('سرویس ترجمه این متن را ترجمه نکرد', 422);
   if (message.stop_reason === 'max_tokens') throw new TranslateError('متن برای ترجمه یک‌جا خیلی طولانی است؛ بخش‌بخش ترجمه کنید', 413);
+  return message.content.flatMap((block) => (block.type === 'text' ? [block.text] : [])).join('');
+}
 
-  const text = message.content.flatMap((block) => (block.type === 'text' ? [block.text] : [])).join('');
-  let parsed: z.infer<typeof ResultSchema>;
+/**
+ * هر سرویس با API سازگار با ChatGPT (/chat/completions): TRANSLATE_API_BASE_URL (مثلاً https://openrouter.ai/api/v1)،
+ * TRANSLATE_API_KEY و TRANSLATE_MODEL. خروجی JSON با دستور سیستم خواسته می‌شود چون همه مدل‌ها response_format را ندارند.
+ */
+async function translateWithOpenAICompatible(prompt: string): Promise<string> {
+  const base = process.env.TRANSLATE_API_BASE_URL!.replace(/\/+$/, '');
+  const model = process.env.TRANSLATE_MODEL;
+  if (!model) throw new TranslateError('TRANSLATE_MODEL (نام مدل سرویس ترجمه) تنظیم نشده است', 503);
+
+  let res: Response;
   try {
-    parsed = ResultSchema.parse(JSON.parse(text));
+    res = await fetch(`${base}/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.TRANSLATE_API_KEY ?? ''}` },
+      body: JSON.stringify({
+        model,
+        temperature: 0.2,
+        messages: [
+          { role: 'system', content: `${SYSTEM}\n\nRespond with only a JSON object of the form {"translations":[{"id":"...","text":"..."}]} and nothing else.` },
+          { role: 'user', content: prompt },
+        ],
+      }),
+      signal: AbortSignal.timeout(280_000),
+    });
   } catch {
-    throw new TranslateError('پاسخ سرویس ترجمه قابل خواندن نبود؛ دوباره امتحان کنید', 502);
+    throw new TranslateError('سرویس ترجمه در دسترس نیست (اتصال برقرار نشد)', 502);
   }
+  if (res.status === 401 || res.status === 403) throw new TranslateError('کلید سرویس ترجمه (TRANSLATE_API_KEY) نامعتبر است یا دسترسی ندارد', 503);
+  if (res.status === 429) throw new TranslateError('سرویس ترجمه موقتاً شلوغ است؛ چند دقیقه دیگر دوباره امتحان کنید', 429);
+  if (!res.ok) throw new TranslateError(`خطای سرویس ترجمه (${res.status})`, 502);
 
-  const known = new Set(todo.map((item) => item.id));
-  return Object.fromEntries(parsed.translations.filter((t) => known.has(t.id)).map((t) => [t.id, t.text]));
+  const json = (await res.json().catch(() => null)) as { choices?: { message?: { content?: string }; finish_reason?: string }[] } | null;
+  const choice = json?.choices?.[0];
+  if (choice?.finish_reason === 'length') throw new TranslateError('متن برای ترجمه یک‌جا خیلی طولانی است؛ بخش‌بخش ترجمه کنید', 413);
+  return choice?.message?.content ?? '';
 }
