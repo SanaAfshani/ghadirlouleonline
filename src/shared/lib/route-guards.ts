@@ -30,7 +30,9 @@ export async function ensureProduct(categorySlug: string, slug: string, locale: 
   if (elsewhere) {
     movedTo(`/products/${encodeURIComponent(elsewhere.category.slug)}/${encodeURIComponent(elsewhere.slug)}`, locale);
   }
-  const moved = await findRedirect(`/products/${categorySlug}/${slug}`);
+  // محصولی که با دسته‌اش جمع شده ریدایرکت خودش را ندارد؛ آدرس قدیمی‌اش دنبال مقصد دسته می‌رود، نه ۴۰۴
+  const moved =
+    (await findRedirect(`/products/${categorySlug}/${slug}`)) ?? (await findRedirect(`/products/${categorySlug}`));
   if (moved) movedTo(moved, locale);
   notFound();
 }
