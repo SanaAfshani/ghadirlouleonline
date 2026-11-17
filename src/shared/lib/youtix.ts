@@ -21,12 +21,26 @@ export class YoutixError extends Error {
   }
 }
 
-export function isYoutixConfigured(): boolean {
-  return Boolean(process.env.YOUTIX_API_KEY);
+/**
+ * «سئوی محصولات» در یوتیکس روی سایت جدایی است که محصولات فعلی را دارد، پس کلید خودش را دارد؛
+ * اگر تنظیم نشده باشد همان کلید مقاله‌ها امتحان می‌شود (وقتی هر دو در یک سایت یوتیکس باشند).
+ */
+type YoutixKey = 'articles' | 'products';
+
+function apiKey(kind: YoutixKey): string | undefined {
+  return (kind === 'products' && process.env.YOUTIX_PRODUCT_API_KEY) || process.env.YOUTIX_API_KEY;
 }
 
-export async function youtixFetch<T>(path: string, init: { method?: 'GET' | 'POST'; body?: unknown } = {}): Promise<T> {
-  const key = process.env.YOUTIX_API_KEY;
+export function isYoutixConfigured(kind: YoutixKey = 'articles'): boolean {
+  return Boolean(apiKey(kind));
+}
+
+export async function youtixFetch<T>(
+  path: string,
+  init: { method?: 'GET' | 'POST'; body?: unknown } = {},
+  kind: YoutixKey = 'articles',
+): Promise<T> {
+  const key = apiKey(kind);
   if (!key) throw new YoutixError('کلید API یوتیکس (YOUTIX_API_KEY) روی سرور تنظیم نشده است', 503);
 
   let res: Response;
@@ -71,7 +85,29 @@ export type YoutixTask = {
   error?: string;
 };
 
-/** فیلدهایی از GET /articles/{id} که استفاده می‌کنیم */
+/** ایده مقاله محصول (GET /product-ideas) — هر ایده چند محصول مرتبط دارد */
+export type YoutixProductIdea = {
+  id: string;
+  title: string;
+  content_style?: string;
+  products: { id: number; name: string; url: string }[];
+  article_id: string | null;
+  article_status: string | null;
+};
+
+export type YoutixProductIdeas = { batch: number; status: string; error: string | null; data: YoutixProductIdea[] };
+
+/** ردیف لیست مقاله‌های محصول (GET /product-articles) */
+export type YoutixProductArticleRow = {
+  id: string;
+  title: string;
+  status: string;
+  error_message?: string | null;
+  word_count?: number | null;
+  created_at: string;
+};
+
+/** فیلدهایی از GET /articles/{id} و /product-articles/{id} (ساختار هر دو یکی است) که استفاده می‌کنیم */
 type YoutixArticle = {
   id: string;
   title?: string;
@@ -84,14 +120,23 @@ type YoutixArticle = {
   [key: string]: unknown;
 };
 
-/** لینک‌های داخلی که یوتیکس با دامنه کامل سایت می‌نویسد نسبی می‌شوند تا در همان تب باز شوند */
-const OWN_LINK = new RegExp(
-  `\\]\\(https?://(?:www\\.)?${new URL(siteConfig.url).hostname.replace(/\./g, '\\.')}(/[^)\\s]*)?(?=[)\\s])`,
-  'gi',
-);
+/**
+ * لینک‌های داخلی که یوتیکس با دامنه کامل سایت می‌نویسد نسبی می‌شوند تا در همان تب باز شوند — دامنه‌های
+ * دیگر سایت (.com) هم، چون سایت «سئوی محصولات» در یوتیکس با همان دامنه ثبت شده است
+ */
+const OWN_HOSTS = [new URL(siteConfig.url).hostname, ...siteConfig.altDomains]
+  .map((host) => host.replace(/^www\./, '').replace(/\./g, '\\.'))
+  .filter((host, i, all) => all.indexOf(host) === i);
+const OWN_LINK = new RegExp(`\\]\\(https?://(?:www\\.)?(?:${OWN_HOSTS.join('|')})(/[^)\\s]*)?(?=[)\\s])`, 'gi');
+
+/** یوتیکس دسته را به آدرس ووکامرس (/product-category/...) لینک می‌دهد که در این سایت وجود ندارد */
+const CATEGORY_LINK = /\[([^\]]*)\]\(\/product-category\/[^)\s]*\)/g;
+
+/** آدرس دسته این سایت برای متن لینک؛ مقاله‌های وبلاگ عادی چنین لینکی ندارند */
+export type CategoryPathResolver = (linkText: string) => string;
 
 /** متن کامل Markdown؛ اگر content خالی بود از بخش‌ها ساخته می‌شود */
-function articleMarkdown(article: YoutixArticle): string {
+function articleMarkdown(article: YoutixArticle, categoryPath: CategoryPathResolver): string {
   let markdown = typeof article.content === 'string' ? article.content : '';
   if (!markdown.trim()) {
     const sections = [...(article.sections ?? [])].sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
@@ -100,7 +145,9 @@ function articleMarkdown(article: YoutixArticle): string {
       ...sections.map((s) => [s.heading ? `## ${s.heading}` : '', s.content ?? ''].join('\n\n')),
     ].join('\n\n');
   }
-  return markdown.replace(OWN_LINK, (_m, path?: string) => `](${path || '/'}`);
+  return markdown
+    .replace(OWN_LINK, (_m, path?: string) => `](${path || '/'}`)
+    .replace(CATEGORY_LINK, (_m, text: string) => `[${text}](${categoryPath(text)})`);
 }
 
 /**
@@ -148,13 +195,17 @@ export type YoutixPostData = {
  * فیلدهای سئو و faq_schema از همان نگاشت «ورود از ابزار تولید محتوا» می‌آیند؛ متن همیشه از Markdown
  * ساخته می‌شود (markdownToHtml همه چیز را escape می‌کند) — پاک‌ساز HTML فقط در مرورگر کار می‌کند.
  */
-export async function buildYoutixPost(article: YoutixArticle): Promise<YoutixPostData> {
-  const markdown = parseArticleMarkdown(articleMarkdown(article));
+export async function buildYoutixPost(
+  article: YoutixArticle,
+  categoryPath: CategoryPathResolver = () => '/products',
+): Promise<YoutixPostData> {
+  const source = articleMarkdown(article, categoryPath);
+  const markdown = parseArticleMarkdown(source);
   const json = parseArticleJson(JSON.stringify({ ...article, content: '' }));
   const meta = json.ok ? json.data : null;
 
   // بخش «سوالات متداول» داخل متن هم هست؛ از متن جدا می‌شود تا دو بار نمایش داده نشود
-  const body = markdown.ok ? markdown.data.content : markdownToHtml(articleMarkdown(article));
+  const body = markdown.ok ? markdown.data.content : markdownToHtml(source);
   const faqs = meta?.faqs.length ? meta.faqs : markdown.ok ? markdown.data.faqs : [];
   const title = meta?.title || (markdown.ok ? markdown.data.title : '') || 'مقاله یوتیکس';
   const excerpt = meta?.excerpt || (markdown.ok ? markdown.data.excerpt : '') || stripHtml(body).slice(0, 180);
@@ -180,5 +231,14 @@ export async function buildYoutixPost(article: YoutixArticle): Promise<YoutixPos
 
 export async function getYoutixArticle(id: string): Promise<YoutixArticle> {
   const json = await youtixFetch<{ data?: YoutixArticle } & YoutixArticle>(`/articles/${encodeURIComponent(id)}`);
+  return json.data ?? json;
+}
+
+export async function getYoutixProductArticle(id: string): Promise<YoutixArticle> {
+  const json = await youtixFetch<{ data?: YoutixArticle } & YoutixArticle>(
+    `/product-articles/${encodeURIComponent(id)}`,
+    {},
+    'products',
+  );
   return json.data ?? json;
 }

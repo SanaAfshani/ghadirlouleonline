@@ -8,7 +8,7 @@ import { m as motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Package, Layers, FileText, FileSpreadsheet, HelpCircle,
   Star, Building2, MessageSquare, Settings, Users, LogOut,
-  Menu, Palette, ChevronLeft, SearchCheck, CandlestickChart, PhoneCall, BadgeCheck, GalleryHorizontal, Sparkles, LayoutTemplate, Languages } from 'lucide-react';
+  Menu, Palette, ChevronLeft, SearchCheck, CandlestickChart, PhoneCall, BadgeCheck, GalleryHorizontal, Sparkles, LayoutTemplate, Languages, ShoppingBag } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import toast from 'react-hot-toast';
 import { useAdminNotifications } from '@/widgets/admin/AdminNotifications';
@@ -61,7 +61,8 @@ const navGroups: { label: string; items: { href: string; label: string; icon: Re
       { href: '/admin/hero', label: 'اسلایدر هرو', icon: GalleryHorizontal },
       { href: '/admin/certificates', label: 'گواهینامه‌ها', icon: BadgeCheck },
       { href: '/admin/blog', label: 'وبلاگ', icon: FileText },
-      { href: '/admin/youtix', label: 'یوتیکس (تولید مقاله)', icon: Sparkles },
+      { href: '/admin/youtix', label: 'یوتیکس (تولید مقاله)', icon: Sparkles, exact: true },
+      { href: '/admin/youtix/products', label: 'یوتیکس (سئوی محصولات)', icon: ShoppingBag },
       { href: '/admin/projects', label: 'پروژه‌ها', icon: Building2 },
       { href: '/admin/faq', label: 'سوالات متداول', icon: HelpCircle },
       { href: '/admin/testimonials', label: 'نظرات', icon: Star },
