@@ -64,13 +64,30 @@ function RtlText({ children, style, rtl = true }: { children: string; style?: Re
   );
 }
 
+/**
+ * تصویر ساخته‌شده هر زبان در حافظه سرور. force-dynamic (برای build) یعنی بدون این هر درخواست — هر پیش‌نمایش
+ * تلگرام/واتساپ و هر خزش گوگل — فونت را از نو از گوگل می‌گرفت و Satori را اجرا می‌کرد: ۱۲ تا ۱۵ ثانیه CPU که
+ * بقیه درخواست‌های سرور را هم پشت خودش نگه می‌داشت. نام سایت در کلید است، پس تغییرش در پنل تصویر تازه می‌سازد.
+ */
+const rendered = new Map<string, ArrayBuffer>();
+
 export default async function OpengraphImage({ params }: { params: Promise<{ lang: string }> }) {
   const locale = await resolveLocale(params);
-  const [font, raw] = await Promise.all([loadVazirmatn(), getSiteSettingsMap()]);
-  const { siteName } = mergeSiteSettings(raw, locale);
-  const t = messages[locale];
-  const rtl = locale === 'fa';
+  const { siteName } = mergeSiteSettings(await getSiteSettingsMap(), locale);
+  const key = `${locale}:${siteName}`;
+  let png = rendered.get(key);
+  if (!png) {
+    const font = await loadVazirmatn();
+    png = await renderCard(siteName, locale === 'fa', messages[locale], font).arrayBuffer();
+    // بدون فونت متن فارسی مربع است؛ آن تصویر نگه داشته نمی‌شود تا درخواست بعدی دوباره امتحان کند
+    if (font) rendered.set(key, png);
+  }
+  return new Response(png, {
+    headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' },
+  });
+}
 
+function renderCard(siteName: string, rtl: boolean, t: (typeof messages)['fa'], font: ArrayBuffer | null) {
   return new ImageResponse(
     (
       <div

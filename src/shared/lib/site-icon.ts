@@ -23,17 +23,25 @@ async function sourceBytes(src: string): Promise<Buffer> {
   return readFile(path.join(process.cwd(), 'public', DEFAULT_ICON));
 }
 
+const rendered = new Map<string, Buffer>();
+
 /**
  * آیکون سایت در اندازه خواسته‌شده، PNG مربعی با پس‌زمینه شفاف. آپلود پنل WebP است و آیکون آیفون و بعضی مرورگرها
  * WebP نمی‌پذیرند، پس این‌جا تبدیل می‌شود. منبع: «تنظیمات ← لوگو و آیکون» (آیکون جدا یا همان لوگو).
  */
 export async function renderSiteIcon(size: IconSize): Promise<{ png: Buffer; version: string }> {
   const src = siteIconSource(await getSiteSettingsMap());
-  const input = await sourceBytes(src).catch(() => sourceBytes(DEFAULT_ICON));
-  const png = await sharp(input)
-    .resize(size, size, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-    .png()
-    .toBuffer();
+  // هر درخواست favicon خواندن فایل از دیتابیس + sharp بود (~۱.۵ ثانیه)؛ آیکون تازه پنل src تازه دارد و کلید عوض می‌شود
+  const key = `${src}:${size}`;
+  let png = rendered.get(key);
+  if (!png) {
+    const input = await sourceBytes(src).catch(() => sourceBytes(DEFAULT_ICON));
+    png = await sharp(input)
+      .resize(size, size, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+      .png()
+      .toBuffer();
+    rendered.set(key, png);
+  }
   return { png, version: iconVersionOf(src) };
 }
 
