@@ -8,7 +8,7 @@ export const searchSeo = seoSection('search.seo', {
   },
   en: {
     metaTitle: 'Search products and articles',
-    metaDescription: 'Search Qadir Lule Online products, articles and projects',
+    metaDescription: 'Search Ghadir Louleh Online products, articles and projects',
   },
 });
 

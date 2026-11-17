@@ -15,7 +15,7 @@ const ResultSchema = z.object({
   translations: z.array(z.object({ id: z.string(), text: z.string() })),
 });
 
-const SYSTEM = `You translate website content for "Qadir Lule Online" (Persian: قدیر لوله آنلاین), the exclusive sales agent of the pipe manufacturer "Ghadir Louleh Pasargad" (قدیر لوله پاسارگاد) in Iran, from Persian into English.
+const SYSTEM = `You translate website content for "Ghadir Louleh Online" (Persian: قدیر لوله آنلاین), the exclusive sales agent of the pipe manufacturer "Ghadir Louleh Pasargad" (قدیر لوله پاسارگاد) in Iran, from Persian into English.
 Audience: contractors, consulting engineers and buyers of civil-infrastructure products. Tone: clear, professional B2B English; no marketing fluff added.
 
 Terminology:

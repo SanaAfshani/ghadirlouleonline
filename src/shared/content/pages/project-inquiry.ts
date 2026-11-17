@@ -10,7 +10,7 @@ export const projectInquirySeo = seoSection('projectInquiry.seo', {
   en: {
     metaTitle: 'Project purchase inquiry | Corrugated and spiral pipes',
     metaDescription:
-      'Request bulk prices for corrugated pipes, spiral pipes and fittings for civil projects: several sizes in one request, with SN class, lengths, project city and delivery time — sent straight to the Qadir Lule Online bulk sales team.',
+      'Request bulk prices for corrugated pipes, spiral pipes and fittings for civil projects: several sizes in one request, with SN class, lengths, project city and delivery time — sent straight to the Ghadir Louleh Online bulk sales team.',
   },
 });
 

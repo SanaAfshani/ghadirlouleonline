@@ -80,7 +80,7 @@ export const trackSeo = seoSection('track.seo', {
   },
   en: {
     metaTitle: 'Order tracking',
-    metaDescription: 'Track your Qadir Lule Online order and pro forma invoice by its number: preparation, loading, shipping and delivery.',
+    metaDescription: 'Track your Ghadir Louleh Online order and pro forma invoice by its number: preparation, loading, shipping and delivery.',
   },
 });
 

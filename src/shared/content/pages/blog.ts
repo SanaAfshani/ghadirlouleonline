@@ -8,7 +8,7 @@ export const blogSeo = seoSection('blog.seo', {
   },
   en: {
     metaTitle: 'Blog | Pipe buying guides and technical articles',
-    metaDescription: 'Technical articles and buying guides for water and sewer pipes, double-wall corrugated pipes, spiral pipes and fittings — written by the Qadir Lule Online team.',
+    metaDescription: 'Technical articles and buying guides for water and sewer pipes, double-wall corrugated pipes, spiral pipes and fittings — written by the Ghadir Louleh Online team.',
   },
 });
 

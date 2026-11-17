@@ -15,7 +15,7 @@ export const officialRepresentativeSeo = seoSection('official-representative.seo
   en: {
     metaTitle: 'Official exclusive agent of Ghadir Louleh Pasargad',
     metaDescription:
-      'Ghadir Louleh Pasargad’s official statement appointing Qadir Lule Online, managed by Amir Yousefi, as its official and exclusive online sales agent for corrugated, spiral and polyethylene pipes.',
+      'Ghadir Louleh Pasargad’s official statement appointing Ghadir Louleh Online, managed by Amir Yousefi, as its official and exclusive online sales agent for corrugated, spiral and polyethylene pipes.',
   },
 });
 
@@ -33,7 +33,7 @@ export const officialRepresentativeHero = defineSection({
     },
     en: {
       label: 'Official statement from Ghadir Louleh Pasargad',
-      title: 'Qadir Lule Online: the official and exclusive gateway for Ghadir Louleh Pasargad products',
+      title: 'Ghadir Louleh Online: the official and exclusive gateway for Ghadir Louleh Pasargad products',
     },
   },
 });
@@ -124,12 +124,12 @@ export const officialRepresentativeLetter = defineSection({
     },
     en: {
       note: 'Unofficial English translation; the Persian text is the official version.',
-      opening: `<p><strong>Ghadir Louleh Pasargad</strong>, as a manufacturer and supplier of specialised products for the pipe and infrastructure industry, has established an official partnership with <strong>Qadir Lule Online</strong> in order to expand its sales network, make its products easier for customers to obtain, and provide professional services to those working in construction and on civil engineering projects.</p>
-<blockquote>Accordingly, Qadir Lule Online, managed by Mr. Amir Yousefi, is hereby introduced as the official and exclusive sales and online distribution agent for Ghadir Louleh Pasargad products.</blockquote>
-<p>Drawing on the production capacity and the technical and commercial backing of Ghadir Louleh Pasargad, Qadir Lule Online is responsible for offering, presenting, marketing and following up the supply of this company’s products online.</p>
+      opening: `<p><strong>Ghadir Louleh Pasargad</strong>, as a manufacturer and supplier of specialised products for the pipe and infrastructure industry, has established an official partnership with <strong>Ghadir Louleh Online</strong> in order to expand its sales network, make its products easier for customers to obtain, and provide professional services to those working in construction and on civil engineering projects.</p>
+<blockquote>Accordingly, Ghadir Louleh Online, managed by Mr. Amir Yousefi, is hereby introduced as the official and exclusive sales and online distribution agent for Ghadir Louleh Pasargad products.</blockquote>
+<p>Drawing on the production capacity and the technical and commercial backing of Ghadir Louleh Pasargad, Ghadir Louleh Online is responsible for offering, presenting, marketing and following up the supply of this company’s products online.</p>
 <h2>Our commitment to customers</h2>
 <p>At Ghadir Louleh Pasargad, we believe that supplying high-quality products, providing accurate technical information and building confidence in the purchasing process are among the most important principles of a long-term partnership with our customers.</p>
-<p>To this end, Qadir Lule Online operates as the official channel for contact and online sales of our products, with the following goals:</p>`,
+<p>To this end, Ghadir Louleh Online operates as the official channel for contact and online sales of our products, with the following goals:</p>`,
       goals: [
         { id: 'genuine', text: 'Offering genuine, approved Ghadir Louleh Pasargad products' },
         { id: 'technical', text: 'Providing technical information and product specifications' },
@@ -139,7 +139,7 @@ export const officialRepresentativeLetter = defineSection({
         { id: 'bulk', text: 'Creating a reliable platform for bulk purchasing and direct supply of products' },
       ],
       productsIntro: `<h2>Product range</h2>
-<p>Backed by its official partnership with Ghadir Louleh Pasargad, Qadir Lule Online supplies the following products:</p>`,
+<p>Backed by its official partnership with Ghadir Louleh Pasargad, Ghadir Louleh Online supplies the following products:</p>`,
       products: [
         {
           id: 'corrugated',
@@ -159,8 +159,8 @@ export const officialRepresentativeLetter = defineSection({
       ],
       closing: `<h2>Closing remarks</h2>
 <p>Customer trust, the manufacturer’s credibility and product quality are the three fundamental principles of our partnership.</p>
-<p>By introducing Qadir Lule Online as the official and exclusive gateway for the online sale of its products, Ghadir Louleh Pasargad has taken a step towards expanding its services, improving customer access and creating a more reliable purchasing experience for pipe industry products.</p>
-<p><strong>Qadir Lule Online: your direct connection to Ghadir Louleh Pasargad products.</strong></p>`,
+<p>By introducing Ghadir Louleh Online as the official and exclusive gateway for the online sale of its products, Ghadir Louleh Pasargad has taken a step towards expanding its services, improving customer access and creating a more reliable purchasing experience for pipe industry products.</p>
+<p><strong>Ghadir Louleh Online: your direct connection to Ghadir Louleh Pasargad products.</strong></p>`,
       regards: 'Sincerely,',
       signerRole: 'Management, Ghadir Louleh Pasargad',
       signerName: 'Jamshid Shateri',
@@ -190,7 +190,7 @@ export const officialRepresentativeAside = defineSection({
       factoryLabel: 'کارخانه و توانمندی تأمین',
     },
     en: {
-      imageAlt: 'Agency certificate issued by Ghadir Louleh Pasargad to Qadir Lule Online, managed by Amir Yousefi',
+      imageAlt: 'Agency certificate issued by Ghadir Louleh Pasargad to Ghadir Louleh Online, managed by Amir Yousefi',
       caption: 'Agency certificate issued by Ghadir Louleh Pasargad',
       manufacturerLabel: 'Official Ghadir Louleh Pasargad website',
       certificatesLabel: 'Factory certificates and standards',

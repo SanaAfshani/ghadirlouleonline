@@ -35,13 +35,13 @@ export const privacySeo = seoSection('privacy.seo', {
   },
   en: {
     metaTitle: 'Privacy policy',
-    metaDescription: 'Qadir Lule Online privacy policy: what information we receive through the contact and consultation request forms, and how it is used.',
+    metaDescription: 'Ghadir Louleh Online privacy policy: what information we receive through the contact and consultation request forms, and how it is used.',
   },
 });
 
 export const privacyHero = heroSection('privacy.hero', {
   fa: { label: 'قوانین', title: 'حریم خصوصی', description: 'نحوه نگهداری و استفاده از اطلاعات شما در قدیر لوله آنلاین' },
-  en: { label: 'Policies', title: 'Privacy policy', description: 'How Qadir Lule Online stores and uses your information' },
+  en: { label: 'Policies', title: 'Privacy policy', description: 'How Ghadir Louleh Online stores and uses your information' },
 });
 
 export const privacyBody = defineSection({
@@ -64,7 +64,7 @@ export const privacyBody = defineSection({
 <p>اگر می‌خواهید پیام یا اطلاعات تماس شما حذف یا اصلاح شود، از طریق <a href="/contact">صفحه تماس</a> یا ایمیل <a href="mailto:{email}" dir="ltr">{email}</a> با ما در ارتباط باشید.</p>`,
     },
     en: {
-      html: `<p>Qadir Lule Online is the sole exclusive sales agent of Ghadir Louleh Pasargad. This page explains what information we receive from you when you use the site and what we do with it.</p>
+      html: `<p>Ghadir Louleh Online is the sole exclusive sales agent of Ghadir Louleh Pasargad. This page explains what information we receive from you when you use the site and what we do with it.</p>
 <h2>What information we receive</h2>
 <p>The site has no user registration or online payment, and we never receive your bank card details. Only when you fill in the “Contact us” or “Consultation and purchase request” form do we record the following: your name, phone number, email (if provided), subject and message.</p>
 <h2>What this information is used for</h2>
@@ -95,7 +95,7 @@ export const termsSeo = seoSection('terms.seo', {
   },
   en: {
     metaTitle: 'Terms and conditions of purchase',
-    metaDescription: 'Terms of use for Qadir Lule Online: price validity, placing and confirming orders, shipping from the factory warehouse and product specifications.',
+    metaDescription: 'Terms of use for Ghadir Louleh Online: price validity, placing and confirming orders, shipping from the factory warehouse and product specifications.',
   },
 });
 
@@ -125,7 +125,7 @@ export const termsBody = defineSection({
 <p>برای هر پرسشی درباره این شرایط از طریق <a href="/contact">صفحه تماس</a> با ما در ارتباط باشید. حریم خصوصی اطلاعات شما در صفحه <a href="/privacy">حریم خصوصی</a> توضیح داده شده است.</p>`,
     },
     en: {
-      html: `<p>Qadir Lule Online is the sole exclusive sales agent of Ghadir Louleh Pasargad. Using this site and submitting a purchase request means you accept the terms below.</p>
+      html: `<p>Ghadir Louleh Online is the sole exclusive sales agent of Ghadir Louleh Pasargad. Using this site and submitting a purchase request means you accept the terms below.</p>
 <h2>Prices</h2>
 <p>Prices are in Toman and are updated in real time during sales hours; outside business hours, today’s price is given through “Request a price”. The final price, availability and shipping cost are confirmed by a sales specialist when the order is placed and stated in the pro forma invoice.</p>
 <h2>Placing and confirming an order</h2>
@@ -135,7 +135,7 @@ export const termsBody = defineSection({
 <h2>Technical specifications and images</h2>
 <p>Product specifications and descriptions are provided to guide your choice. For projects that require a particular standard or specification, please consult our specialists before buying.</p>
 <h2>Site content</h2>
-<p>The texts, price tables and articles on this site belong to Qadir Lule Online and may be quoted with attribution and a link to the site.</p>
+<p>The texts, price tables and articles on this site belong to Ghadir Louleh Online and may be quoted with attribution and a link to the site.</p>
 <p>For any questions about these terms, contact us through the <a href="/contact">contact page</a>. How we handle your personal information is explained on the <a href="/privacy">privacy policy</a> page.</p>`,
     },
   },

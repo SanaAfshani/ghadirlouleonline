@@ -14,7 +14,7 @@ export const certificatesSeo = seoSection('certificates.seo', {
   en: {
     metaTitle: 'Agency documents and technical approvals',
     metaDescription:
-      'Qadir Lule Online’s agency certificate, ISO 9001:2015 certification, the mandatory ISIRI 9116-3 standard licence, quality-control test reports and Ghadir Louleh Pasargad technical documents, with the validity of each.',
+      'Ghadir Louleh Online’s agency certificate, ISO 9001:2015 certification, the mandatory ISIRI 9116-3 standard licence, quality-control test reports and Ghadir Louleh Pasargad technical documents, with the validity of each.',
   },
 });
 
@@ -38,7 +38,7 @@ export const certificatesHero = defineSection({
       label: 'Credentials and quality',
       title: 'Agency documents and technical approvals',
       description:
-        'Qadir Lule Online’s agency certificate and Ghadir Louleh Pasargad’s quality and standard documents, with the issuer, validity and related product of each. Tap any document to view it.',
+        'Ghadir Louleh Online’s agency certificate and Ghadir Louleh Pasargad’s quality and standard documents, with the issuer, validity and related product of each. Tap any document to view it.',
     },
   },
 });
@@ -55,7 +55,7 @@ export const certificatesExclusive = defineSection({
       text: 'محصولات قدیر لوله پاسارگاد — لوله کاروگیت دوجداره، لوله اسپیرال و اتصالات — با همین گواهینامه‌ها فقط از طریق قدیر لوله آنلاین عرضه می‌شود؛ کالای اصل کارخانه با قیمت روز کارخانه.',
     },
     en: {
-      text: 'Ghadir Louleh Pasargad products — double-wall corrugated pipes, spiral pipes and fittings — covered by these certificates are sold only through Qadir Lule Online: genuine factory goods at the daily factory price.',
+      text: 'Ghadir Louleh Pasargad products — double-wall corrugated pipes, spiral pipes and fittings — covered by these certificates are sold only through Ghadir Louleh Online: genuine factory goods at the daily factory price.',
     },
   },
 });
@@ -85,7 +85,7 @@ export const certificatesRepresentation = defineSection({
     },
     en: {
       title: 'Agency documents',
-      certificateTitle: 'Qadir Lule Online agency certificate',
+      certificateTitle: 'Ghadir Louleh Online agency certificate',
       certificateCode: 'Validity: unlimited, from the date of issue',
       validity: 'Unlimited, from the date of issue',
       subject: 'Sales and distribution agency for Ghadir Louleh Pasargad double-wall and water supply pipes',

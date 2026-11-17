@@ -46,7 +46,7 @@ export const factoryHero = defineSection({
     en: {
       eyebrow: 'Factory and supply capacity',
       title: 'Ghadir Louleh Pasargad corrugated and spiral pipe factory in Garmsar',
-      text: 'Double-wall polyethylene pipes have been made in Garmsar Industrial Park since 2012; today the factory produces corrugated pipes up to 1200 mm and spiral pipes up to 2000 mm, under the ISIRI 9116-3 licence and ISO 9001:2015 certification. Qadir Lule Online is the exclusive sales agent of Ghadir Louleh Pasargad.',
+      text: 'Double-wall polyethylene pipes have been made in Garmsar Industrial Park since 2012; today the factory produces corrugated pipes up to 1200 mm and spiral pipes up to 2000 mm, under the ISIRI 9116-3 licence and ISO 9001:2015 certification. Ghadir Louleh Online is the exclusive sales agent of Ghadir Louleh Pasargad.',
       inquiryLabel: 'Project inquiry',
       videosLabel: 'Production line videos',
       imageAlt: 'Aerial view of the Ghadir Louleh Pasargad factory in Garmsar Industrial Park',
@@ -161,7 +161,7 @@ export const factoryAbout = defineSection({
       title: 'Ghadir Louleh Pasargad: from one 200–400 mm line to 2000 mm pipes',
       body: `<p>Ghadir Louleh Pasargad Manufacturing and Trading Company started in 2012 with a single 200–400 mm corrugated pipe line in Garmsar Industrial Park (Semnan Province). With the addition of large-diameter lines and a spiral pipe line, the full range of sewer and stormwater pipes for civil projects — from 110 mm service connections to 2000 mm trunk collectors — is now made at this factory.</p>
 <p>The factory’s products are used in urban and rural sewage collection networks, agricultural land drainage, stormwater disposal and as ducting for power and telecom cables. Corrugated pipes come in two ring-stiffness classes, SN4 and SN8, so that an economical and reliable pipe can be chosen for each project’s burial depth and traffic load.</p>
-<p>Qadir Lule Online is the exclusive sales agent of Ghadir Louleh Pasargad and handles daily prices, pro forma invoices, loading from the factory warehouse and delivery to your site. <a href="/official-representative">Read the factory’s official statement on the agency</a></p>`,
+<p>Ghadir Louleh Online is the exclusive sales agent of Ghadir Louleh Pasargad and handles daily prices, pro forma invoices, loading from the factory warehouse and delivery to your site. <a href="/official-representative">Read the factory’s official statement on the agency</a></p>`,
       facts: [
         { id: 'location', title: 'Production site', text: 'Garmsar Industrial Park, Garmsar, Semnan; production, storage and loading on one site' },
         { id: 'products', title: 'Products', text: 'Double-wall corrugated pipes, large-diameter spiral pipes and matching corrugated pipe fittings' },
@@ -531,7 +531,7 @@ export const factoryFaq = defineSection({
         {
           id: 'location',
           question: 'Where is the Ghadir Louleh Pasargad factory?',
-          answer: 'The factory and warehouse are in Garmsar Industrial Park, Garmsar, Semnan Province. Purchasing, price requests and loading arrangements are handled through Qadir Lule Online, the exclusive sales agent of Ghadir Louleh Pasargad.',
+          answer: 'The factory and warehouse are in Garmsar Industrial Park, Garmsar, Semnan Province. Purchasing, price requests and loading arrangements are handled through Ghadir Louleh Online, the exclusive sales agent of Ghadir Louleh Pasargad.',
         },
         {
           id: 'sizes',

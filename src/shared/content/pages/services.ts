@@ -10,7 +10,7 @@ export const servicesSeo = seoSection('services.seo', {
   en: {
     metaTitle: 'Services | Technical advice and Mill Certificates',
     metaDescription:
-      'Services of Qadir Lule Online, exclusive agent of Ghadir Louleh Pasargad: free technical advice, factory certificates (ISIRI 9116-3, ISO 9001), quality guarantee and nationwide delivery.',
+      'Services of Ghadir Louleh Online, exclusive agent of Ghadir Louleh Pasargad: free technical advice, factory certificates (ISIRI 9116-3, ISO 9001), quality guarantee and nationwide delivery.',
   },
 });
 
@@ -152,7 +152,7 @@ export const servicesFactory = defineSection({
     en: {
       eyebrow: 'The manufacturer',
       body: 'Ghadir Louleh Pasargad manufactures double-wall polyethylene (corrugated) pipes and spiral pipes for sewer, drainage and stormwater networks in Garmsar Industrial Park (Semnan Province). Its products carry the ISIRI 9116-3 national standard licence and ISO 9001:2015 quality management certification, and the factory’s quality-control laboratory tests every pipe for dimensions, ring stiffness, carbon black content, MFI and watertightness.',
-      highlightTitle: 'Qadir Lule Online is the sole exclusive sales agent of Ghadir Louleh Pasargad.',
+      highlightTitle: 'Ghadir Louleh Online is the sole exclusive sales agent of Ghadir Louleh Pasargad.',
       highlightText: 'Buying from us means genuine factory products with these same certificates, the factory’s daily price and direct shipping from the Garmsar warehouse.',
       buttonLabel: 'View certificates and licences',
       facts: [

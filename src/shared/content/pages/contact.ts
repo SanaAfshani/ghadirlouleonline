@@ -12,7 +12,7 @@ export const contactSeo = {
     en: {
       metaTitle: 'Contact us | Buy corrugated and spiral pipes',
       metaDescription:
-        'Contact Qadir Lule Online, exclusive sales agent of Ghadir Louleh Pasargad: sales and bulk orders {mobile} (call, WhatsApp and Rubika), office {officePhone}, Tehran office and Garmsar factory.',
+        'Contact Ghadir Louleh Online, exclusive sales agent of Ghadir Louleh Pasargad: sales and bulk orders {mobile} (call, WhatsApp and Rubika), office {officePhone}, Tehran office and Garmsar factory.',
     },
   }),
   description: 'در توضیحات، {mobile} شماره همراه فروش و {officePhone} اولین تلفن دفتر از «تنظیمات سایت» است.',
@@ -34,7 +34,7 @@ export const contactHero = defineSection({
     },
     en: {
       label: 'Contact us',
-      title: 'Contact Qadir Lule Online',
+      title: 'Contact Ghadir Louleh Online',
       description: 'Today’s prices, advice on choosing the size and SN class, and orders for corrugated pipes, spiral pipes and fittings — reach our sales team by phone, WhatsApp or Rubika.',
     },
   },
@@ -202,7 +202,7 @@ export const contactFactory = defineSection({
     en: {
       eyebrow: 'About the factory',
       title: 'Ghadir Louleh Pasargad: corrugated pipe manufacturer in Garmsar',
-      highlightTitle: 'Qadir Lule Online is the sole exclusive sales agent of Ghadir Louleh Pasargad.',
+      highlightTitle: 'Ghadir Louleh Online is the sole exclusive sales agent of Ghadir Louleh Pasargad.',
       highlightText: 'Contact our sales office to buy, request a price or place a project order.',
       buttonLabel: 'Certificates',
       body: 'Ghadir Louleh Pasargad Manufacturing and Trading Company has produced double-wall polyethylene (corrugated) pipes in Garmsar Industrial Park since 2012. The factory started with a single 200–400 mm line and, after adding new lines and a spiral pipe line, now supplies corrugated pipes up to 1200 mm and spiral pipes up to 2000 mm for sewer, drainage and stormwater projects.',
@@ -280,7 +280,7 @@ export const contactFaq = defineSection({
         {
           id: 'agent',
           question: 'Who is the official sales agent of Ghadir Louleh Pasargad?',
-          answer: 'Qadir Lule Online is the sole exclusive sales agent of Ghadir Louleh Pasargad, supplying the factory’s products at today’s price with direct shipping from the Garmsar warehouse.',
+          answer: 'Ghadir Louleh Online is the sole exclusive sales agent of Ghadir Louleh Pasargad, supplying the factory’s products at today’s price with direct shipping from the Garmsar warehouse.',
         },
         {
           id: 'location',

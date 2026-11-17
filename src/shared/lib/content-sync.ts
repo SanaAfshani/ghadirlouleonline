@@ -314,6 +314,34 @@ export async function syncCertificates() {
   return `${ours.length} certificates added`;
 }
 
+const BRAND_SPELLING_KEY = 'brand_spelling_2026_11';
+const OLD_BRAND_EN = 'Qadir Lule Online';
+
+/**
+ * املای انگلیسی نام سایت «Ghadir Louleh Online» است. «Qadir Lule Online» در متن‌های پیش‌فرض و دستور مترجم
+ * خودکار بود، پس در ترجمه‌های ذخیره‌شده، تنظیمات (`*_en`) و بخش‌های ویرایش‌شده صفحات هم نشسته است.
+ * همه ستون‌ها متن (JSON رشته‌ای) هستند و عبارت ASCII است، پس REPLACE ساختار JSON را خراب نمی‌کند. یک بار.
+ */
+export async function syncBrandSpelling() {
+  if (await prisma.siteSettings.findUnique({ where: { key: BRAND_SPELLING_KEY }, select: { key: true } })) return 'already done';
+  const targets = [
+    ['SiteSettings', 'value'],
+    ['ContentBlock', 'data'],
+    ...['Category', 'Product', 'BlogPost', 'Project', 'FAQ', 'Testimonial', 'PriceItem'].map((table) => [table, 'translations']),
+  ];
+  let changed = 0;
+  for (const [table, column] of targets) {
+    changed += await prisma.$executeRawUnsafe(
+      `UPDATE "${table}" SET "${column}" = REPLACE("${column}", $1, $2) WHERE "${column}" LIKE $3`,
+      OLD_BRAND_EN,
+      siteConfig.nameEn,
+      `%${OLD_BRAND_EN}%`,
+    );
+  }
+  await prisma.siteSettings.create({ data: { key: BRAND_SPELLING_KEY, value: new Date().toISOString(), type: 'text' } });
+  return `${changed} rows updated`;
+}
+
 const EXCLUSIVE_TEXT_KEY = 'exclusive_text_2026_10';
 
 /**

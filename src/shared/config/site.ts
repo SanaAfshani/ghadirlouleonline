@@ -4,7 +4,7 @@ import { CORRUGATED_FITTINGS, SPIRAL_PIPE_SIZES, spiralPipeSlug } from './produc
 
 export const siteConfig = {
   name: 'قدیر لوله آنلاین',
-  nameEn: 'Qadir Lule Online',
+  nameEn: 'Ghadir Louleh Online',
   /** کارخانه تولیدکننده — قدیر لوله آنلاین تنها نماینده انحصاری فروش آن است */
   legalName: 'قدیر لوله پاسارگاد',
   legalNameEn: 'Ghadir Louleh Pasargad',

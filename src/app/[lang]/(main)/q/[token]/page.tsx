@@ -29,7 +29,7 @@ const messages = defineMessages({
   en: {
     quote: 'Quote',
     quoteNumber: 'Quote {number}',
-    description: 'Quote {number} — Qadir Lule Online',
+    description: 'Quote {number} — Ghadir Louleh Online',
     rejectedTitle: 'Quote {number} was not approved',
     expiredTitle: 'Quote {number} has expired',
     rejectedText: 'Our sales specialist did not approve this request (for example because of stock or a price change). Contact sales to submit it again or arrange your order.',

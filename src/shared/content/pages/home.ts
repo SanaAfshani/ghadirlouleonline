@@ -18,7 +18,7 @@ export const homeSeo = {
     en: {
       metaTitle: 'Double-wall corrugated and spiral pipe supplier | Daily corrugated pipe prices',
       metaDescription:
-        'Qadir Lule Online, exclusive agent of Ghadir Louleh Pasargad: daily prices for ISIRI 9116 double-wall corrugated pipes, shipped from the Garmsar factory across Iran.',
+        'Ghadir Louleh Online, exclusive agent of Ghadir Louleh Pasargad: daily prices for ISIRI 9116 double-wall corrugated pipes, shipped from the Garmsar factory across Iran.',
     },
   }),
   // صفحه اصلی عنوان کامل خودش را دارد و نام سایت به آن اضافه نمی‌شود
@@ -273,13 +273,13 @@ export const homeFactory = defineSection({
       photoTitle: 'Ghadir Louleh Pasargad factory',
       eyebrow: 'Factory and warehouse',
       intro:
-        '<p><strong>Qadir Lule Online</strong> is the sole exclusive sales agent of Ghadir Louleh Pasargad, a manufacturer of double-wall polyethylene (corrugated) pipes. Orders are loaded directly at the factory warehouse in Garmsar and shipped across the country with no middlemen.</p>',
+        '<p><strong>Ghadir Louleh Online</strong> is the sole exclusive sales agent of Ghadir Louleh Pasargad, a manufacturer of double-wall polyethylene (corrugated) pipes. Orders are loaded directly at the factory warehouse in Garmsar and shipped across the country with no middlemen.</p>',
       steps: [
         { id: 'order', title: 'Order or request a price', desc: 'Online from the price table or by calling the sales office' },
         { id: 'loading', title: 'Loading at the factory warehouse', desc: 'Garmsar Industrial Park, Semnan Province' },
         { id: 'delivery', title: 'Delivery to your project site', desc: 'Shipped anywhere in Iran once scheduled' },
       ],
-      exclusiveText: 'Ghadir Louleh Pasargad products, certified to ISO 9001 and holding the ISIRI 9116-3 national standard licence, are sold only through Qadir Lule Online.',
+      exclusiveText: 'Ghadir Louleh Pasargad products, certified to ISO 9001 and holding the ISIRI 9116-3 national standard licence, are sold only through Ghadir Louleh Online.',
       certificatesTitle: 'Certificates and licences',
       factoryTitle: 'Factory and warehouse',
       officeTitle: 'Head office and sales',

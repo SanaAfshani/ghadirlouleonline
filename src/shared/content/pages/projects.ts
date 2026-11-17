@@ -8,7 +8,7 @@ export const projectsSeo = seoSection('projects.seo', {
   },
   en: {
     metaTitle: 'Projects | Pipe and fittings supply references',
-    metaDescription: 'Completed water and sewer pipe and industrial fittings supply projects across Iran by Qadir Lule Online.',
+    metaDescription: 'Completed water and sewer pipe and industrial fittings supply projects across Iran by Ghadir Louleh Online.',
   },
 });
 

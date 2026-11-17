@@ -8,7 +8,7 @@ export const aboutSeo = seoSection('about.seo', {
   },
   en: {
     metaTitle: 'About us | Official agent of Ghadir Louleh Pasargad',
-    metaDescription: 'Qadir Lule Online, the exclusive agent of Ghadir Louleh Pasargad: double-wall corrugated pipes, spiral pipes and corrugated fittings, delivered across Iran.',
+    metaDescription: 'Ghadir Louleh Online, the exclusive agent of Ghadir Louleh Pasargad: double-wall corrugated pipes, spiral pipes and corrugated fittings, delivered across Iran.',
   },
 });
 
@@ -28,7 +28,7 @@ export const aboutHero = defineSection({
     },
     en: {
       label: 'About us',
-      title: 'Qadir Lule Online',
+      title: 'Ghadir Louleh Online',
       description: 'The official, exclusive sales and online distribution agent of Ghadir Louleh Pasargad: double-wall corrugated pipes, spiral pipes and corrugated pipe fittings',
     },
   },
@@ -104,7 +104,7 @@ export const aboutStory = defineSection({
       eyebrow: 'Our story',
       title: 'Official agent of a factory making double-wall pipes since 2012',
       body: `<p>Ghadir Louleh Pasargad Manufacturing and Trading Company started in early 2012 in Garmsar Industrial Park with a single 200–400 mm production line, and today manufactures double-wall corrugated pipes and spiral pipes. The factory holds ISO 9001 certification and the mandatory ISIRI 9116-3 standard licence, and in January 2024 signed a technical cooperation agreement with a company from Tajikistan.</p>
-<p>Qadir Lule Online, managed by Mr. Amir Yousefi, is — according to the <a href="/official-representative">factory's official statement</a> — the official and exclusive sales and online distribution agent of Ghadir Louleh Pasargad. We focus on three products: double-wall corrugated pipes, spiral pipes and corrugated pipe fittings, all supplied directly from the factory at today's price.</p>`,
+<p>Ghadir Louleh Online, managed by Mr. Amir Yousefi, is — according to the <a href="/official-representative">factory's official statement</a> — the official and exclusive sales and online distribution agent of Ghadir Louleh Pasargad. We focus on three products: double-wall corrugated pipes, spiral pipes and corrugated pipe fittings, all supplied directly from the factory at today's price.</p>`,
       advantages: [
         { id: 'direct', text: 'Supplied directly by the Ghadir Louleh Pasargad factory, with no middlemen' },
         { id: 'official', text: 'Official, exclusive agent with the factory’s representation certificate' },
@@ -182,7 +182,7 @@ export const aboutTeam = defineSection({
       eyebrow: 'Management',
       title: 'Agency and factory management',
       members: [
-        { id: 'yousefi', name: 'Mr. Amir Yousefi', role: 'Manager, Qadir Lule Online', text: 'Sales and supply, daily pricing, pro forma invoices and order follow-up' },
+        { id: 'yousefi', name: 'Mr. Amir Yousefi', role: 'Manager, Ghadir Louleh Online', text: 'Sales and supply, daily pricing, pro forma invoices and order follow-up' },
         { id: 'jamshid', name: 'Dr. Jamshid Shateri', role: 'CEO, Ghadir Louleh Pasargad', text: 'Signatory of the official statement appointing the agency' },
         { id: 'nader', name: 'Dr. Nader Shateri', role: 'Sales Director, Ghadir Louleh Pasargad', text: 'Factory sales department' },
       ],
