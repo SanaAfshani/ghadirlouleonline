@@ -11,7 +11,7 @@ interface ImageUploaderProps {
   onChange: (images: string[]) => void;
   max?: number;
   /** سقف اندازه/کیفیت ذخیره‌سازی — «hero» برای عکس‌های تمام‌عرض */
-  profile?: 'default' | 'hero';
+  profile?: 'default' | 'hero' | 'brand';
 }
 
 export function ImageUploader({ images, onChange, max = 8, profile }: ImageUploaderProps) {

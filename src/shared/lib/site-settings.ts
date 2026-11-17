@@ -64,6 +64,10 @@ export type SiteSettings = LocalizedSiteText & {
   whatsappUrl: string;
   rubikaId: string;
   rubikaUrl: string;
+  /** لوگوی سایت (هدر، فوتر، پنل، پیش‌فاکتور، schema) — از پنل «تنظیمات ← لوگو و آیکون» */
+  logo: string;
+  /** نسخه آیکون (favicon) برای آدرس‌های /api/brand/icon — با عوض شدن آیکون، مرورگر نسخه تازه را می‌گیرد */
+  iconVersion: string;
   certificates: Certificate[];
   heroSlides: HeroSlide[];
   trustBadges: TrustBadge[];
@@ -142,6 +146,16 @@ export const defaultLocalizedText: Record<Locale, LocalizedSiteText> = {
   },
 };
 
+/** لوگو و آیکون پیش‌فرض تا وقتی در پنل چیزی آپلود نشده */
+export const DEFAULT_LOGO = '/images/logo.png';
+export const DEFAULT_ICON = '/images/site-icon.png';
+
+/** منبع آیکون سایت: آیکون جدا، وگرنه همان لوگو، وگرنه آیکون پیش‌فرض */
+export function siteIconSource(raw: Record<string, string>): string {
+  const pick = (v: string | undefined) => (v && IMAGE_SRC.test(v.trim()) ? v.trim() : '');
+  return pick(raw.site_icon) || pick(raw.site_logo) || DEFAULT_ICON;
+}
+
 /** پیش‌فرض کامل فارسی — برای Context کلاینت قبل از رسیدن داده و API هایی که زبان ندارند */
 export const defaultSiteSettings: SiteSettings = {
   ...defaultLocalizedText.fa,
@@ -156,6 +170,8 @@ export const defaultSiteSettings: SiteSettings = {
   whatsappUrl: whatsappFromMobile(siteConfig.mobile) ?? siteConfig.socials.whatsapp,
   rubikaId: siteConfig.socials.rubikaId,
   rubikaUrl: siteConfig.socials.rubikaUrl,
+  logo: DEFAULT_LOGO,
+  iconVersion: 'default',
   certificates: [],
   // تا وقتی چیزی در پنل تنظیم نشده، همان عکس ثابت فعلی نشان داده می‌شود
   heroSlides: [
@@ -263,7 +279,7 @@ export function parseTrustBadges(raw: string | undefined): TrustBadge[] | null {
 export const EDITABLE_SETTING_KEYS = new Set([
   ...Object.values(LOCALIZED_KEYS).flatMap((key) => [key, localizedSettingKey(key, 'en')]),
   'contact_phone', 'contact_mobile', 'contact_email', 'company_phones', 'map_url',
-  'rubika_id', 'rubika_url', 'trust_badges',
+  'rubika_id', 'rubika_url', 'trust_badges', 'site_logo', 'site_icon',
   'hero_slides', 'certificates', 'theme_color',
 ]);
 
@@ -296,6 +312,9 @@ export function mergeSiteSettings(raw: Record<string, string>, locale: Locale = 
     whatsappUrl: whatsappFromMobile(mobile) ?? defaultSiteSettings.whatsappUrl,
     rubikaId: raw.rubika_id?.trim() || defaultSiteSettings.rubikaId,
     rubikaUrl: httpUrl(raw.rubika_url, defaultSiteSettings.rubikaUrl),
+    logo: raw.site_logo && IMAGE_SRC.test(raw.site_logo.trim()) ? raw.site_logo.trim() : DEFAULT_LOGO,
+    // باید با iconVersionOf در site-icon.ts یکی باشد
+    iconVersion: siteIconSource(raw).replace(/[^\w]/g, '').slice(-24),
     certificates: parseCertificates(raw.certificates).map((c) => ({ ...c, title: (en && c.titleEn) || c.title })),
     // خالی بودن یعنی هنوز چیزی تنظیم نشده — عکس پیش‌فرض می‌ماند تا هرو هیچ‌وقت بی‌عکس نشود
     heroSlides: (heroSlides.length ? heroSlides : defaultSiteSettings.heroSlides).map((s) => ({ ...s, alt: (en && s.altEn) || s.alt })),

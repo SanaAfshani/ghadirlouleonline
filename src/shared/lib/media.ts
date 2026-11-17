@@ -12,7 +12,12 @@ import { prisma } from '@/shared/lib/prisma';
 export const IMAGE_PROFILES = {
   default: { maxSide: 2000, quality: 90 },
   hero: { maxSide: 3400, quality: 95 },
+  /** لوگو و آیکون سایت — بدون واترمارک (BRAND_PREFIX) */
+  brand: { maxSide: 1024, quality: 95 },
 } as const;
+
+/** نشانه فایل‌های برند در originalName: لوگوی سایت نباید واترمارکِ خودش را بگیرد (media-cache) */
+export const BRAND_PREFIX = 'brand/';
 
 export type ImageProfile = keyof typeof IMAGE_PROFILES;
 
@@ -43,7 +48,7 @@ export async function saveImage(file: File, profile: ImageProfile = 'default'): 
       size: output.info.size,
       width: output.info.width,
       height: output.info.height,
-      originalName: file.name.slice(0, 200),
+      originalName: `${profile === 'brand' ? BRAND_PREFIX : ''}${file.name}`.slice(0, 200),
     },
     select: { id: true },
   });

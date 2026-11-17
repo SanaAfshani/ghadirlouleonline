@@ -84,7 +84,7 @@ function e164(phone: string) {
 
 type ContactSettings = Pick<
   SiteSettings,
-  'locale' | 'siteName' | 'siteDescription' | 'legalName' | 'phone' | 'mobile' | 'email' | 'address' | 'companyPhones' | 'factoryAddress' | 'mapUrl' | 'whatsappUrl' | 'rubikaUrl'
+  'locale' | 'siteName' | 'siteDescription' | 'legalName' | 'logo' | 'phone' | 'mobile' | 'email' | 'address' | 'companyPhones' | 'factoryAddress' | 'mapUrl' | 'whatsappUrl' | 'rubikaUrl'
 >;
 
 /** نام شهر و استان در آدرس پستی schema — به زبان صفحه */
@@ -126,8 +126,8 @@ export function organizationSchema(s: ContactSettings) {
     legalName: s.legalName,
     alternateName: [siteConfig.name, siteConfig.nameEn, siteConfig.legalName, siteConfig.legalNameEn].filter((n) => n !== s.siteName),
     url: absoluteUrl(localizePath('/', s.locale)),
-    logo: absoluteUrl('/images/logo.png'),
-    image: absoluteUrl('/images/logo.png'),
+    logo: absoluteUrl(s.logo),
+    image: absoluteUrl(s.logo),
     description: s.siteDescription,
     email: s.email,
     telephone: phones[0] ?? e164(s.phone),
@@ -162,7 +162,7 @@ export function localBusinessSchema(s: ContactSettings) {
         '@id': `${siteConfig.url}/#localbusiness`,
         name: s.siteName,
         url: absoluteUrl(localizePath('/', s.locale)),
-        image: absoluteUrl('/images/logo.png'),
+        image: absoluteUrl(s.logo),
         telephone: phones[0] ?? e164(s.phone),
         email: s.email,
         description:
@@ -188,7 +188,7 @@ export function localBusinessSchema(s: ContactSettings) {
         '@id': `${siteConfig.url}/#factory`,
         name: factory.name,
         url: absoluteUrl(localizePath('/contact', s.locale)),
-        image: absoluteUrl('/images/logo.png'),
+        image: absoluteUrl(s.logo),
         telephone: phones[0] ?? e164(s.phone),
         description:
           s.locale === 'fa'

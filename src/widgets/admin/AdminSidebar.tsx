@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -14,6 +14,19 @@ import toast from 'react-hot-toast';
 import { useAdminNotifications } from '@/widgets/admin/AdminNotifications';
 import { logoutAdmin } from '@/widgets/admin/logout';
 import { useAdminUser } from '@/widgets/admin/AdminUser';
+import { DEFAULT_LOGO } from '@/shared/lib/site-settings';
+
+/** لوگوی تنظیم‌شده در پنل (تنظیمات ← لوگو و آیکون)؛ تا رسیدن پاسخ، لوگوی پیش‌فرض */
+function useSiteLogo() {
+  const [logo, setLogo] = useState(DEFAULT_LOGO);
+  useEffect(() => {
+    fetch('/api/settings')
+      .then((r) => r.json())
+      .then((j) => typeof j?.data?.site_logo === 'string' && j.data.site_logo && setLogo(j.data.site_logo))
+      .catch(() => {});
+  }, []);
+  return logo;
+}
 import { faDigits } from '@/shared/lib/utils';
 
 /** adminOnly: فقط مدیر کل (API همین بخش‌ها برای ویرایشگر ۴۰۳ می‌دهد؛ این‌جا فقط از منو پنهان می‌شوند) */
@@ -140,6 +153,7 @@ type SidebarProps = {
 
 function SidebarContent({ collapsed, onToggleCollapse, onLogout }: { collapsed: boolean; onToggleCollapse?: () => void; onLogout: () => void }) {
   const user = useAdminUser();
+  const logo = useSiteLogo();
   // تا نقش معلوم نشده، بخش‌های مدیر کل پنهان می‌مانند (بعد از رسیدن نقش ظاهر می‌شوند، نه برعکس)
   const groups = navGroups
     .map((group) => ({ ...group, items: group.items.filter((item) => !item.adminOnly || user?.role === 'ADMIN') }))
@@ -155,7 +169,7 @@ function SidebarContent({ collapsed, onToggleCollapse, onLogout }: { collapsed: 
       >
         {!collapsed && (
           <div className="flex items-center gap-3 min-w-0">
-            <Image src="/images/logo.png" alt="" width={36} height={36} className="w-9 h-9 object-contain flex-shrink-0" />
+            <Image src={logo} alt="" width={36} height={36} className="w-9 h-9 object-contain flex-shrink-0" />
             <div className="min-w-0">
               <div className="font-bold text-[var(--foreground)] text-sm truncate">قدیر لوله آنلاین</div>
               <div className="text-[var(--muted-foreground)] text-xs">پنل مدیریت</div>

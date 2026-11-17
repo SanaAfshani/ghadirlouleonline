@@ -234,7 +234,7 @@ export function QuoteView({ quote, settings }: { quote: PublicQuote; settings: S
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5">
             <div className="flex items-start gap-3 min-w-0">
               <div className="relative w-14 h-14 shrink-0 rounded-xl overflow-hidden border border-slate-200 dark:border-[var(--border)] bg-white">
-                <Image src="/images/logo.png" alt={settings.siteName} fill className="object-contain p-1" sizes="56px" />
+                <Image src={settings.logo} alt={settings.siteName} fill className="object-contain p-1" sizes="56px" />
               </div>
               <div className="min-w-0">
                 <p className="text-lg font-black leading-tight">{settings.siteName}</p>

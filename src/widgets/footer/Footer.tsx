@@ -68,7 +68,7 @@ function Column({ title, children }: { title: string; children: React.ReactNode 
 export function Footer({ categories, content }: { categories: NavCategory[]; content: ContentOf<typeof globalFooter> }) {
   const {
     siteName, siteDescription, phone, phoneHref, mobile, mobileHref, email, address, companyPhones, factoryAddress, mapUrl, whatsappUrl, certificates,
-    exclusiveTitle, workingHours, rubikaId, trustBadges,
+    exclusiveTitle, workingHours, rubikaId, trustBadges, logo,
   } = useSiteSettings();
   const locale = useLocale();
   const t = useMessages(messages);
@@ -87,7 +87,7 @@ export function Footer({ categories, content }: { categories: NavCategory[]; con
         <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr] gap-2 lg:gap-12">
           <div className="pb-6 lg:pb-0">
             <Link href="/" className="flex items-center gap-3">
-              <Image src="/images/logo.png" alt="" width={52} height={52} className="w-12 h-12 object-contain" />
+              <Image src={logo} alt="" width={52} height={52} className="w-12 h-12 object-contain" />
               <span className="text-xl font-black text-white">{siteName}</span>
             </Link>
             <Link href="/official-representative" className="mt-4 inline-flex items-center gap-1.5 text-sm font-black text-[var(--accent-text)] hover:underline">

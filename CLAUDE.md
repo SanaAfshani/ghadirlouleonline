@@ -56,6 +56,7 @@ src/
 - **Auth:** JWT در cookie httpOnly به نام `admin_token` (امضا در proxy هم بررسی می‌شود). هر API ادمین باید از `requireAdmin` / `requireSuperAdmin` در `src/shared/lib/admin-auth.ts` استفاده کند.
 - **دیتابیس:** PostgreSQL (محلی از طریق `DATABASE_URL` در `.env`).  
   برای اعمال تغییر schema: `npx prisma db push` یا `npx prisma migrate dev`. دیپلوی Runflare migrate اجرا نمی‌کند: هر مایگریشن جدید را idempotent در `src/shared/lib/ensure-schema.ts` هم بگذارید.
+- **لوگو و آیکون سایت:** از «تنظیمات ← لوگو و آیکون سایت» (`site_logo`، `site_icon`؛ خالی = `/images/logo.png` و `/images/site-icon.png`). آپلود با پروفایل `brand` (بدون واترمارک، `BRAND_PREFIX` در `media.ts`). favicon و آیکون آیفون PNG ساخته‌شده از همان تنظیم: `/api/brand/icon/[size]` و `/favicon.ico` (`src/shared/lib/site-icon.ts`) — فایل ثابت icon.png در `src/app` نگذارید، بر تنظیمات پنل غالب می‌شود.
 - **آپلود فایل:** فایل‌های آپلودی در `public/uploads/` ذخیره می‌شوند و از مسیر `/uploads/...` قابل دسترسی هستند.
 - **تصاویر:** Next.js Image با `fill` و `object-cover` برای تصاویر پوشش.
 - **RTL/LTR:** جهت از `dir` تگ html می‌آید (fa: rtl، en: ltr) و globals.css جهت ثابت ندارد. در فرم‌ها `dir="ltr"` فقط برای فیلدهای slug/url/شماره (در صفحه فارسی راست‌چین می‌ماند؛ `text-left` یعنی عمداً چپ‌چین).

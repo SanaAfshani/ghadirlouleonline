@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { prisma } from '@/shared/lib/prisma';
 import { addWatermark } from '@/shared/lib/watermark';
+import { BRAND_PREFIX } from '@/shared/lib/media';
 
 /**
  * کش نسخه واترمارک‌دار عکس‌های آپلودی. قبلاً هر درخواست /media/<id> عکس را از دیتابیس می‌خواند و دوباره واترمارک
@@ -44,10 +45,11 @@ async function fromDisk(id: string): Promise<Entry | null> {
 }
 
 async function build(id: string): Promise<Entry | null> {
-  const media = await prisma.media.findUnique({ where: { id }, select: { data: true, mime: true } });
+  const media = await prisma.media.findUnique({ where: { id }, select: { data: true, mime: true, originalName: true } });
   if (!media) return null;
   const original = Buffer.from(media.data);
-  const body = (await addWatermark(original, media.mime).catch(() => null)) ?? original;
+  // لوگو و آیکون سایت بی‌واترمارک
+  const body = media.originalName.startsWith(BRAND_PREFIX) ? original : ((await addWatermark(original, media.mime).catch(() => null)) ?? original);
   const entry = { body, mime: media.mime };
   // نوشتن روی دیسک نباید پاسخ را معطل یا خراب کند
   mkdir(DIR, { recursive: true })

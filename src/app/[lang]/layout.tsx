@@ -6,6 +6,7 @@ import { localeDir, locales, ogLocale } from '@/shared/i18n/config';
 import { resolveLocale } from '@/shared/i18n/server';
 import { LocaleProvider } from '@/shared/i18n/LocaleProvider';
 import { RootDocument } from '@/shared/ui/RootDocument';
+import { iconMetadata } from '@/shared/lib/site-icon';
 
 type Props = { params: Promise<{ lang: string }> };
 
@@ -52,6 +53,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     publisher: settings.siteName,
     creator: settings.siteName,
     category: 'business',
+    icons: iconMetadata(settings.iconVersion),
     // شماره تلفن‌ها خودمان لینک شده‌اند؛ تشخیص خودکار مرورگر باعث hydration mismatch می‌شود
     formatDetection: { telephone: false, address: false, email: false },
     ...(google ? { verification: { google } } : {}),

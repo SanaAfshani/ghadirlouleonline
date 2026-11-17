@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react';
 import { m as motion } from 'framer-motion';
 import {
   Save, Phone, Loader2, Building2, LayoutPanelTop, UserRound, MessageCircle, ShieldCheck,
-  Sparkles, Plus, Trash2,
+  Sparkles, Plus, Trash2, Image as ImageIcon,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { ImageUploader } from '@/shared/ui/ImageUploader';
 import {
-  defaultLocalizedText, defaultSiteSettings, localizedSettingKey, parseTrustBadges,
+  DEFAULT_ICON, DEFAULT_LOGO, defaultLocalizedText, defaultSiteSettings, localizedSettingKey, parseTrustBadges,
   type LocalizedSiteText, type TrustBadge,
 } from '@/shared/lib/site-settings';
 import { requestTranslation } from '@/features/admin/content/translate-client';
@@ -91,7 +91,9 @@ const SECTIONS: Section[] = [
 const ROWS = SECTIONS.flatMap((s) => s.rows);
 const LOCALIZED_ROWS = ROWS.filter((r): r is LocalizedRow => r.kind === 'localized');
 /** همه کلیدهای متنی این فرم — همه در EDITABLE_SETTING_KEYS هستند */
-const TEXT_KEYS = ROWS.flatMap((r) => (r.kind === 'localized' ? [r.key, localizedSettingKey(r.key, 'en')] : [r.key]));
+/** لوگو و آیکون: آدرس عکس آپلودی (پروفایل brand، بدون واترمارک)؛ خالی یعنی پیش‌فرض سایت */
+const BRAND_KEYS = ['site_logo', 'site_icon'] as const;
+const TEXT_KEYS = [...ROWS.flatMap((r) => (r.kind === 'localized' ? [r.key, localizedSettingKey(r.key, 'en')] : [r.key])), ...BRAND_KEYS];
 
 type Values = Record<string, string>;
 
@@ -261,6 +263,8 @@ export default function AdminSettingsPage() {
         </button>
       </div>
 
+      <BrandCard logo={values.site_logo} icon={values.site_icon} onLogo={setValue('site_logo')} onIcon={setValue('site_icon')} />
+
       <div className="grid gap-6">
         {SECTIONS.map((section, si) => (
           <motion.div
@@ -368,6 +372,56 @@ export default function AdminSettingsPage() {
           ذخیره تنظیمات
         </button>
       </div>
+    </div>
+  );
+}
+
+/** لوگو (هدر، فوتر، پنل، پیش‌فاکتور) و آیکون تب مرورگر/آیفون — آیکون خالی یعنی همان لوگو */
+function BrandCard({ logo, icon, onLogo, onIcon }: { logo: string; icon: string; onLogo: (v: string) => void; onIcon: (v: string) => void }) {
+  const iconPreview = icon || logo || DEFAULT_ICON;
+  return (
+    <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 space-y-5">
+      <h2 className="text-[var(--foreground)] font-bold flex items-center gap-2">
+        <ImageIcon className="w-5 h-5 text-[var(--accent-text)]" />
+        لوگو و آیکون سایت
+      </h2>
+      <div className="grid sm:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-[var(--foreground)]">لوگو</p>
+          <p className="text-xs text-[var(--muted-foreground)] leading-6">
+            در هدر، فوتر، پنل مدیریت، پیش‌فاکتور و اطلاعات گوگل. مربعی یا افقی، PNG با پس‌زمینه شفاف، حداقل ۵۱۲ پیکسل.
+          </p>
+          <ImageUploader images={logo ? [logo] : []} onChange={(list) => onLogo(list[0] ?? '')} max={1} profile="brand" />
+          {!logo && <BrandFallback src={DEFAULT_LOGO} label="فعلاً لوگوی پیش‌فرض سایت نمایش داده می‌شود" />}
+        </div>
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-[var(--foreground)]">آیکون (favicon)</p>
+          <p className="text-xs text-[var(--muted-foreground)] leading-6">
+            آیکون تب مرورگر، آیفون و نتایج گوگل. مربعی و ساده (در اندازه ۱۶ پیکسل هم خوانا باشد). خالی بگذارید تا همان لوگو استفاده شود.
+          </p>
+          <ImageUploader images={icon ? [icon] : []} onChange={(list) => onIcon(list[0] ?? '')} max={1} profile="brand" />
+          {/* پیش‌نمایش تب مرورگر و آیکون آیفون */}
+          <div className="flex items-center gap-4 pt-1">
+            <div className="flex items-center gap-2 h-9 px-3 rounded-t-lg bg-[var(--muted)] border border-[var(--border)] border-b-0 max-w-48">
+              {/* eslint-disable-next-line @next/next/no-img-element -- پیش‌نمایش کوچک، بدون بهینه‌سازی */}
+              <img src={iconPreview} alt="" className="w-4 h-4 object-contain" />
+              <span className="text-xs truncate">قدیر لوله آنلاین</span>
+            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element -- پیش‌نمایش کوچک، بدون بهینه‌سازی */}
+            <img src={iconPreview} alt="" className="w-12 h-12 rounded-xl object-contain bg-white border border-[var(--border)]" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BrandFallback({ src, label }: { src: string; label: string }) {
+  return (
+    <div className="flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
+      {/* eslint-disable-next-line @next/next/no-img-element -- پیش‌نمایش کوچک، بدون بهینه‌سازی */}
+      <img src={src} alt="" className="w-8 h-8 object-contain" />
+      {label}
     </div>
   );
 }

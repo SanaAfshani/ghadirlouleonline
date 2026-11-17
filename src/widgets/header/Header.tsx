@@ -87,11 +87,11 @@ function isActive(pathname: string, href: string) {
 }
 
 function Logo({ compact = false }: { compact?: boolean }) {
-  const { siteName, legalName } = useSiteSettings();
+  const { siteName, legalName, logo } = useSiteSettings();
   const t = useMessages(messages);
   return (
     <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label={fill(t.home, { name: siteName })}>
-      <Image src="/images/logo.png" alt="" width={44} height={44} className={cn('object-contain', compact ? 'w-9 h-9' : 'w-11 h-11')} priority />
+      <Image src={logo} alt="" width={44} height={44} className={cn('object-contain', compact ? 'w-9 h-9' : 'w-11 h-11')} priority />
       <span className="leading-tight whitespace-nowrap">
         <span className={cn('block font-black text-[var(--foreground)]', compact ? 'text-[15px]' : 'text-lg')}>{siteName}</span>
         {!compact && <span className="block text-[11px] text-[var(--muted-foreground)]">{fill(t.exclusiveAgent, { name: legalName })}</span>}
