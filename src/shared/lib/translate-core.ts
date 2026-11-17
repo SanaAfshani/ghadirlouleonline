@@ -132,9 +132,17 @@ async function translateWithOpenAICompatible(prompt: string): Promise<string> {
   } catch {
     throw new TranslateError('سرویس ترجمه در دسترس نیست (اتصال برقرار نشد)', 502);
   }
-  if (res.status === 401 || res.status === 403) throw new TranslateError('کلید سرویس ترجمه (TRANSLATE_API_KEY) نامعتبر است یا دسترسی ندارد', 503);
-  if (res.status === 429) throw new TranslateError('سرویس ترجمه موقتاً شلوغ است؛ چند دقیقه دیگر دوباره امتحان کنید', 429);
-  if (!res.ok) throw new TranslateError(`خطای سرویس ترجمه (${res.status})`, 502);
+  if (!res.ok) {
+    // پیام خود سرویس (مثلاً «اعتبار کافی نیست» یا «این مدل در سطح حساب شما در دسترس نیست») — بدون آن علت ۴۲۹ معلوم نبود
+    const detail = await res
+      .json()
+      .then((j: { error?: { message?: string } | string; message?: string }) => (typeof j?.error === 'string' ? j.error : j?.error?.message ?? j?.message ?? ''))
+      .catch(() => '');
+    const why = detail ? ` — ${String(detail).slice(0, 200)}` : '';
+    if (res.status === 401 || res.status === 403) throw new TranslateError(`کلید یا دسترسی سرویس ترجمه مشکل دارد${why}`, 503);
+    if (res.status === 429) throw new TranslateError(`سرویس ترجمه درخواست را نپذیرفت (محدودیت سرعت، اعتبار یا سطح حساب)${why}`, 429);
+    throw new TranslateError(`خطای سرویس ترجمه (${res.status})${why}`, 502);
+  }
 
   const json = (await res.json().catch(() => null)) as { choices?: { message?: { content?: string }; finish_reason?: string }[] } | null;
   const choice = json?.choices?.[0];
