@@ -4,6 +4,7 @@ import { prisma } from '@/shared/lib/prisma';
 import { requireSuperAdmin } from '@/shared/lib/admin-auth';
 import { serverErrorResponse } from '@/shared/lib/api-errors';
 import { defaultLocalizedText } from '@/shared/lib/site-settings';
+import { scheduleAutoTranslate } from '@/shared/lib/auto-translate';
 
 /** فقط کلیدهای سئو از این مسیر قابل تغییرند */
 const KEYS = ['google_site_verification', 'home_seo_content', 'home_seo_content_en'] as const;
@@ -31,6 +32,7 @@ export async function PUT(request: NextRequest) {
       if (key === 'google_site_verification') value = value.match(/content=["']([^"']+)["']/)?.[1] ?? value;
       await prisma.siteSettings.upsert({ where: { key }, update: { value }, create: { key, value, type: 'text' } });
     }
+    scheduleAutoTranslate('settings', 'settings');
     revalidateLocalized('/', 'layout');
     return NextResponse.json({ success: true });
   } catch (error) {

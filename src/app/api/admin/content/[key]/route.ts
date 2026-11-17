@@ -8,6 +8,7 @@ import { findSection } from '@/shared/content/registry';
 import { countUntranslated, editableSection } from '@/shared/content/resolve';
 import { sanitizeSectionData } from '@/shared/content/sanitize';
 import type { StoredBlock } from '@/shared/content/types';
+import { scheduleAutoTranslate } from '@/shared/lib/auto-translate';
 
 type Props = { params: Promise<{ key: string }> };
 
@@ -65,6 +66,8 @@ export async function PUT(request: NextRequest, { params }: Props) {
     const data = JSON.stringify(stored);
     await prisma.contentBlock.upsert({ where: { key }, update: { data }, create: { key, data } });
 
+    // متن فارسی تازه ← نسخه انگلیسیِ خالی خودکار ترجمه می‌شود
+    if (locale === 'fa') scheduleAutoTranslate('content', key);
     // بخش‌ها در layout (هدر/فوتر) و صفحه‌های مختلف استفاده می‌شوند؛ کل سایت هر دو زبان تازه می‌شود
     revalidateLocalized('/', 'layout');
     return NextResponse.json({ success: true, data: await sectionPayload(key) });

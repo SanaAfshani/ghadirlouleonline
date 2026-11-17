@@ -7,6 +7,7 @@ import { recordRedirect } from '@/shared/lib/redirects';
 import { sanitizeTranslations } from '@/shared/lib/translations';
 import { stripDangerousHtml } from '@/shared/content/sanitize';
 import { revalidateLocalized } from '@/shared/i18n/server';
+import { scheduleAutoTranslate } from '@/shared/lib/auto-translate';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -70,6 +71,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
     revalidateLocalized(`/projects/${project.slug}`);
     revalidateLocalized('/projects');
 
+    scheduleAutoTranslate('project', project.id);
     return NextResponse.json({ success: true, data: serializeProject(project) });
   } catch (error) {
     console.error('Project PUT error:', error);

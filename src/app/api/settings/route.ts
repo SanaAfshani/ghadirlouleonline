@@ -3,6 +3,7 @@ import { revalidateLocalized } from '@/shared/i18n/server';
 import { prisma } from '@/shared/lib/prisma';
 import { requireSuperAdmin } from '@/shared/lib/admin-auth';
 import { EDITABLE_SETTING_KEYS } from '@/shared/lib/site-settings';
+import { scheduleAutoTranslate } from '@/shared/lib/auto-translate';
 
 export async function GET() {
   try {
@@ -41,6 +42,7 @@ export async function POST(request: NextRequest) {
       )
     );
 
+    scheduleAutoTranslate('settings', 'settings');
     revalidateLocalized('/', 'layout');
     revalidateLocalized('/contact');
 

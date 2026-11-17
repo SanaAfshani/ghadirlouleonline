@@ -3,7 +3,7 @@ import { requireSuperAdmin } from '@/shared/lib/admin-auth';
 import { serverErrorResponse } from '@/shared/lib/api-errors';
 import { revalidateLocalized } from '@/shared/i18n/server';
 import { exportPending, findTarget, importTranslations, translateTarget, translationCoverage, type ExportedItem } from '@/shared/lib/bulk-translate';
-import { TranslateError, translateToEnglish } from '@/shared/lib/translate';
+import { isTranslatorConfigured, TranslateError, translateToEnglish } from '@/shared/lib/translate';
 
 // هر دور چند درخواست ترجمه پشت سر هم است
 export const maxDuration = 300;
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
         },
       });
     }
-    return NextResponse.json({ success: true, data: await translationCoverage() });
+    return NextResponse.json({ success: true, data: await translationCoverage(), auto: isTranslatorConfigured() });
   } catch (error) {
     return serverErrorResponse(error, 'Translations GET');
   }

@@ -11,6 +11,7 @@ import { isSupplyStatus } from '@/shared/lib/supply-status';
 import { sanitizeTranslations } from '@/shared/lib/translations';
 import { stripDangerousHtml } from '@/shared/content/sanitize';
 import { revalidateLocalized } from '@/shared/i18n/server';
+import { scheduleAutoTranslate } from '@/shared/lib/auto-translate';
 
 /** فیلد متنی اختیاری: رشته خالی را به null تبدیل می‌کند تا fallback سئو درست کار کند */
 function optionalText(value: unknown): string | null {
@@ -116,6 +117,7 @@ export async function POST(request: NextRequest) {
     revalidateLocalized('/products', 'layout');
     revalidateLocalized('/');
 
+    scheduleAutoTranslate('product', product.id);
     return NextResponse.json({ success: true, data: serializeProduct(product) }, { status: 201 });
   } catch (error) {
     console.error('Products POST error:', error);

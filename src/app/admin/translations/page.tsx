@@ -10,11 +10,11 @@ import type { TargetCoverage } from '@/shared/lib/bulk-translate';
 
 const card = 'bg-[var(--card)] border border-[var(--border)] rounded-2xl';
 
-async function fetchCoverage(): Promise<TargetCoverage[]> {
+async function fetchCoverage(): Promise<{ coverage: TargetCoverage[]; auto: boolean }> {
   const res = await fetch('/api/admin/translations');
   const j = await res.json().catch(() => ({}));
   if (!res.ok || !j.success) throw new Error(j.error || 'بارگذاری نشد');
-  return j.data;
+  return { coverage: j.data, auto: Boolean(j.auto) };
 }
 
 /**
@@ -27,13 +27,18 @@ export default function AdminTranslationsPage() {
   const [error, setError] = useState('');
   const stop = useRef(false);
 
-  const load = useCallback(async () => setCoverage(await fetchCoverage()), []);
+  const [auto, setAuto] = useState<boolean | null>(null);
+  const apply = useCallback((r: { coverage: TargetCoverage[]; auto: boolean }) => {
+    setCoverage(r.coverage);
+    setAuto(r.auto);
+  }, []);
+  const load = useCallback(async () => apply(await fetchCoverage()), [apply]);
 
   useEffect(() => {
     fetchCoverage()
-      .then(setCoverage)
+      .then(apply)
       .catch((e) => setError(e instanceof Error ? e.message : 'بارگذاری نشد'));
-  }, []);
+  }, [apply]);
 
   /** یک بخش تا آخر؛ false یعنی خطا یا توقف */
   const runTarget = async (key: string): Promise<boolean> => {
@@ -120,7 +125,8 @@ export default function AdminTranslationsPage() {
               <button
                 type="button"
                 onClick={runAll}
-                disabled={!pending}
+                disabled={!pending || auto === false}
+                title={auto === false ? 'سرویس ترجمه تنظیم نشده است' : undefined}
                 className="h-11 px-5 rounded-xl bg-[var(--accent)] text-[var(--accent-foreground)] text-sm font-black flex items-center gap-1.5 disabled:opacity-50"
               >
                 <Sparkles className="w-4 h-4" /> ترجمه همه ({faDigits(pending)} متن)
@@ -129,6 +135,22 @@ export default function AdminTranslationsPage() {
           </div>
         )}
       </div>
+
+      {auto !== null && (
+        <div
+          className={cn(
+            'flex items-start gap-3 p-4 rounded-2xl border text-sm leading-7',
+            auto ? 'border-emerald-500/30 bg-emerald-500/10' : 'border-amber-500/30 bg-amber-500/10',
+          )}
+        >
+          {auto ? <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" /> : <Languages className="w-5 h-5 shrink-0 text-amber-600" />}
+          <p>
+            {auto
+              ? 'ترجمه خودکار فعال است: هر بار محصول، مقاله، دسته، پروژه، سوال، نظر، تنظیمات یا محتوای صفحه‌ای را ذخیره کنید، متن‌های انگلیسیِ خالی همان مورد چند ثانیه بعد خودکار ترجمه می‌شوند.'
+              : 'ترجمه خودکار غیرفعال است (سرویس ترجمه روی سرور تنظیم نشده). تا وقتی فعال نشده، از «دانلود متن‌های بدون ترجمه / بارگذاری فایل ترجمه» پایین همین صفحه استفاده کنید. برای فعال‌سازی، متغیرهای TRANSLATE_API_BASE_URL، TRANSLATE_API_KEY و TRANSLATE_MODEL را در رانفلر تنظیم کنید.'}
+          </p>
+        </div>
+      )}
 
       <div className={cn(card, 'p-5 text-sm text-[var(--muted-foreground)] leading-7')}>
         فقط متن‌هایی که نسخه انگلیسی ندارند ترجمه می‌شوند؛ ترجمه‌هایی که دستی نوشته یا اصلاح کرده‌اید دست نمی‌خورند. هر رکوردی که نامش ترجمه شود،
@@ -198,7 +220,7 @@ export default function AdminTranslationsPage() {
                   <button
                     type="button"
                     onClick={() => runOne(c.key)}
-                    disabled={running !== null}
+                    disabled={running !== null || auto === false}
                     className="h-10 px-4 rounded-xl border border-[var(--border)] text-sm font-bold flex items-center gap-1.5 hover:border-[var(--accent)] disabled:opacity-50"
                   >
                     {running === c.key ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}

@@ -9,6 +9,7 @@ import { serializeFaqs } from '@/shared/lib/page-faqs';
 import { pingIndexNow } from '@/shared/lib/indexnow';
 import { sanitizeTranslations } from '@/shared/lib/translations';
 import { stripDangerousHtml } from '@/shared/content/sanitize';
+import { scheduleAutoTranslate } from '@/shared/lib/auto-translate';
 
 type RouteContext = { params: Promise<{ slug: string }> };
 
@@ -123,6 +124,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       tags = [];
     }
 
+    scheduleAutoTranslate('blogPost', post.id);
     return NextResponse.json({ success: true, data: { ...post, tags, faqs: parseFaqs(post.faqs) } });
   } catch (error) {
     console.error('Blog slug PUT error:', error);

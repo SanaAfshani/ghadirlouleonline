@@ -75,8 +75,9 @@ export function ProductsPageClient({ hero, categories, products }: ProductsPageC
                         <p className="mt-1 text-sm leading-7 text-[var(--muted-foreground)]">{digits(category.description, locale)}</p>
                       )}
                     </div>
-                    <Link href={`/products/${category.slug}`} className="text-sm font-bold text-[var(--accent-text)] flex items-center gap-1 shrink-0">
-                      {fill(t.categoryLink, { name: category.name })} <ChevronLeft className="w-4 h-4 ltr:rotate-180" />
+                    {/* روی گوشی باریک متن انگلیسی بلندتر است؛ فقط از sm به بالا جمع نشود */}
+                    <Link href={`/products/${category.slug}`} className="min-w-0 text-sm font-bold text-[var(--accent-text)] flex items-center gap-1 sm:shrink-0">
+                      <span className="min-w-0">{fill(t.categoryLink, { name: category.name })}</span> <ChevronLeft className="w-4 h-4 shrink-0 ltr:rotate-180" />
                     </Link>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">

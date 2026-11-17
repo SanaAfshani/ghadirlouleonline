@@ -287,6 +287,12 @@ export async function translateTarget(key: string, translate: Translator, maxCha
     chars += size;
   }
 
+  await translateRows(picked, translate);
+  return { translated: picked.length, remaining: pending.length - picked.length };
+}
+
+/** رکوردهای داده‌شده را با چند درخواست ترجمه و ذخیره می‌کند */
+async function translateRows(picked: PendingRow[], translate: Translator) {
   // شناسه هر متن در درخواست: «اندیس رکورد:مسیر فیلد» تا نتیجه به رکورد خودش برگردد
   const all = picked.flatMap((row, r) => row.items.map((item) => ({ ...item, id: `${r}:${item.id}` })));
   const results: Record<string, string> = {};
@@ -310,7 +316,16 @@ export async function translateTarget(key: string, translate: Translator, maxCha
     const result = Object.fromEntries(Object.entries(results).filter(([id]) => id.startsWith(prefix)).map(([id, text]) => [id.slice(prefix.length), text]));
     if (Object.keys(result).length) await row.save(result);
   }
-  return { translated: picked.length, remaining: pending.length - picked.length };
+}
+
+/** ترجمه متن‌های خالی یک رکورد (ترجمه خودکار بعد از ذخیره در پنل) — تعداد متن‌های ترجمه‌شده */
+export async function translateRow(key: string, rowId: string, translate: Translator): Promise<number> {
+  const target = findTarget(key);
+  if (!target) throw new Error(`unknown target: ${key}`);
+  const row = (await target.rows()).find((r) => r.id === rowId && r.items.length);
+  if (!row) return 0;
+  await translateRows([row], translate);
+  return row.items.length;
 }
 
 /** برای ترجمه بیرون از برنامه (اسکریپت): همه متن‌های بدون ترجمه با نشانی کامل */

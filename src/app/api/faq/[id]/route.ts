@@ -4,6 +4,7 @@ import { prisma } from '@/shared/lib/prisma';
 import { sanitizeTranslations } from '@/shared/lib/translations';
 import { stripDangerousHtml } from '@/shared/content/sanitize';
 import { revalidateLocalized } from '@/shared/i18n/server';
+import { scheduleAutoTranslate } from '@/shared/lib/auto-translate';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -27,6 +28,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
     });
 
     revalidateLocalized('/faq');
+    scheduleAutoTranslate('faq', faq.id);
     return NextResponse.json({ success: true, data: faq });
   } catch (error) {
     console.error('FAQ PUT error:', error);

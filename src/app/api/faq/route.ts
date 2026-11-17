@@ -4,6 +4,7 @@ import { prisma } from '@/shared/lib/prisma';
 import { sanitizeTranslations } from '@/shared/lib/translations';
 import { stripDangerousHtml } from '@/shared/content/sanitize';
 import { revalidateLocalized } from '@/shared/i18n/server';
+import { scheduleAutoTranslate } from '@/shared/lib/auto-translate';
 
 export async function GET(request: NextRequest) {
   try {
@@ -32,6 +33,7 @@ export async function POST(request: NextRequest) {
       },
     });
     revalidateLocalized('/faq');
+    scheduleAutoTranslate('faq', faq.id);
     return NextResponse.json({ success: true, data: faq }, { status: 201 });
   } catch (error) {
     console.error('FAQ POST error:', error);

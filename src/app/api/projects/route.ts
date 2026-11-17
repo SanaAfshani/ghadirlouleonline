@@ -6,6 +6,7 @@ import { slugify } from '@/shared/lib/utils';
 import { sanitizeTranslations } from '@/shared/lib/translations';
 import { stripDangerousHtml } from '@/shared/content/sanitize';
 import { revalidateLocalized } from '@/shared/i18n/server';
+import { scheduleAutoTranslate } from '@/shared/lib/auto-translate';
 
 export async function GET(request: NextRequest) {
   try {
@@ -59,6 +60,7 @@ export async function POST(request: NextRequest) {
     revalidateLocalized(`/projects/${project.slug}`);
     revalidateLocalized('/projects');
 
+    scheduleAutoTranslate('project', project.id);
     return NextResponse.json({ success: true, data: serializeProject(project) }, { status: 201 });
   } catch (error) {
     console.error('Projects POST error:', error);

@@ -5,6 +5,7 @@ import { serverErrorResponse } from '@/shared/lib/api-errors';
 import { priceFromWeight, specFields, text, toPrice } from '@/shared/lib/price-admin';
 import { sanitizeTranslations } from '@/shared/lib/translations';
 import { stripDangerousHtml } from '@/shared/content/sanitize';
+import { scheduleAutoTranslate } from '@/shared/lib/auto-translate';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -38,6 +39,7 @@ export async function PATCH(request: NextRequest, { params }: Props) {
       }
     }
     const item = await prisma.priceItem.update({ where: { id }, data });
+    scheduleAutoTranslate('priceItem', item.id);
     return NextResponse.json({ success: true, data: item });
   } catch (error) {
     return serverErrorResponse(error, 'Admin price PATCH error:');

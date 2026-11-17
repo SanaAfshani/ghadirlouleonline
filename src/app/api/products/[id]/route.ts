@@ -11,6 +11,7 @@ import { isSupplyStatus } from '@/shared/lib/supply-status';
 import { sanitizeTranslations } from '@/shared/lib/translations';
 import { stripDangerousHtml } from '@/shared/content/sanitize';
 import { revalidateLocalized } from '@/shared/i18n/server';
+import { scheduleAutoTranslate } from '@/shared/lib/auto-translate';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -114,6 +115,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
     revalidateLocalized('/products', 'layout');
     revalidateLocalized('/');
 
+    scheduleAutoTranslate('product', product.id);
     return NextResponse.json({ success: true, data: serializeProduct(product) });
   } catch (error) {
     console.error('Product PUT error:', error);

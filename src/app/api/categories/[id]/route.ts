@@ -7,6 +7,7 @@ import { slugify } from '@/shared/lib/utils';
 import { recordRedirect } from '@/shared/lib/redirects';
 import { sanitizeTranslations } from '@/shared/lib/translations';
 import { stripDangerousHtml } from '@/shared/content/sanitize';
+import { scheduleAutoTranslate } from '@/shared/lib/auto-translate';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -42,6 +43,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
     revalidateLocalized('/categories');
     revalidateLocalized('/products', 'layout');
 
+    scheduleAutoTranslate('category', category.id);
     return NextResponse.json({ success: true, data: category });
   } catch (error) {
     return serverErrorResponse(error, 'Category PUT error:');

@@ -6,6 +6,7 @@ import { slugify } from '@/shared/lib/utils';
 import { serverErrorResponse } from '@/shared/lib/api-errors';
 import { sanitizeTranslations } from '@/shared/lib/translations';
 import { stripDangerousHtml } from '@/shared/content/sanitize';
+import { scheduleAutoTranslate } from '@/shared/lib/auto-translate';
 
 export async function GET(request: NextRequest) {
   try {
@@ -39,6 +40,7 @@ export async function POST(request: NextRequest) {
     revalidateLocalized('/categories');
     revalidateLocalized('/products', 'layout');
 
+    scheduleAutoTranslate('category', category.id);
     return NextResponse.json({ success: true, data: category }, { status: 201 });
   } catch (error) {
     return serverErrorResponse(error, 'Categories POST error:');

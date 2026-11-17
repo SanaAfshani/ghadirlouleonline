@@ -40,6 +40,11 @@ export class TranslateError extends Error {
   }
 }
 
+/** سرویس ترجمه خودکار تنظیم شده است؟ (ترجمه هنگام ذخیره و دکمه‌های پنل) */
+export function isTranslatorConfigured(): boolean {
+  return Boolean(process.env.TRANSLATE_API_BASE_URL?.trim() || process.env.ANTHROPIC_API_KEY?.trim());
+}
+
 export async function translateToEnglish(items: TranslateItem[]): Promise<Record<string, string>> {
   const todo = items.filter((item) => item.text.trim());
   if (!todo.length) return {};
